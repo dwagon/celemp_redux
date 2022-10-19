@@ -16,7 +16,7 @@ namespace Celemp
 
             var options = new JsonSerializerOptions { WriteIndented = true };
             string jsonString = JsonSerializer.Serialize(galaxy, options);
-            Console.WriteLine("Galaxy="+jsonString);
+            File.WriteAllText("/Users/dwagon/celemp.json", jsonString);
         }
 
     }

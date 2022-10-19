@@ -28,19 +28,19 @@ namespace Celemp
             number = plannum;
             name = "foo";
             owner = 0;
-            setPDU();
-            setIndustry();
-            num_mines = numMines();
-            setMines(num_mines);
-            setOre();
-            setLinks();
+            SetPDU();
+            SetIndustry();
+            num_mines = NumMines();
+            SetMines(num_mines);
+            SetOre();
+            SetLinks();
             for (int player=0;player<9;player++)
             {
                 knows[player] = false;
             }
         }
 
-        private void setOre()
+        private void SetOre()
         {
             var rnd = new Random();
 
@@ -65,7 +65,7 @@ namespace Celemp
             }
         }
 
-        private void setLinks()
+        private void SetLinks()
         {
             for (int link_num = 0; link_num < 4; link_num++)
             {
@@ -73,7 +73,7 @@ namespace Celemp
             }
         }
 
-        private int normal() {
+        private int Normal() {
             var rnd = new Random();
 
             int val = rnd.Next(100);
@@ -84,13 +84,13 @@ namespace Celemp
             return 1;
         }
 
-        private void setIndustry()
+        private void SetIndustry()
         // Set the industry for a planet
         {
             var rnd = new Random();
             if (rnd.Next(100) > (100 - proto.galHasInd))
             {
-                industry = normal();
+                industry = Normal();
             }
             else
             {
@@ -99,16 +99,16 @@ namespace Celemp
             indleft = industry;
         }
 
-        private void setPDU()
+        private void SetPDU()
         {
             var rnd = new Random();
             if (rnd.Next(100) > (100 - proto.galHasPDU))
             {
-                pdu = normal() * 2;
+                pdu = Normal() * 2;
             }
         }
 
-        private int numMines()
+        private int NumMines()
         // Return the number of mines a normal planet should have
         {
             int num_mines;
@@ -120,15 +120,15 @@ namespace Celemp
             }
             else if (rnd.Next(100) > (100 - proto.galExtraMines))
             {
-                num_mines = normal() * (rnd.Next(8) + 1);
+                num_mines = Normal() * (rnd.Next(8) + 1);
             }
             else {
-                num_mines = normal() * (rnd.Next(5) + 1);
+                num_mines = Normal() * (rnd.Next(5) + 1);
             }
             return num_mines;
         }
 
-        private void setMines(int num_mines)
+        private void SetMines(int num_mines)
         // Allocate mines to the planet with a tendency to clump
         {
             var rnd = new Random();

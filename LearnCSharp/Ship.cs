@@ -37,7 +37,7 @@ namespace Celemp
             planet = -1;
         }
 
-        public bool isEmpty()
+        public bool IsEmpty()
         // Is this an empty ship - or a hull
         {
             if (cargo == 0 && fight == 0 && tractor == 0 && shield == 0) {
@@ -46,7 +46,7 @@ namespace Celemp
             return false;
         }
 
-        public int shields()
+        public int ShieldPower()
         // Return the shield power
         {
             int totunits = 0;

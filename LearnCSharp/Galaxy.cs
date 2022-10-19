@@ -8,22 +8,25 @@ namespace Celemp
     {
         public uint turn { get; set; }
         public Protofile proto = null!;
-        public Planet[] planets { get; set; }
+        public Dictionary<int, Planet> planets { get; set; }
         public Player[] players { get; set; }
-        public Ship[] ships { get; set; }
+        public List<Ship> ships { get; set; }
 
         public Galaxy(Protofile protofile)
         {
             proto = protofile;
-            planets = new Planet[256];
-            ships = new Ship[256];
+            planets = new Dictionary<int, Planet>();
+            ships = new List<Ship>();
             turn = 0;
-
             players = new Player[9];
 
             InitPlanets();
+            InitPlayers();
+        }
 
-            for (int plr_num=0; plr_num<9;plr_num++)
+        private void InitPlayers()
+        {
+            for (int plr_num = 0; plr_num < 9; plr_num++)
             {
                 players[plr_num] = new Player(proto, plr_num);
             }
@@ -31,20 +34,27 @@ namespace Celemp
 
         private void InitPlanets() {
             int[] trans = new int[256];
-            for (int plan_num = 0; plan_num < 256; plan_num++)
-            {
-                planets[plan_num] = new Planet(proto, plan_num);
+            Dictionary<String, List<int>> linkmap;
+        
+            trans = GeneratePlanetShuffle();
+            linkmap = LoadGalaxyLinks();
+            for (int plan_num = 0; plan_num< 256; plan_num++) {
+                int linknum = 0;
+
+                planets[trans[plan_num]] = new Planet(proto, trans[plan_num]);
+                foreach (int link in linkmap[plan_num.ToString()])
+                {
+                    planets[trans[plan_num]].link[linknum++] = trans[link];
+                }
             }
             NamePlanets();
-            trans = GeneratePlanetShuffle();
-            LinkPlanets(trans);
         }
 
         private static int[] GeneratePlanetShuffle() 
         // Shuffle planet numbers around so they aren't always the same
         {
             int[] trans = new int[256];
-            Dictionary<int, bool> used = new Dictionary<int, bool>();
+            List<int> used = new();
             int num;
             Random rnd = new Random();
 
@@ -52,32 +62,26 @@ namespace Celemp
             for (int plan_num=0; plan_num < 256; plan_num++)
             {
                 num = -1;
-                while (num < 0 || used.ContainsKey(num))
+                while (num < 0 || used.Contains(num))
                 {
                     num = rnd.Next(256);
                 }
                 trans[plan_num] = num;
+                used.Add(num);
             }
             return trans;
         }
 
-        private void LinkPlanets(int[] trans)
+        private Dictionary<String, List<int>> LoadGalaxyLinks()
         // Link the planets together
-        { 
+        {
             Dictionary<String, List<int>>? linkdict;
             using (StreamReader r = new ("/Users/dwagon/Projects/LearnCSharp/LearnCSharp/GalaxyLinks.json"))
             {
                 string jsonString = r.ReadToEnd();
                 linkdict = JsonSerializer.Deserialize<Dictionary<String, List<int>>>(jsonString);
             }
-            for (int plan_num = 0; plan_num < 256; plan_num++)
-            {
-                int linknum = 0;
-                foreach (int link in linkdict[plan_num.ToString()])
-                {
-                    planets[plan_num].link[linknum++] = trans[link];
-                }
-            }
+            return linkdict;
         }
 
         void NamePlanets()
