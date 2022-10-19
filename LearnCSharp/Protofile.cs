@@ -39,19 +39,23 @@ namespace Celemp
             amnesty = 10;
             winning_score = 10000;
             winning_turns = 30;
+
             homeIndustry = 60;
             homePDU = 100;
             homeSpacemine = 0;
             homeDeployed = 0;
+
             galHasInd = 30;
             galHasPDU = 10;
             galNoMines = 1;
             galExtraMines = 1;
             galExtraOre = 20;
             for (int oretype = 0; oretype < 10; oretype++) {
-                earthOre[oretype] = 0;
+                earthOre[oretype] = 10;
                 earthMines[oretype] = 0;
             }
+            homeOre = new int[10] {100, 30, 30, 20, 25, 15, 15, 15, 50, 50};
+            homeMines = new int[10] { 5, 3, 3, 1, 2, 1, 1, 0, 0, 0 };
         }
 
         public void LoadProto(string filename)

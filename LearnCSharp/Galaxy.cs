@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Celemp
 {
@@ -48,7 +49,23 @@ namespace Celemp
                 }
             }
             NamePlanets();
-        }
+            SetEarth(trans[228]);   // 228 is planet Earth
+
+            int[] research =
+                { 25, 28, 31, 33, 36, 39, 66, 70, 74, 103, 106, 109, 111, 113, 115, 141, 145, 149,
+      178, 181, 184, 186, 188, 190, 216, 220, 224}; // Research planets
+            foreach (int rp in research)
+            {
+                SetResearchPlanet(trans[rp]);
+            }
+
+            int plrnum = 1;
+            int[] home_planets = { 214, 68, 222, 143, 139, 147, 64, 218, 72 };  // Home planets
+            foreach (int hp in home_planets)
+            {
+                SetHome(trans[hp], plrnum++);
+            }
+    }
 
         private static int[] GeneratePlanetShuffle() 
         // Shuffle planet numbers around so they aren't always the same
@@ -73,7 +90,7 @@ namespace Celemp
         }
 
         private Dictionary<String, List<int>> LoadGalaxyLinks()
-        // Link the planets together
+        // Return the dictionary of links for planets
         {
             Dictionary<String, List<int>>? linkdict;
             using (StreamReader r = new ("/Users/dwagon/Projects/LearnCSharp/LearnCSharp/GalaxyLinks.json"))
@@ -104,6 +121,49 @@ namespace Celemp
                 planetnames = JsonSerializer.Deserialize<String[]>(jsonString);
             }
             return planetnames;
+        }
+        private void SetResearchPlanet(int plannum)
+        {
+            Planet rp = planets[plannum];
+            rp.name = $"{rp.name} RP";
+            rp.research = true;
+        }
+
+        private void SetEarth(int plannum)
+        {
+            Planet earth = planets[plannum];
+            earth.name = "**** EARTH ****";
+            earth.industry = proto.earthInd;
+            earth.pdu = proto.earthPDU;
+            for (int ore_type = 0; ore_type < 10; ore_type++)
+            {
+                earth.ore[ore_type] = proto.earthOre[ore_type];
+                earth.mine[ore_type] = proto.earthMines[ore_type];
+            }
+        }
+
+        private void SetHome(int plan_num, int player_num)
+        // Make planet {plan_num} the home planet of player {player_num}
+        {
+            Planet home = planets[plan_num];
+            home.name = $"Home Planet {home.name}";
+            home.owner = player_num;
+            for (int ore_type = 0; ore_type < 10; ore_type++)
+            {
+                home.mine[ore_type] = proto.homeMines[ore_type];
+                home.ore[ore_type] = proto.homeOre[ore_type];
+            }
+            home.pdu = proto.homePDU;
+            home.industry = proto.homeIndustry;
+            home.indleft = home.industry;
+            // Ensure no A-ring planets are defended or industrial to make things more even
+            for (int link=0;link<4; link++)
+            {
+                Planet neighbour = planets[home.link[link]];
+                neighbour.industry = 0;
+                neighbour.pdu = 0;
+            }
+          
         }
     }
 }

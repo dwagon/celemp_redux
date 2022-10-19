@@ -18,6 +18,7 @@ namespace Celemp
         public int pdu { get; set; }
         public int[] link { get; set; } = new int[4];
         public bool[] knows { get; set; } = new bool[9];
+        public bool research { get; set; }
         private readonly Protofile proto;
 
         public Planet(Protofile protofile, int plannum)
@@ -26,8 +27,9 @@ namespace Celemp
 
             proto = protofile;
             number = plannum;
-            name = "foo";
+            name = "TODO";
             owner = 0;
+            research = false;
             SetPDU();
             SetIndustry();
             num_mines = NumMines();
@@ -152,20 +154,6 @@ namespace Celemp
             }
         }
 
-        private void SetEarth()
-        {
-            name = "**** EARTH ****";
-            industry = proto.earthInd;
-            pdu = proto.earthPDU;
-            for (int ore_type=0;ore_type < 10; ore_type++)
-            {
-                ore[ore_type] = proto.earthOre[ore_type];
-                mine[ore_type] = proto.earthMines[ore_type];
-            }
-        } 
-
-        private void SetHome() { }
-
-        private void SetResearch() { }
+ 
     }
 }
