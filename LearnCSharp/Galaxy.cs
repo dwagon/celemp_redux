@@ -11,15 +11,19 @@ namespace Celemp
         public Protofile proto = null!;
         public Dictionary<int, Planet> planets { get; set; }
         public Player[] players { get; set; }
-        public List<Ship> ships { get; set; }
+        public Dictionary<int, Ship> ships { get; set; }
+        private Dictionary<int, Planet> home_planets;
+        private int ship_num;
 
         public Galaxy(Protofile protofile)
         {
             proto = protofile;
             planets = new Dictionary<int, Planet>();
-            ships = new List<Ship>();
+            ships = new Dictionary<int, Ship>();
             turn = 0;
+            ship_num = 0;
             players = new Player[9];
+            home_planets = new Dictionary<int, Planet>();
 
             InitPlanets();
             InitPlayers();
@@ -30,7 +34,46 @@ namespace Celemp
             for (int plr_num = 0; plr_num < 9; plr_num++)
             {
                 players[plr_num] = new Player(proto, plr_num);
+                players[plr_num].home_planet = home_planets[plr_num].number;
+
+                InitShip1(players[plr_num]);
+                InitShip2(players[plr_num]);
             }
+        }
+
+        private void InitShip1(Player owner) {
+            Ship newship;
+
+            for (int num=0; num < proto.ship1_num; num++)
+            {
+                newship = InitShip(proto.ship1_fight, proto.ship1_cargo, proto.ship1_shield, proto.ship1_tractor, proto.ship1_eff);
+                newship.owner = owner.number;
+                newship.planet = owner.home_planet;
+            }
+        }
+
+        private void InitShip2(Player owner) {
+            Ship newship;
+
+            for (int num = 0; num < proto.ship2_num; num++)
+            {
+                newship = InitShip(proto.ship2_fight, proto.ship2_cargo, proto.ship2_shield, proto.ship2_tractor, proto.ship2_eff);
+                newship.owner = owner.number;
+                newship.planet = owner.home_planet;
+            }
+        }
+
+        private Ship InitShip(int fight, int cargo, int shield, int tractor, int eff)
+        {
+            Ship newship = new Ship();
+            newship.fight = fight;
+            newship.cargo = cargo;
+            newship.shield = shield;
+            newship.tractor = tractor;
+            newship.efficiency = eff;
+            newship.number = ship_num;
+            ships[ship_num++] = newship;
+            return newship;
         }
 
         private void InitPlanets() {
@@ -59,7 +102,7 @@ namespace Celemp
                 SetResearchPlanet(trans[rp]);
             }
 
-            int plrnum = 1;
+            int plrnum = 0;
             int[] home_planets = { 214, 68, 222, 143, 139, 147, 64, 218, 72 };  // Home planets
             foreach (int hp in home_planets)
             {
@@ -122,7 +165,9 @@ namespace Celemp
             }
             return planetnames;
         }
+
         private void SetResearchPlanet(int plannum)
+        // Set specified planet as a Research planet
         {
             Planet rp = planets[plannum];
             rp.name = $"{rp.name} RP";
@@ -148,6 +193,7 @@ namespace Celemp
             Planet home = planets[plan_num];
             home.name = $"Home Planet {home.name}";
             home.owner = player_num;
+            home_planets[player_num] = home;
             for (int ore_type = 0; ore_type < 10; ore_type++)
             {
                 home.mine[ore_type] = proto.homeMines[ore_type];

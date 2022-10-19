@@ -16,11 +16,12 @@ namespace Celemp
         public int mines { get; set; }
         public int pdu { get; set; }
         public int planet { get; set; }
+        public int efficiency { get; set; }
 
-        public Ship(int shipnumb)
+        public Ship()
         {
-            name = "";
-            number = shipnumb;
+            name = "Unnamed";
+            number = -1;
             owner = -1;
             fight = 0;
             cargo = 0;
@@ -34,6 +35,7 @@ namespace Celemp
             industry = 0;
             mines = 0;
             pdu = 0;
+            efficiency = 0;
             planet = -1;
         }
 

@@ -8,6 +8,7 @@ namespace Celemp
         public int number { get; set; }
         public int earthCredit { get; set; }
         public int desturn { get; set; }
+        public int home_planet { get; set; }
 
         public Player(Protofile proto, int plr_num)
         {
@@ -15,6 +16,7 @@ namespace Celemp
             number = plr_num;
             earthCredit = 0;
             desturn = 30;
+            home_planet = -1;
         }
     }
 }
