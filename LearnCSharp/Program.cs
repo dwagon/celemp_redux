@@ -17,6 +17,8 @@ namespace Celemp
             var options = new JsonSerializerOptions { WriteIndented = true };
             string jsonString = JsonSerializer.Serialize(galaxy, options);
             File.WriteAllText("/Users/dwagon/celemp.json", jsonString);
+
+            galaxy.GenerateTurnSheets();
         }
 
     }

@@ -7,21 +7,32 @@ namespace Celemp
     [Serializable]
     public class Galaxy
     {
-        public uint turn { get; set; }
-        public Protofile proto = null!;
+        public int game_number { get; set; }
+        public int turn { get; set; }
+        public String duedate { get; set; }
+        public Protofile config = null!;
         public Dictionary<int, Planet> planets { get; set; }
         public Player[] players { get; set; }
         public Dictionary<int, Ship> ships { get; set; }
+        public int earth_bids_cargo;
+        public int earth_bids_fighter;
+        public int earth_bids_shield;
+
         private Dictionary<int, Planet> home_planets;
         private int ship_num;
 
         public Galaxy(Protofile protofile)
         {
-            proto = protofile;
+            config = protofile;
+            duedate = "TODO";   // TODO - generate due date
+            game_number = 0;    // TODO - make game number a parameter
             planets = new Dictionary<int, Planet>();
             ships = new Dictionary<int, Ship>();
             turn = 0;
             ship_num = 0;
+            earth_bids_cargo = 1;
+            earth_bids_fighter = 1;
+            earth_bids_shield = 1;
             players = new Player[9];
             home_planets = new Dictionary<int, Planet>();
 
@@ -29,24 +40,32 @@ namespace Celemp
             InitPlayers();
         }
 
+        public void GenerateTurnSheets()
+        {
+            for (int plrNum = 0; plrNum < 9; plrNum ++)
+            {
+                players[plrNum].GenerateTurnSheet();
+            }
+        }
+
         private void InitPlayers()
         {
-            for (int plr_num = 0; plr_num < 9; plr_num++)
+            for (int plrNum = 0; plrNum < 9; plrNum++)
             {
-                players[plr_num] = new Player(proto, plr_num);
-                players[plr_num].home_planet = home_planets[plr_num].number;
+                players[plrNum] = new Player(this, plrNum);
+                players[plrNum].home_planet = home_planets[plrNum].number;
 
-                InitShip1(players[plr_num]);
-                InitShip2(players[plr_num]);
+                InitShip1(players[plrNum]);
+                InitShip2(players[plrNum]);
             }
         }
 
         private void InitShip1(Player owner) {
             Ship newship;
 
-            for (int num=0; num < proto.ship1_num; num++)
+            for (int num=0; num < config.ship1_num; num++)
             {
-                newship = InitShip(proto.ship1_fight, proto.ship1_cargo, proto.ship1_shield, proto.ship1_tractor, proto.ship1_eff);
+                newship = InitShip(config.ship1_fight, config.ship1_cargo, config.ship1_shield, config.ship1_tractor, config.ship1_eff);
                 newship.owner = owner.number;
                 newship.planet = owner.home_planet;
             }
@@ -55,9 +74,9 @@ namespace Celemp
         private void InitShip2(Player owner) {
             Ship newship;
 
-            for (int num = 0; num < proto.ship2_num; num++)
+            for (int num = 0; num < config.ship2_num; num++)
             {
-                newship = InitShip(proto.ship2_fight, proto.ship2_cargo, proto.ship2_shield, proto.ship2_tractor, proto.ship2_eff);
+                newship = InitShip(config.ship2_fight, config.ship2_cargo, config.ship2_shield, config.ship2_tractor, config.ship2_eff);
                 newship.owner = owner.number;
                 newship.planet = owner.home_planet;
             }
@@ -65,9 +84,10 @@ namespace Celemp
 
         private Ship InitShip(int fight, int cargo, int shield, int tractor, int eff)
         {
-            Ship newship = new Ship();
-            newship.fight = fight;
+            Ship newship = new Ship(this);
+            newship.fighter = fight;
             newship.cargo = cargo;
+            newship.cargoleft = cargo;
             newship.shield = shield;
             newship.tractor = tractor;
             newship.efficiency = eff;
@@ -85,7 +105,7 @@ namespace Celemp
             for (int plan_num = 0; plan_num< 256; plan_num++) {
                 int linknum = 0;
 
-                planets[trans[plan_num]] = new Planet(proto, trans[plan_num]);
+                planets[trans[plan_num]] = new Planet(this, trans[plan_num]);
                 foreach (int link in linkmap[plan_num.ToString()])
                 {
                     planets[trans[plan_num]].link[linknum++] = trans[link];
@@ -147,7 +167,7 @@ namespace Celemp
         void NamePlanets()
         // Give the planets names
         {
-            Random rnd = new Random();
+            Random rnd = new ();
 
             string[] planetNames = LoadPlanetNames();
             for (int plan_num=0; plan_num < 256; plan_num++) {
@@ -170,7 +190,6 @@ namespace Celemp
         // Set specified planet as a Research planet
         {
             Planet rp = planets[plannum];
-            rp.name = $"{rp.name} RP";
             rp.research = true;
         }
 
@@ -178,12 +197,12 @@ namespace Celemp
         {
             Planet earth = planets[plannum];
             earth.name = "**** EARTH ****";
-            earth.industry = proto.earthInd;
-            earth.pdu = proto.earthPDU;
+            earth.industry = config.earthInd;
+            earth.pdu = config.earthPDU;
             for (int ore_type = 0; ore_type < 10; ore_type++)
             {
-                earth.ore[ore_type] = proto.earthOre[ore_type];
-                earth.mine[ore_type] = proto.earthMines[ore_type];
+                earth.ore[ore_type] = config.earthOre[ore_type];
+                earth.mine[ore_type] = config.earthMines[ore_type];
             }
         }
 
@@ -196,12 +215,13 @@ namespace Celemp
             home_planets[player_num] = home;
             for (int ore_type = 0; ore_type < 10; ore_type++)
             {
-                home.mine[ore_type] = proto.homeMines[ore_type];
-                home.ore[ore_type] = proto.homeOre[ore_type];
+                home.mine[ore_type] = config.homeMines[ore_type];
+                home.ore[ore_type] = config.homeOre[ore_type];
             }
-            home.pdu = proto.homePDU;
-            home.industry = proto.homeIndustry;
+            home.pdu = config.homePDU;
+            home.industry = config.homeIndustry;
             home.indleft = home.industry;
+            home.knows[player_num] = true;
             // Ensure no A-ring planets are defended or industrial to make things more even
             for (int link=0;link<4; link++)
             {

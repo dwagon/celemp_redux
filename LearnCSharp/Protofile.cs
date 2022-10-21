@@ -13,9 +13,8 @@ namespace Celemp
         public int[] earthOre = new int[10];
         public int[] earthMines = new int[10];
         public int earthFlag;
-        public int amnesty;
-        public int winning_score;
-        public int winning_turns;
+        public int earthAmnesty;
+        public Dictionary<String, Tuple<bool, int>> winning_terms;
         public int homeIndustry;
         public int homePDU;
         public int homeSpacemine;
@@ -33,6 +32,7 @@ namespace Celemp
         public int ship1_shield, ship2_shield;
         public int ship1_tractor, ship2_tractor;
         public int ship1_eff, ship2_eff;
+        public String turn_directory;
 
         public Protofile()
         {
@@ -48,9 +48,15 @@ namespace Celemp
                 earthMines[oretype] = 0;
             }
 
-            amnesty = 10;
-            winning_score = 10000;
-            winning_turns = 30;
+            earthAmnesty = 10;
+            winning_terms = new Dictionary<string, Tuple<bool, int>>();
+            winning_terms.Add("Score", new Tuple<bool, int>(true, 2500));
+            winning_terms.Add("Credit", new Tuple<bool, int>(false, 0));
+            winning_terms.Add("Earth Ownership", new Tuple<bool, int>(false, 0));
+            winning_terms.Add("Income", new Tuple<bool, int>(false, 0));
+            winning_terms.Add("Planets", new Tuple<bool, int>(false, 0));
+            winning_terms.Add("Fixed Turn", new Tuple<bool, int>(false, 0));
+            winning_terms.Add("Variable Turn", new Tuple<bool, int>(false, 0));
 
             homeIndustry = 60;
             homePDU = 100;
@@ -78,6 +84,8 @@ namespace Celemp
             ship2_shield = 0;
             ship2_tractor = 0;
             ship2_eff = 1;
+
+            turn_directory = "/tmp";
         }
 
         public void LoadProto(string filename)
@@ -126,13 +134,13 @@ namespace Celemp
                             earthPDU = Convert.ToInt16(tokens[1]);
                             break;
                         case "amnesty":
-                            amnesty = Convert.ToInt16(tokens[1]);
+                            earthAmnesty = Convert.ToInt16(tokens[1]);
                             break;
                         case "winning_score":
-                            winning_score = Convert.ToInt16(tokens[1]);
+                            winning_terms["Score"] = new Tuple<bool, int> (true, Convert.ToInt16(tokens[1]));
                             break;
                         case "winning_turns":
-                            winning_turns = Convert.ToInt16(tokens[1]);
+                            winning_terms["Fixed Turn"] = new Tuple<bool, int>(true, Convert.ToInt16(tokens[1]));
                             break;
                         case "home_ind":
                             homeIndustry = Convert.ToInt16(tokens[1]);
