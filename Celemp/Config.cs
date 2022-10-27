@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Celemp
 {
-    public class Protofile
+    public class Config
     {
         public int earthMult;
         public int earthInd;
@@ -34,7 +34,7 @@ namespace Celemp
         public int ship1_eff, ship2_eff;
         public String turn_directory;
 
-        public Protofile()
+        public Config(String protofile)
         {
             earthMult = 1;
             earthInd = 60;
@@ -86,15 +86,18 @@ namespace Celemp
             ship2_eff = 1;
 
             turn_directory = "/tmp";
+
+            LoadProto(protofile);
         }
 
-        public void LoadProto(string filename)
+        private void LoadProto(string filename)
         {
         string text = File.ReadAllText(filename);
+            Console.WriteLine($"Loading prototype from {filename}");
 
         using (StringReader sr = new StringReader(text))
             {
-                string line;
+                string? line;
                 while ((line = sr.ReadLine()) != null)
                 {
                     if (line.StartsWith('#') || string.IsNullOrWhiteSpace(line))
@@ -148,7 +151,7 @@ namespace Celemp
                         case "home_pdu":
                             homePDU = Convert.ToInt16(tokens[1]);
                             break;
-                        case "home_spcmine":
+                        case "home_spacemine":
                             homeSpacemine = Convert.ToInt16(tokens[1]);
                             break;
                         case "home_deployed":
@@ -204,6 +207,18 @@ namespace Celemp
                             break;
                         case "ship2_shield":
                             ship2_shield = Convert.ToInt16(tokens[1]);
+                            break;
+                        case "ship1_tractor":
+                            ship1_tractor = Convert.ToInt16(tokens[1]);
+                            break;
+                        case "ship2_tractor":
+                            ship2_tractor = Convert.ToInt16(tokens[1]);
+                            break;
+                        case "ship1_eff":
+                            ship1_eff = Convert.ToInt16(tokens[1]);
+                            break;
+                        case "ship2_eff":
+                            ship2_eff = Convert.ToInt16(tokens[1]);
                             break;
                         default:
                             Console.WriteLine($"LoadProto: Unknown token {tokens[0]}");

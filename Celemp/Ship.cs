@@ -23,12 +23,11 @@ namespace Celemp
         public int planet { get; set; }
         public int efficiency { get; set; }
         public String stndord { get; set; }
-        private Galaxy galaxy;
+        private Galaxy? galaxy;
 
-        public Ship(Galaxy this_galaxy)
+        public Ship()
         {
             name = "Unnamed";
-            galaxy = this_galaxy;
             number = -1;
             owner = -1;
             fighter = 0;
@@ -50,6 +49,11 @@ namespace Celemp
             efficiency = 0;
             planet = -1;
             stndord = "";
+        }
+
+        public void SetGalaxy(Galaxy aGalaxy)
+        {
+            galaxy = aGalaxy;
         }
 
         public bool IsEmpty()
@@ -83,7 +87,7 @@ namespace Celemp
             float tmpshots;
             float ratio;
 
-            if (galaxy.turn < galaxy.config.earthAmnesty && galaxy.planets[planet].IsEarth())
+            if (galaxy!.turn < galaxy.earthAmnesty && galaxy.planets[planet].IsEarth())
                 return 0; // Zero shots due to Earth amnesty
 
             ratio = shts / weight;
@@ -109,7 +113,7 @@ namespace Celemp
         public void TurnFriendShip(StreamWriter outfh)
         {
             bool hasCargo = false;
-            String ownerName = galaxy.players[owner].name;
+            String ownerName = galaxy!.players[owner].name;
             type = CalcType();
 
             outfh.WriteLine("\n");

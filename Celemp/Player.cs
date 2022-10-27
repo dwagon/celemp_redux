@@ -14,36 +14,29 @@ namespace Celemp
         public int earthCredit { get; set; }
         public int desired_endturn { get; set; }
         public int home_planet { get; set; }
-        private Galaxy galaxy;
+        private Galaxy? galaxy;
 
-        public Player(Galaxy this_galaxy, int plrNum)
+        public Player()
         {
             score = 0;
             income = 0;
-            galaxy = this_galaxy;
-            number = plrNum;
             name = "Unknown";
+            number = -1;
             earthCredit = 0;
             desired_endturn = 30;
             home_planet = -1;
         }
 
-        public int NumberResearchPlanetsOwned()
-        // Return the number of research planets owned by this player
+        public void InitPlayer(Galaxy aGalaxy)
         {
-            int count = 0;
-            for (int plan_num=0; plan_num < 256; plan_num++)
-            {
-                if (galaxy.planets[plan_num].owner == number && galaxy.planets[plan_num].research)
-                    count++;
-            }
-            return count;
+            galaxy = aGalaxy;
         }
 
         public void GenerateTurnSheet()
         // Generate the turn sheet output file
         {
-            var output_filename = Path.Join(galaxy.config.turn_directory, $"turn_{number}.tex");
+            //var output_filename = Path.Join(galaxy.config.turn_directory, $"turn_{number}.tex");
+            string output_filename = Path.Join("/Users/dwagon", $"turn_{number}.tex");
             Console.WriteLine($"Generating {output_filename}");
             using (StreamWriter sw = File.CreateText(output_filename))
             {
@@ -64,7 +57,7 @@ namespace Celemp
         {
             for(int planNum=0;planNum<256;planNum++)
             {
-                if (galaxy.planets[planNum].knows[number])
+                if (galaxy!.planets[planNum].knows[number])
                 {
                     galaxy.planets[planNum].TurnPlanetDetails(outfh);
                     foreach (KeyValuePair<int, Ship> ship in galaxy.ships)
@@ -105,7 +98,7 @@ namespace Celemp
         {
             outfh.Write("\\documentclass{article}\n");
             outfh.Write("\\usepackage{longtable, graphicx, epstopdf, changepage, a4wide}\n");
-            outfh.Write("\\title{Celestial Empire Game " + galaxy.game_number + "}\n");
+            outfh.Write("\\title{Celestial Empire Game}\n");
             outfh.Write("\\author{Dougal Scott $<$dougal.scott@gmail.com$>$}\n");
             outfh.Write("\\begin{document}\n");
             outfh.Write("\\maketitle\n");
@@ -116,20 +109,20 @@ namespace Celemp
             outfh.Write("\n");
             outfh.Write("\\section*{" + name + "}\n");
             /* Print out score and gm and turn numbers */
-            outfh.Write("\\subsection*{Turn " + galaxy.turn + "}\n");
+            outfh.Write("\\subsection*{Turn " + galaxy!.turn + "}\n");
             outfh.Write("\\begin{itemize}\n");
             outfh.Write("\\item score=" + score + "\n");
             /* Print out due date, and player scores */
             outfh.Write("\\item date due= before " + galaxy.duedate + "\n");
             outfh.Write("\\item your income=", income + "\n");
             outfh.Write("\\item Earth credits=" + earthCredit + "\n");
-            outfh.Write("\\item Credits:Score=" + galaxy.config.earthMult + "\n");
-            outfh.Write($"\\item You have {NumberResearchPlanetsOwned() + 1} scans this turn\n");
+            outfh.Write("\\item Credits:Score=" + galaxy.earthMult + "\n");
+            outfh.Write($"\\item You have {galaxy!.NumberResearchPlanetsOwned(number) + 1} scans this turn\n");
             outfh.Write("\\item \\begin{tabular}{c|c|c}\n");
             outfh.Write("\\multicolumn{3}{c}{Player Scores}\\\\ \\hline \n");
-            outfh.Write($"{galaxy.players[0].score} & {galaxy.players[1].score}& {galaxy.players[2].score}\\\\ \n");
-            outfh.Write($"{galaxy.players[3].score} & {galaxy.players[4].score} & {galaxy.players[5].score}\\\\ \n");
-            outfh.Write($"{galaxy.players[6].score} & {galaxy.players[7].score} & {galaxy.players[8].score}\\\\ \n");
+            outfh.Write($"{galaxy!.players[0].score} & {galaxy.players[1].score}& {galaxy.players[2].score}\\\\ \n");
+            outfh.Write($"{galaxy!.players[3].score} & {galaxy.players[4].score} & {galaxy.players[5].score}\\\\ \n");
+            outfh.Write($"{galaxy!.players[6].score} & {galaxy.players[7].score} & {galaxy.players[8].score}\\\\ \n");
             outfh.Write("\\end{tabular}\n\n");
             outfh.Write("\\end{itemize}\n\n");
         }
@@ -138,9 +131,9 @@ namespace Celemp
         {
             outfh.Write("Minimum bids:\n");
             outfh.Write("\\begin{itemize}\n");
-            outfh.Write($"\\item Cargo={galaxy.earth_bids_cargo}\n");
-            outfh.Write($"\\item Fighter={galaxy.earth_bids_fighter}\n");
-            outfh.Write($"\\item Shield={galaxy.earth_bids_shield}\n");
+            outfh.Write($"\\item Cargo={galaxy!.earthBids["Cargo"]}\n");
+            outfh.Write($"\\item Fighter={galaxy!.earthBids["Fighter"]}\n");
+            outfh.Write($"\\item Shield={galaxy!.earthBids["Shield"]}\n");
             outfh.Write("\\end{itemize}\n");
         }
 
@@ -149,31 +142,31 @@ namespace Celemp
             /* Print winning conditions */
             outfh.Write("\\subsection*{Winning Conditions}\n");
             outfh.Write("\\begin{itemize}\n");
-            if (galaxy.config.winning_terms["Earth Ownership"].Item1)
+            if (galaxy!.winning_terms!["Earth Ownership"].Item1)
             {
                 outfh.Write("\\item Earth\n");
             }
-            if (galaxy.config.winning_terms["Credit"].Item1)
+            if (galaxy!.winning_terms["Credit"].Item1)
             {
-                outfh.Write("\\item Credits=" + galaxy.config.winning_terms["Credit"].Item2 + "\n");
+                outfh.Write("\\item Credits=" + galaxy.winning_terms["Credit"].Item2 + "\n");
             }
-            if (galaxy.config.winning_terms["Income"].Item1)
+            if (galaxy!.winning_terms["Income"].Item1)
             {
-                outfh.Write("\\item Income=" + galaxy.config.winning_terms["Income"].Item2 + "\n");
+                outfh.Write("\\item Income=" + galaxy.winning_terms["Income"].Item2 + "\n");
             }
-            if (galaxy.config.winning_terms["Score"].Item1)
+            if (galaxy!.winning_terms["Score"].Item1)
             {
-                outfh.Write("\\item Score=" + galaxy.config.winning_terms["Score"].Item2 + "\n");
+                outfh.Write("\\item Score=" + galaxy.winning_terms["Score"].Item2 + "\n");
             }
-            if (galaxy.config.winning_terms["Planets"].Item1)
+            if (galaxy!.winning_terms["Planets"].Item1)
             {
-                outfh.Write("\\item Planets=" + galaxy.config.winning_terms["Planets"].Item2 + "\n");
+                outfh.Write("\\item Planets=" + galaxy.winning_terms["Planets"].Item2 + "\n");
             }
-            if (galaxy.config.winning_terms["Fixed Turn"].Item1)
+            if (galaxy!.winning_terms["Fixed Turn"].Item1)
             {
-                outfh.Write("\\item Turn=" + galaxy.config.winning_terms["Fixed Turn"].Item2 + "\n");               
+                outfh.Write("\\item Turn=" + galaxy.winning_terms["Fixed Turn"].Item2 + "\n");               
             }
-            if (galaxy.config.winning_terms["Variable Turn"].Item1)
+            if (galaxy!.winning_terms["Variable Turn"].Item1)
             {
                 outfh.Write($"\\item Desired end turn={desired_endturn}\n");
             }

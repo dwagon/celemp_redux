@@ -25,31 +25,42 @@ namespace Celemp
         public bool research { get; set; }
         public int income { get; set; }
         public String stndord { get; set; }
-        private readonly Galaxy galaxy;
+        private Galaxy? galaxy;
 
-        public Planet(Galaxy this_galaxy, int planNum)
+        public Planet()
         {
-            int num_mines = 0;
-
-            galaxy = this_galaxy;
-            number = planNum;
+            galaxy = null;
+            number = -1;
             name = "TODO";
             owner = -1;
             research = false;
             spacemines = 0;
             deployed = 0;
-            SetPDU();
-            SetIndustry();
-            num_mines = NumMines();
-            SetMines(num_mines);
-            SetOre();
-            SetLinks();
             for (int player=0;player<9;player++)
             {
                 knows[player] = false;
             }
             scanned = false;
             stndord = "";
+            Console.WriteLine("Planet");
+        }
+
+        public void setGalaxy(Galaxy? aGalaxy)
+        {
+            galaxy = aGalaxy;
+        }
+
+        public void InitPlanet(Config config)
+        // Initialise planets for the first time to random values
+        {
+            int num_mines = 0;
+
+            num_mines = NumMines(config.galNoMines, config.galExtraMines);
+            SetMines(num_mines);
+            SetOre(config.galExtraOre);
+            SetLinks();
+            SetPDU(config.galHasPDU);
+            SetIndustry(config.galHasInd);
         }
 
         public String DisplayNumber(int num=-1)
@@ -65,7 +76,7 @@ namespace Celemp
                 outfh.Write(" --- Research Planet");
             outfh.Write("\n");
             outfh.Write("\\begin{tabular}{r|llll}\n");
-            outfh.Write("Owner & \\multicolumn{4}{l}{" + galaxy.players[owner].name + "}\\\\\n");
+            outfh.Write("Owner & \\multicolumn{4}{l}{" + galaxy!.players[owner].name + "}\\\\\n");
             if (scanned)
             {
                 outfh.Write("Scanned & \\multicolumn{4}{l}{Planet scanned this turn}\\\\\n");
@@ -121,10 +132,11 @@ namespace Celemp
 
         public bool IsEarth()
         {
+            // TODO - Sometimes this should be true
             return false;
         }
 
-        private void SetOre()
+        private void SetOre(int pct_extra_ore)
         {
             var rnd = new Random();
 
@@ -132,7 +144,7 @@ namespace Celemp
             {
                 if (mine[ore_type] != 0)
                 {
-                    if (rnd.Next(100) > (100 - galaxy.config.galExtraOre))
+                    if (rnd.Next(100) > (100 - pct_extra_ore))
                         ore[ore_type] = mine[ore_type] + rnd.Next(5);
                     else
                         ore[ore_type] = rnd.Next(3);
@@ -163,11 +175,11 @@ namespace Celemp
             return 1;
         }
 
-        private void SetIndustry()
+        private void SetIndustry(int pct_has_industry)
         // Set the industry for a planet
         {
             var rnd = new Random();
-            if (rnd.Next(100) > (100 - galaxy.config.galHasInd))
+            if (rnd.Next(100) > (100 - pct_has_industry))
             {
                 industry = Normal();
             }
@@ -178,24 +190,25 @@ namespace Celemp
             indleft = industry;
         }
 
-        private void SetPDU()
+        private void SetPDU(int pct_has_pdu)
         {
             var rnd = new Random();
-            if (rnd.Next(100) > (100 - galaxy.config.galHasPDU))
+
+            if (rnd.Next(100) > (100 - pct_has_pdu))
             {
                 pdu = Normal() * 2;
             }
         }
 
-        private int NumMines()
+        private int NumMines(int pct_no_mines, int pct_extra_mines)
         // Return the number of mines a normal planet should have
         {
             int num_mines;
             var rnd = new Random();
 
-            if (rnd.Next(100) > (100 - galaxy.config.galNoMines))
+            if (rnd.Next(100) > (100 - pct_no_mines))
                 num_mines = 0;
-            else if (rnd.Next(100) > (100 - galaxy.config.galExtraMines))
+            else if (rnd.Next(100) > (100 - pct_extra_mines))
                 num_mines = Normal() * (rnd.Next(8) + 1);
             else
             {
@@ -227,7 +240,5 @@ namespace Celemp
                 }
             }
         }
-
- 
     }
 }
