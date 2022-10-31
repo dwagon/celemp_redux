@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-
-namespace Celemp
+﻿namespace Celemp
 {
+    [Serializable]
     public class Ship
     {
         public string name { get; set; }
@@ -28,7 +25,7 @@ namespace Celemp
         public Ship()
         {
             name = "Unnamed";
-            number = -1;
+            // number = -1;
             owner = -1;
             fighter = 0;
             cargo = 0;

@@ -1,21 +1,19 @@
-﻿using System;
-using System.IO;
-using System.Text.Json;
-using System.Xml.Linq;
+﻿using System.Text.Json;
 
 namespace Celemp
 {
+    [Serializable]
     public class Galaxy
     {
         public int turn { get; set; }
         public String duedate { get; set; }
-        public Dictionary<int, Planet> planets = new();
+        public Dictionary<int, Planet> planets { get; set; }
         public Player[] players { get; set; }
-        public Dictionary<int, Ship> ships { get; set; }
         public Dictionary<string, int> earthBids { get; set; }
-        public Dictionary<String, Tuple<bool, int>>? winning_terms;
-        public int earthAmnesty;
-        public int earthMult;
+        public Dictionary<String, Tuple<bool, int>> winning_terms { get; set; }
+        public int earthAmnesty { get; set; }
+        public int earthMult { get; set; }
+        public Dictionary<int, Ship> ships { get; set; }
 
         private Dictionary<int, Planet> home_planets;
         private int ship_num;
@@ -24,14 +22,13 @@ namespace Celemp
         {
             duedate = "TODO";   // TODO - generate due date
             planets = new Dictionary<int, Planet>();
-            for (int plan_num = 0; plan_num < 256; plan_num++)
-                planets[plan_num] = new Planet();
             ships = new Dictionary<int, Ship>();
+            winning_terms = new();
             turn = 0;
             ship_num = 0;
             earthBids = new();
-            earthMult = 1;
-            earthAmnesty = 10;
+            earthMult = -1;
+            earthAmnesty = -1;
             earthBids.Add("Cargo", 1);
             earthBids.Add("Fighter", 1);
             earthBids.Add("Shield", 1);
@@ -50,6 +47,7 @@ namespace Celemp
         {
             winning_terms = config.winning_terms;
             earthMult = config.earthMult;
+            earthAmnesty = config.earthAmnesty;
         }
 
         public void SaveGame(string save_file)
@@ -60,22 +58,11 @@ namespace Celemp
             File.WriteAllText(save_file, jsonString);
         }
 
-        public Galaxy LoadGame(string save_file)
-        {
-            string jsonString = File.ReadAllText(save_file);
-            Galaxy? galaxy = JsonSerializer.Deserialize<Galaxy>(jsonString);
-            if (galaxy is null)
-            {
-                Console.WriteLine($"Failed to load from {save_file}");
-                System.Environment.Exit(1);
-            }
-            return this;
-        }
-
         public void GenerateTurnSheets()
         {
             for (int plrNum = 0; plrNum < 9; plrNum ++)
             {
+                Console.WriteLine($"Generate turn sheet for player {plrNum}");
                 players[plrNum].GenerateTurnSheet();
             }
         }
@@ -86,7 +73,7 @@ namespace Celemp
             {
                 players[plrNum] = new Player();
                 players[plrNum].home_planet = home_planets[plrNum].number;
-                players[plrNum].InitPlayer(this);
+                players[plrNum].InitPlayer(this, plrNum);
 
                 InitShip1(players[plrNum], config);
                 InitShip2(players[plrNum], config);
@@ -142,7 +129,7 @@ namespace Celemp
             }
             for (int plan_num = 0; plan_num< 256; plan_num++) {
                 int linknum = 0;
-                Console.WriteLine($"InitPlanets {trans[plan_num]}");
+
                 planets[trans[plan_num]] = new Planet();
                 planets[trans[plan_num]].InitPlanet(config);
                 planets[trans[plan_num]].setGalaxy(this);

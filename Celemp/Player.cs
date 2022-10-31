@@ -1,8 +1,4 @@
-﻿using System;
-using Microsoft.VisualBasic;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace Celemp
+﻿namespace Celemp
 {
     [Serializable]
     public class Player
@@ -25,6 +21,12 @@ namespace Celemp
             earthCredit = 0;
             desired_endturn = 30;
             home_planet = -1;
+        }
+
+        public void InitPlayer(Galaxy aGalaxy, int aPlrNum)
+        {
+            galaxy = aGalaxy;
+            number = aPlrNum;
         }
 
         public void InitPlayer(Galaxy aGalaxy)

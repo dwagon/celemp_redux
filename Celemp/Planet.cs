@@ -1,10 +1,4 @@
-﻿using System;
-using System.Diagnostics.Metrics;
-using System.Numerics;
-using System.Runtime.Serialization;
-using System.Text.Json;
-
-namespace Celemp
+﻿namespace Celemp
 {
     [Serializable]
     public class Planet
@@ -42,7 +36,6 @@ namespace Celemp
             }
             scanned = false;
             stndord = "";
-            Console.WriteLine("Planet");
         }
 
         public void setGalaxy(Galaxy? aGalaxy)
