@@ -34,11 +34,11 @@
             galaxy = aGalaxy;
         }
 
-        public void GenerateTurnSheet()
+        public void GenerateTurnSheet(string celemp_path)
         // Generate the turn sheet output file
         {
             //var output_filename = Path.Join(galaxy.config.turn_directory, $"turn_{number}.tex");
-            string output_filename = Path.Join("/Users/dwagon", $"turn_{number}.tex");
+            string output_filename = Path.Join(celemp_path, $"turn_{number}_{galaxy!.turn}.tex");
             Console.WriteLine($"Generating {output_filename}");
             using (StreamWriter sw = File.CreateText(output_filename))
             {

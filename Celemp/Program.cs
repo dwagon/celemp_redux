@@ -3,9 +3,7 @@
 namespace Celemp
 {
     class Program
-    {
-        readonly string path = "/Users/dwagon";
-        
+    {        
         static void Main(string[] args)
         {
             int game_number;
@@ -14,24 +12,49 @@ namespace Celemp
                 PrintUsage();
                 System.Environment.Exit(1);
             }
+
             Program pc = new Program();
             game_number = Int16.Parse(args[1]);
+            string game_path = MakePath(game_number);
+           
 
             switch (args[0])
             {
                 case "new":
-                    pc.NewGame(game_number);
+                    pc.NewGame(game_path);
                     break;
                 case "turn":
-                    pc.ProcessTurns(game_number);
+                    pc.ProcessTurns(game_number, game_path);
                     break;
                 case "sheet":
-                    pc.GenerateTurnSheets(game_number);
+                    pc.GenerateTurnSheets(game_number, game_path);
                     break;
                 default:
                     Console.WriteLine($"Unknown argument {args[0]}");
                     break;
             }
+        }
+
+        static string MakePath(int game_number)
+        {
+            string file_path;
+            string? celemp_path;
+            celemp_path = Environment.GetEnvironmentVariable("CELEMP_HOME");
+
+
+            if (celemp_path == null)
+            {
+                Console.WriteLine("Need a value for CELEMP_HOME");
+                Environment.Exit(1);
+            }
+            file_path = Path.Join(celemp_path, $"game_{game_number}");
+
+            if (!Directory.Exists(file_path))
+            {
+                Console.WriteLine($"Creating directory {file_path}");
+                Directory.CreateDirectory(file_path);
+            }
+            return file_path;
         }
 
         static void PrintUsage()
@@ -41,26 +64,25 @@ namespace Celemp
             Console.WriteLine("celemp sheet <gamenum>");
         }
 
-        void NewGame(int game_number) {
-            string save_file = Path.Join(path, $"celemp_{game_number}.json");
-            Config config = new(Path.Join(path, "protofile"));
+        void NewGame(string celemp_path) {
+            string save_file = Path.Join(celemp_path, "celemp.json");
+            Config config = new(Path.Join(celemp_path, "protofile"));
             Galaxy galaxy = new();
 
-            Console.WriteLine($"New galaxy {game_number}");
+            Console.WriteLine("New galaxy");
             galaxy.InitGalaxy(config);
             galaxy.SaveGame(save_file);
         }
 
-        void GenerateTurnSheets(int game_number) {
-            string save_file = Path.Join(path, $"celemp_{game_number}.json");
+        void GenerateTurnSheets(int game_number, string celemp_path) {
+            string save_file = Path.Join(celemp_path, "celemp.json");
 
             Galaxy galaxy = LoadGame(save_file);
-            galaxy.SaveGame($"/Users/dwagon/celemp_{game_number}_a.json");  // DEBUG
-            galaxy.GenerateTurnSheets();
+            galaxy.GenerateTurnSheets(celemp_path);
         }
 
-        void ProcessTurns(int game_number) {
-            string save_file = Path.Join(path, $"celemp_{game_number}.json");
+        void ProcessTurns(int game_number, string celemp_path) {
+            string save_file = Path.Join(celemp_path, "celemp.json");
             Galaxy galaxy = LoadGame(save_file);
             // TODO the processing of the turn
             galaxy.SaveGame(save_file);
@@ -69,7 +91,16 @@ namespace Celemp
         public Galaxy LoadGame(string save_file)
         {
             Galaxy galaxy = new();
-            string jsonString = File.ReadAllText(save_file);
+            string jsonString = "";
+            try
+            {
+                jsonString = File.ReadAllText(save_file);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Failure when reading save file {save_file}: {exc.Message}");
+                Environment.Exit(1);
+            }
             galaxy = JsonSerializer.Deserialize<Galaxy>(jsonString)!;
             if (galaxy is null)
             {
