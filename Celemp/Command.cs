@@ -164,29 +164,65 @@ namespace Celemp
             {
                 priority = CommandOrder.LOADALL;
                 numbers.Add("ship", ship);
+                return;
+            }
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+
+            char cmdchar = Char.ToLower(cmd[5 + offset]);
+            switch (cmdchar)
+            {
+                case 'm':
+                    ShipLoadMine(cmd, ship, amount);
+                    break;
+                case 'd':
+                    ShipLoadPDU(cmd, ship, amount);
+                    break;
+                case 'i':
+                    ShipLoadIndustry(cmd, ship, amount);
+                    break;
+                case 'r':
+                    ShipLoadOre(cmd, ship, amount);
+                    break;
+                case 's':
+                    ShipLoadSpacemines(cmd, ship, amount);
+                    break;
+                default:
+                    throw new CommandParseException($"Ship load command not understood {cmd}");
             }
 
+        }
+
+        private (int, int) ExtractAmount(string str, int startidx)
+        // Pull out the number from the str starting at index
+        // Return the number and the number of characters it took
+        {
+            int amount = -1;
+            var amountstr = "";
+            for (int idx = startidx; idx < str.Length; idx++)
+            {
+                if (Char.IsDigit(str[idx]))
+                    amountstr += str[idx];
+                else
+                    break;
+            }
+            amount = Int16.Parse(amountstr);
+
+            return (amount, amountstr.Length);
         }
 
         private void ShipPurchaseOre(string cmd, int ship) { }
         private void ShipRetrieve(string cmd, int ship) { }
         private void ShipTend(string cmd, int ship) { }
         private void ShipUnload(string cmd, int ship) {
-            int amount=-1;
-            string amountstr = "";
-
-            // Pull out the amount
-            for(int idx=5;idx<cmd.Length;idx++)
-            {
-                if (Char.IsDigit(cmd[idx]))
-                {
-                    amountstr.Append(cmd[idx]);
-                }
-                else { break; }
+            // S123U
+            if (cmd.Length==5) {
+                priority = CommandOrder.UNLODALL;
+                numbers.Add("ship", ship);
+                return;
             }
-            amount = Int16.Parse(amountstr);
+            (int amount, int offset) = ExtractAmount(cmd, 5);
 
-            char cmdchar = Char.ToLower(cmd[5 + amountstr.Length]);
+            char cmdchar = Char.ToLower(cmd[5 + offset]);
             switch (cmdchar)
             {
                 case 'm':
@@ -224,6 +260,47 @@ namespace Celemp
         private void ShipUnloadOre(string cmd, int ship, int amount) { }
         private void ShipUnloadSpacemines(string cmd, int ship, int amount) { }
 
+        private void ShipLoadMine(string cmd, int ship, int amount)
+        {
+            // S123L23M2 - Load 23 Mines of type 2
+            int type = Convert.ToInt16(cmd[cmd.Length - 1]);
+            priority = CommandOrder.LOADMIN;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+            numbers.Add("oretype", type);
+        }
+
+        private void ShipLoadPDU(string cmd, int ship, int amount) {
+            // S123L34D
+            priority = CommandOrder.LOADDEF;
+            numbers.Add("amount", amount);
+            numbers.Add("ship", ship);
+        }
+
+        private void ShipLoadIndustry(string cmd, int ship, int amount) {
+            // S345L3I
+            priority = CommandOrder.LOADIND;
+            numbers.Add("amount", amount);
+            numbers.Add("ship", ship);
+        }
+
+        private void ShipLoadOre(string cmd, int ship, int amount) {
+            // S123L120R2
+            int type = (int) Char.GetNumericValue(cmd[cmd.Length - 1]);
+            Console.WriteLine($"DBG {cmd} Last = '{cmd[cmd.Length - 1]}' type={type}");
+
+            priority = CommandOrder.LOADORE;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+            numbers.Add("oretype", type);
+        }
+
+        private void ShipLoadSpacemines(string cmd, int ship, int amount) {
+            // S234L34S
+            priority = CommandOrder.LOADSPM;
+            numbers.Add("amount", amount);
+            numbers.Add("ship", ship);
+        }
 
         private void ShipSellOre(string cmd, int ship) { }
         private void ShipUnbuild(string cmd, int ship) { }
@@ -299,7 +376,7 @@ namespace Celemp
             int num;
             bool good = Int32.TryParse(shp.Substring(1), out num);
 
-            if (shp[0] != 's') {
+            if (Char.ToLower(shp[0]) != 's') {
                 throw new CommandParseException($"Ship {shp} doesn't begin with an 'S'");
             }
             if (!good)

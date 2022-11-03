@@ -1,4 +1,5 @@
-﻿using static Celemp.Constants;
+﻿using System.Security.AccessControl;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -15,10 +16,6 @@ namespace Celemp
         public int tractor { get; set; }
         public ShipType type { get; set; }
         public Dictionary<String, int> carrying { get; set; }
-        public int[] ore { get; set; } = new int[numOreTypes];
-        public int industry { get; set; }
-        public int mines { get; set; }
-        public int pdu { get; set; }
         public int planet { get; set; }
         public int efficiency { get; set; }
         public String stndord { get; set; }
@@ -68,6 +65,13 @@ namespace Celemp
         {
             if (num < 0) { num = number; }
             return (num + 100).ToString();
+        }
+
+        public void LoadShip(string cargotype, int amount)
+        {
+            // Load cargo onto the ship - doesn't remove it from source
+            cargoleft -= amount;
+            carrying[cargotype] += amount;
         }
 
         public int EffectiveEfficiency()

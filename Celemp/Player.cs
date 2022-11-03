@@ -46,21 +46,136 @@ namespace Celemp
             switch (cmd.priority)
             {
                 case CommandOrder.SCAN:
-                    Scan(cmd);
+                    Cmd_Scan(cmd);
                     break;
+                case CommandOrder.NAMESHIP:
+                    Cmd_NameShip(cmd);
+                    break;
+                case CommandOrder.LOADALL:
+                    Cmd_LoadAll(cmd);
+                    break;
+                case CommandOrder.LOADORE:
+                    Cmd_LoadOre(cmd);
+                    break;
+                case CommandOrder.LOADIND:
+                    Cmd_LoadIndustry(cmd);
+                    break;
+                case CommandOrder.LOADMIN:
+                    Cmd_LoadMine(cmd);
+                    break;
+                case CommandOrder.LOADSPM:
+                    Cmd_LoadSpacemine(cmd);
+                    break;
+                case CommandOrder.LOADDEF:
+                    Cmd_LoadPDU(cmd);
+                    break;
+
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
         }
 
-        private void Scan(Command cmd)
+        private void Cmd_LoadAll(Command cmd) {
+            // Load all available ore (Except type 0) onto ship
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+            for (int oretype=1;oretype<numOreTypes;oretype++)
+            {
+                int amount = galaxy.planets[planet].ore[oretype];
+                if (galaxy.ships[ship].cargoleft < amount)
+                    amount = galaxy.ships[ship].cargoleft;
+                galaxy.planets[planet].ore[oretype] -= amount;
+                galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
+            }
+        }
+        private void Cmd_LoadOre(Command cmd)
+        {
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+            int amount = cmd.numbers["amount"];
+            int oretype = cmd.numbers["oretype"];
+
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+            if (galaxy.ships[ship].cargoleft < amount)
+                amount = galaxy.ships[ship].cargoleft;
+            if (galaxy.planets[planet].ore[oretype] < amount)
+                amount = galaxy.planets[planet].ore[oretype];
+            galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
+            galaxy.planets[planet].ore[oretype] -= amount;
+        }
+
+        private void Cmd_LoadIndustry(Command cmd) {
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+        }
+        private void Cmd_LoadMine(Command cmd) {
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+        }
+        private void Cmd_LoadSpacemine(Command cmd) {
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+        }
+        private void Cmd_LoadPDU(Command cmd) {
+            int ship = cmd.numbers["ship"];
+            int planet = galaxy!.ships[ship].planet;
+            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
+            {
+                return;
+            }
+        }
+
+        private void Cmd_NameShip(Command cmd)
+        {
+            int ship = cmd.numbers["ship"];
+            if (!CheckShipOwnership(ship)) {
+                return;
+            }
+            galaxy!.ships[ship].name = cmd.strings["name"];
+        }
+
+        private void Cmd_Scan(Command cmd)
         {
             if (scans >= 0)
             {
                 galaxy!.planets[cmd.numbers["planet"]].Scan(cmd.plrNum);
                 scans--;
             }
+        }
+
+        private bool CheckShipOwnership(int shipnum)
+        {
+            if (galaxy!.ships[shipnum].owner == number)
+                return true;
+            return false;
+        }
+
+        private bool CheckPlanetOwnership(int plannum)
+        {
+            if (galaxy!.planets[plannum].owner == number)
+                return true;
+            return false;
         }
 
         public void InitPlayer(Galaxy aGalaxy, int aPlrNum)
