@@ -1,4 +1,6 @@
-﻿namespace Celemp
+﻿using static Celemp.Constants;
+
+namespace Celemp
 {
     public class Config
     {
@@ -7,8 +9,8 @@
         public int earthPDU;
         public int earthSpacemine;
         public int earthDeployed;
-        public int[] earthOre = new int[10];
-        public int[] earthMines = new int[10];
+        public int[] earthOre = new int[numOreTypes];
+        public int[] earthMines = new int[numOreTypes];
         public int earthFlag;
         public int earthAmnesty;
         public Dictionary<String, Tuple<bool, int>> winning_terms;
@@ -16,8 +18,8 @@
         public int homePDU;
         public int homeSpacemine;
         public int homeDeployed;
-        public int[] homeOre = new int[10];
-        public int[] homeMines = new int[10];
+        public int[] homeOre = new int[numOreTypes];
+        public int[] homeMines = new int[numOreTypes];
         public int galHasInd;
         public int galHasPDU;
         public int galNoMines;
@@ -39,7 +41,7 @@
             earthSpacemine = 0;
             earthDeployed = 0;
             earthFlag = 0;
-            for (int oretype = 0; oretype < 10; oretype++)
+            for (int oretype = 0; oretype < numOreTypes; oretype++)
             {
                 earthOre[oretype] = 10;
                 earthMines[oretype] = 0;
@@ -59,8 +61,8 @@
             homePDU = 100;
             homeSpacemine = 0;
             homeDeployed = 0;
-            homeOre = new int[10] { 100, 30, 30, 20, 25, 15, 15, 15, 50, 50 };
-            homeMines = new int[10] { 5, 3, 3, 1, 2, 1, 1, 0, 0, 0 };
+            homeOre = new int[numOreTypes] { 100, 30, 30, 20, 25, 15, 15, 15, 50, 50 };
+            homeMines = new int[numOreTypes] { 5, 3, 3, 1, 2, 1, 1, 0, 0, 0 };
 
             galHasInd = 30;
             galHasPDU = 10;
@@ -119,13 +121,13 @@
                             earthInd = Convert.ToInt16(tokens[1]);
                             break;
                         case "earth_ore":
-                            for (int ore_type = 0; ore_type < 10; ore_type++)
+                            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
                             {
                                 earthOre[ore_type] = Convert.ToInt16(bits[ore_type]);
                             }
                             break;
                         case "earth_mine":
-                            for (int ore_type = 0; ore_type < 10; ore_type++)
+                            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
                             {
                                 earthMines[ore_type] = Convert.ToInt16(bits[ore_type]);
                             }
@@ -155,13 +157,13 @@
                             homeDeployed = Convert.ToInt16(tokens[1]);
                             break;
                         case "home_ore":
-                            for (int ore_type = 0; ore_type < 10; ore_type++)
+                            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
                             {
                                 homeOre[ore_type] = Convert.ToInt16(bits[ore_type]);
                             }
                             break;
                         case "home_mine":
-                            for (int ore_type = 0; ore_type < 10; ore_type++)
+                            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
                             {
                                 homeMines[ore_type] = Convert.ToInt16(bits[ore_type]);
                             }

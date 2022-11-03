@@ -311,7 +311,7 @@ namespace Celemp
             {
                 throw new CommandParseException($"Ship {shp} not a good ship number");
             }
-            return num;
+            return num-100;
         }
 
         private int ParsePlanet(string plan)
@@ -329,7 +329,7 @@ namespace Celemp
             {
                 throw new CommandParseException($"Planet {plan} not a good planet number");
             }
-            return num;
+            return num-100;
         }
     }
 }

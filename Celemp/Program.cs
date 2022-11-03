@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -87,6 +88,7 @@ namespace Celemp
             List<string>[] cmdstrings = LoadCommandStrings(celemp_path);
             List<Command> commands = galaxy.ParseCommandStrings(cmdstrings);
             commands.Sort();
+            galaxy.InitialiseTurn();
             galaxy.ProcessCommands(commands);
             galaxy.SaveGame(save_file);
         }
@@ -95,9 +97,9 @@ namespace Celemp
         // Load the commands from the players
         {
             string cmd_fname;
-            List<string>[] commands = new List<string>[9];
+            List<string>[] commands = new List<string>[numPlayers];
 
-            for (int plrNum = 0; plrNum < 9; plrNum++)
+            for (int plrNum = 1; plrNum < numPlayers; plrNum++)
             {
                 commands[plrNum] = new List<string>();
                 cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
@@ -134,9 +136,9 @@ namespace Celemp
                 Console.WriteLine($"Failed to load from {save_file}");
                 System.Environment.Exit(1);
             }
-            for (int plrNum = 0; plrNum < 9; plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 galaxy.players[plrNum].InitPlayer(galaxy);
-            for (int planNum = 0; planNum < 256; planNum++)
+            for (int planNum = 0; planNum < numPlanets; planNum++)
                 galaxy.planets[planNum].setGalaxy(galaxy);
             foreach (KeyValuePair<int, Ship> kvp in galaxy.ships)
             {

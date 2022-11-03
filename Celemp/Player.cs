@@ -1,4 +1,6 @@
-﻿namespace Celemp
+﻿using static Celemp.Constants;
+
+namespace Celemp
 {
     [Serializable]
     public class Player
@@ -11,6 +13,7 @@
         public int desired_endturn { get; set; }
         public int home_planet { get; set; }
         private Galaxy? galaxy;
+        private int scans;
 
         public Player()
         {
@@ -21,6 +24,12 @@
             earthCredit = 0;
             desired_endturn = 30;
             home_planet = -1;
+            scans = 0;
+        }
+
+        public void InitialiseTurn()
+        {
+            scans = galaxy!.NumberResearchPlanetsOwned(number) + 1;
         }
 
         public IEnumerable<Command> ParseCommandStrings(List<string> aCommands)
@@ -34,6 +43,24 @@
 
         public void ProcessCommand(Command cmd) {
             Console.WriteLine($"Processing command {cmd.cmdstr}");
+            switch (cmd.priority)
+            {
+                case CommandOrder.SCAN:
+                    Scan(cmd);
+                    break;
+                default:
+                    Console.WriteLine($"Command not implemented {cmd.cmdstr}");
+                    break;
+            }
+        }
+
+        private void Scan(Command cmd)
+        {
+            if (scans >= 0)
+            {
+                galaxy!.planets[cmd.numbers["planet"]].Scan(cmd.plrNum);
+                scans--;
+            }
         }
 
         public void InitPlayer(Galaxy aGalaxy, int aPlrNum)
@@ -50,7 +77,6 @@
         public void GenerateTurnSheet(string celemp_path)
         // Generate the turn sheet output file
         {
-            //var output_filename = Path.Join(galaxy.config.turn_directory, $"turn_{number}.tex");
             string output_filename = Path.Join(celemp_path, $"turn_{number}_{galaxy!.turn}.tex");
             Console.WriteLine($"Generating {output_filename}");
             using (StreamWriter sw = File.CreateText(output_filename))
@@ -70,7 +96,7 @@
 
         private void TurnPlanetDetails(StreamWriter outfh)
         {
-            for(int planNum=0;planNum<256;planNum++)
+            for(int planNum=0;planNum<numPlanets;planNum++)
             {
                 if (galaxy!.planets[planNum].knows[number])
                 {
@@ -132,7 +158,7 @@
             outfh.Write("\\item your income=", income + "\n");
             outfh.Write("\\item Earth credits=" + earthCredit + "\n");
             outfh.Write("\\item Credits:Score=" + galaxy.earthMult + "\n");
-            outfh.Write($"\\item You have {galaxy!.NumberResearchPlanetsOwned(number) + 1} scans this turn\n");
+            outfh.Write($"\\item You have {scans} scans this turn\n");
             outfh.Write("\\item \\begin{tabular}{c|c|c}\n");
             outfh.Write("\\multicolumn{3}{c}{Player Scores}\\\\ \\hline \n");
             outfh.Write($"{galaxy!.players[0].score} & {galaxy.players[1].score}& {galaxy.players[2].score}\\\\ \n");

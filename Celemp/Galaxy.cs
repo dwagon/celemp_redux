@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -32,14 +33,14 @@ namespace Celemp
             earthBids.Add("Cargo", 1);
             earthBids.Add("Fighter", 1);
             earthBids.Add("Shield", 1);
-            players = new Player[9];
+            players = new Player[numPlayers];
             home_planets = new Dictionary<int, Planet>();
         }
 
         public List<Command> ParseCommandStrings(List<string>[] cmdstrings)
         {
             List<Command> commands = new();
-            for (int plrNum = 0; plrNum < 9; plrNum++)
+            for (int plrNum = 1; plrNum < numPlayers; plrNum++)
             {
                 foreach (Command cmd in players[plrNum].ParseCommandStrings(cmdstrings[plrNum]))
                     commands.Add(cmd);
@@ -53,7 +54,17 @@ namespace Celemp
             {
                 players[cmd.plrNum].ProcessCommand(cmd);
             }
-        } 
+        }
+
+        public void InitialiseTurn()
+        {
+            for (int plrNum=0; plrNum<numPlayers; plrNum++)
+            {
+                players[plrNum].InitialiseTurn();
+            }
+            for (int planNum = 0; planNum < numPlanets; planNum++)
+                planets[planNum].InitialiseTurn();
+        }
 
         public void InitGalaxy(Config config)
         {
@@ -79,7 +90,7 @@ namespace Celemp
 
         public void GenerateTurnSheets(string celemp_path)
         {
-            for (int plrNum = 0; plrNum < 9; plrNum ++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum ++)
             {
                 Console.WriteLine($"Generate turn sheet for player {plrNum}");
                 players[plrNum].GenerateTurnSheet(celemp_path);
@@ -88,7 +99,7 @@ namespace Celemp
 
         private void InitPlayers(Config config)
         {
-            for (int plrNum = 0; plrNum < 9; plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
             {
                 players[plrNum] = new Player();
                 players[plrNum].home_planet = home_planets[plrNum].number;
@@ -97,6 +108,7 @@ namespace Celemp
                 InitShip1(players[plrNum], config);
                 InitShip2(players[plrNum], config);
             }
+            players[0].name = "NEUTRAL";
         }
 
         private void InitShip1(Player owner, Config config) {
@@ -146,7 +158,7 @@ namespace Celemp
                 Console.WriteLine($"Couldn't load linkmap properly");
                 System.Environment.Exit(1);
             }
-            for (int plan_num = 0; plan_num< 256; plan_num++) {
+            for (int plan_num = 0; plan_num< numPlanets; plan_num++) {
                 int linknum = 0;
 
                 planets[trans[plan_num]] = new Planet();
@@ -170,8 +182,8 @@ namespace Celemp
             }
 
             int plrnum = 0;
-            int[] home_planets = { 214, 68, 222, 143, 139, 147, 64, 218, 72 };  // Home planets
-            foreach (int hp in home_planets)
+            int[] home_planet_list = { 228, 214, 68, 222, 143, 139, 147, 64, 218, 72 };  // Home planets
+            foreach (int hp in home_planet_list)
             {
                 SetHome(trans[hp], plrnum++, config);
             }
@@ -180,18 +192,18 @@ namespace Celemp
         private static int[] GeneratePlanetShuffle() 
         // Shuffle planet numbers around so they aren't always the same
         {
-            int[] trans = new int[256];
+            int[] trans = new int[numPlanets];
             List<int> used = new();
             int num;
             Random rnd = new Random();
 
             // Generate mapping
-            for (int plan_num=0; plan_num < 256; plan_num++)
+            for (int plan_num=0; plan_num < numPlanets; plan_num++)
             {
                 num = -1;
                 while (num < 0 || used.Contains(num))
                 {
-                    num = rnd.Next(256);
+                    num = rnd.Next(numPlanets);
                 }
                 trans[plan_num] = num;
                 used.Add(num);
@@ -217,7 +229,7 @@ namespace Celemp
             Random rnd = new ();
 
             string[] planetNames = LoadPlanetNames();
-            for (int plan_num=0; plan_num < 256; plan_num++) {
+            for (int plan_num=0; plan_num < numPlanets; plan_num++) {
                 int idx = rnd.Next(planetNames.Length);
                 planets[plan_num].name = planetNames[idx];
             }
@@ -252,7 +264,7 @@ namespace Celemp
             earth.name = "**** EARTH ****";
             earth.industry = config.earthInd;
             earth.pdu = config.earthPDU;
-            for (int ore_type = 0; ore_type < 10; ore_type++)
+            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
             {
                 earth.ore[ore_type] = config.earthOre[ore_type];
                 earth.mine[ore_type] = config.earthMines[ore_type];
@@ -263,7 +275,7 @@ namespace Celemp
         // Return the number of research planets owned by player
         {
             int count = 0;
-            for (int plan_num = 0; plan_num < 256; plan_num++)
+            for (int plan_num = 0; plan_num < numPlanets; plan_num++)
             {
                 if (planets[plan_num].owner == plr_num && planets[plan_num].research)
                     count++;
@@ -275,10 +287,13 @@ namespace Celemp
         // Make planet {plan_num} the home planet of player {player_num}
         {
             Planet home = planets[plan_num];
-            home.name = $"Home Planet {home.name}";
             home.owner = plrnum;
             home_planets[plrnum] = home;
-            for (int ore_type = 0; ore_type < 10; ore_type++)
+
+            if (plrnum == 0)   // NEUTRAL
+                return;
+            home.name = $"Home Planet {home.name}";
+            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
             {
                 home.mine[ore_type] = config.homeMines[ore_type];
                 home.ore[ore_type] = config.homeOre[ore_type];

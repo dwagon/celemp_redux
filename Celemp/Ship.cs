@@ -1,4 +1,6 @@
-﻿namespace Celemp
+﻿using static Celemp.Constants;
+
+namespace Celemp
 {
     [Serializable]
     public class Ship
@@ -13,7 +15,7 @@
         public int tractor { get; set; }
         public ShipType type { get; set; }
         public Dictionary<String, int> carrying { get; set; }
-        public int[] ore { get; set; } = new int[10];
+        public int[] ore { get; set; } = new int[numOreTypes];
         public int industry { get; set; }
         public int mines { get; set; }
         public int pdu { get; set; }
@@ -34,7 +36,7 @@
             tractor = 0;
             type = 0;
             carrying = new Dictionary<string, int>();
-            for (int oreType = 0;oreType<10; oreType++)
+            for (int oreType = 0;oreType<numOreTypes; oreType++)
             {
                 carrying.Add($"Ore {oreType}", 0);
             }
@@ -154,7 +156,7 @@
                 outfh.Write("SpcMines " + carrying["Spacemines"]  + ";");
                 hasCargo = true;
             }
-            for (int oreType = 0; oreType < 10; oreType++)
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
                 if (carrying[$"Ore {oreType}"] != 0)
                 {
                     outfh.Write($"R{oreType}" + carrying[$"Ore {oreType}"] + ";");
@@ -292,38 +294,6 @@
         {
             if (!ShipOwnerCheck(player)) { return false; }
             return true;
-                        /*
-             * Planet num;
-
-TRLOAD(printf("load:LoadSpcmine(shp:%d,amt:%d)\n",shp,amt));
-
-fprintf(trns[plr],"S%dL%dS\t",shp+100,amt);
-if(fleet[shp].owner!=plr) {
-    fprintf(trns[plr],"You do not own ship %d\n",shp+100);
-    fprintf(stderr,"LoadSpcmine:Plr %d does not own ship %d\n",plr,shp+100);
-    return;
-    }
-    
-num=fleet[shp].planet;
-if(galaxy[num].owner!=plr && alliance[galaxy[num].owner][plr]!=ALLY) {
-    fprintf(trns[plr],"You do not own planet %d\n",num+100);
-    fprintf(stderr,"LoadSpcmine:Plr %d does not own planet %d\n",plr,num+100);
-    return;
-    }
-if(fleet[shp].cargleft<amt) {
-    amt=fleet[shp].cargleft;
-    fprintf(trns[plr],"C ");
-    }
-if(galaxy[num].spacemine<amt) {
-    amt=galaxy[num].spacemine;
-    fprintf(trns[plr],"SM ");
-    }
-galaxy[num].spacemine-=amt;
-fleet[shp].spacemines+=amt;
-fleet[shp].cargleft-=amt;
-fprintf(trns[plr],"S%dL%dS\n",shp+100,amt);
-return;
-             */
         }
     }
 }
