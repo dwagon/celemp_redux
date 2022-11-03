@@ -36,6 +36,25 @@ namespace Celemp
             home_planets = new Dictionary<int, Planet>();
         }
 
+        public List<Command> ParseCommandStrings(List<string>[] cmdstrings)
+        {
+            List<Command> commands = new();
+            for (int plrNum = 0; plrNum < 9; plrNum++)
+            {
+                foreach (Command cmd in players[plrNum].ParseCommandStrings(cmdstrings[plrNum]))
+                    commands.Add(cmd);
+            }
+            return commands;
+        }
+
+        public void ProcessCommands(List<Command> commands)
+        {
+            foreach (Command cmd in commands)
+            {
+                players[cmd.plrNum].ProcessCommand(cmd);
+            }
+        } 
+
         public void InitGalaxy(Config config)
         {
             InitConfig(config);

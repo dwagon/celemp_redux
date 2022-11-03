@@ -1,0 +1,336 @@
+﻿using System;
+using System.Numerics;
+
+namespace Celemp
+{
+    public class Command: IComparable<Command>
+    {
+        public CommandOrder priority = CommandOrder.NOOPERAT;
+        public Dictionary<string, int> numbers = new();
+        public Dictionary<string, string> strings = new();
+        public string cmdstr = new("");
+        public int plrNum = 0;
+
+        public Command(string rawcmd, int aPlrNum)
+        {
+            cmdstr = rawcmd;
+            plrNum = aPlrNum;
+            char firstchar = rawcmd[0];
+            switch (Char.ToLower(firstchar))
+            {
+                case ' ':
+                    break;
+                case ';':
+                    break;
+                case '+':
+                case '-':
+                    ChangeAlliance(rawcmd);
+                    break;
+                case '{':
+                    Broadcast(rawcmd);
+                    break;
+                case '&':
+                    PersonalMessage(rawcmd);
+                    break;
+                case '(':
+                    AllMessage(rawcmd);
+                    break;
+                case 'o':
+                    SetStandingOrder(rawcmd);
+                    break;
+                case 'x':
+                    ClearStandingOrder(rawcmd);
+                    break;
+                case 's':
+                    if (rawcmd[1] == '1' || rawcmd[1] == '2' || rawcmd[1] == '3')
+                        Ship_Order(rawcmd);
+                    else if (rawcmd.Substring(0,4).ToLower() == "scan")
+                            Scan(rawcmd);
+                    else
+                        throw new CommandParseException($"Unknown command {rawcmd}");
+                    break;
+                case 't':
+                    GameLength(rawcmd);
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                    Planet_Order(rawcmd);
+                    break;
+                default:
+                    throw new CommandParseException($"Unknown command {rawcmd}");
+            }
+        }
+
+        int IComparable<Command>.CompareTo(Command? other)
+        {
+            if (other is null)
+                return 1;
+            return this.priority.CompareTo(other.priority);
+        }
+
+        private void ChangeAlliance(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+
+        }
+
+        private void Broadcast(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void PersonalMessage(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void AllMessage(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void SetStandingOrder(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void ClearStandingOrder(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void Ship_Order(string cmd) {
+            int ship = ParseShip(cmd.Substring(0, 4));
+            char cmdchar = Char.ToLower(cmd[4]);
+            switch (cmdchar)
+            {
+                case 'a':
+                    ShipAttack(cmd, ship);
+                    break;
+                case 'b':
+                    ShipBuild(cmd, ship);
+                    break;
+                case 'd':
+                    ShipDeploy(cmd, ship);
+                    break;
+                case 'e':
+                    ShipEngageTractor(cmd, ship);
+                    break;
+                case 'g':
+                    ShipGift(cmd, ship);
+                    break;
+                case 'j':
+                    ShipJump(cmd, ship);
+                    break;
+                case 'l':
+                    ShipLoad(cmd, ship);
+                    break;
+                case 'p':
+                    ShipPurchaseOre(cmd, ship);
+                    break;
+                case 'r':
+                    ShipRetrieve(cmd, ship);
+                    break;
+                case 't':
+                    ShipTend(cmd, ship);
+                    break;
+                case 'u':
+                    ShipUnload(cmd, ship);
+                    break;
+                case 'x':
+                    ShipSellOre(cmd, ship);
+                    break;
+                case 'z':
+                    ShipUnbuild(cmd, ship);
+                    break;
+                case '=':
+                    ShipName(cmd, ship);
+                    break;
+                default:
+                    throw new CommandParseException($"Ship command not understood {cmd}");
+            }
+        }
+
+        private void ShipAttack(string cmd, int ship) { }
+        private void ShipBuild(string cmd, int ship) { }
+        private void ShipDeploy(string cmd, int ship) { }
+        private void ShipEngageTractor(string cmd, int ship) { }
+
+        private void ShipGift(string cmd, int ship) {
+            // S123GJohn
+            priority = CommandOrder.GIFTSHIP;
+            strings.Add("recipient", cmd.Substring(4));
+        }
+
+        private void ShipJump(string cmd, int ship) { }
+        private void ShipLoad(string cmd, int ship) {
+            // S123L = Load all
+            if (cmd.Length == 5)
+            {
+                priority = CommandOrder.LOADALL;
+                numbers.Add("ship", ship);
+            }
+
+        }
+
+        private void ShipPurchaseOre(string cmd, int ship) { }
+        private void ShipRetrieve(string cmd, int ship) { }
+        private void ShipTend(string cmd, int ship) { }
+        private void ShipUnload(string cmd, int ship) {
+            int amount=-1;
+            string amountstr = "";
+
+            // Pull out the amount
+            for(int idx=5;idx<cmd.Length;idx++)
+            {
+                if (Char.IsDigit(cmd[idx]))
+                {
+                    amountstr.Append(cmd[idx]);
+                }
+                else { break; }
+            }
+            amount = Int16.Parse(amountstr);
+
+            char cmdchar = Char.ToLower(cmd[5 + amountstr.Length]);
+            switch (cmdchar)
+            {
+                case 'm':
+                    ShipUnloadMine(cmd, ship, amount);
+                    break;
+                case 'd':
+                    ShipUnloadPDU(cmd, ship, amount);
+                    break;
+                case 'i':
+                    ShipUnloadIndustry(cmd, ship, amount);
+                    break;
+                case 'r':
+                    ShipUnloadOre(cmd, ship, amount);
+                    break;
+                case 's':
+                    ShipUnloadSpacemines(cmd, ship, amount);
+                    break;
+                default:
+                    throw new CommandParseException($"Ship unload command not understood {cmd}");
+            }
+        }
+
+        private void ShipUnloadMine(string cmd, int ship, int amount) {
+            // S123U23M2 - Unload 23 Mines of type 2
+            int type = Convert.ToInt16(cmd[cmd.Length-1]);
+            priority = CommandOrder.UNLODMIN;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+            strings.Add("cargo", "mine");
+            numbers.Add("oretype", type);
+        }
+
+        private void ShipUnloadPDU(string cmd, int ship, int amount) { }
+        private void ShipUnloadIndustry(string cmd, int ship, int amount) { }
+        private void ShipUnloadOre(string cmd, int ship, int amount) { }
+        private void ShipUnloadSpacemines(string cmd, int ship, int amount) { }
+
+
+        private void ShipSellOre(string cmd, int ship) { }
+        private void ShipUnbuild(string cmd, int ship) { }
+
+        private void ShipName(string cmd, int ship) {
+            // S123=BLACKGUARD
+            priority = CommandOrder.NAMESHIP;
+            numbers.Add("ship", ParseShip(cmd.Substring(0, 4)));
+            strings.Add("name", cmd.Substring(5));
+        }
+
+        private void Scan(string cmd) {
+            // SCAN123
+            priority = CommandOrder.SCAN;
+            numbers.Add("planet", ParsePlanet(cmd.Substring(4)));
+        }
+
+        private void GameLength(string cmd) {
+            Console.WriteLine($"Unimplemented order {cmd}");
+        }
+
+        private void Planet_Order(string cmd) {
+            int planet = ParsePlanet(cmd.Substring(0, 3));
+            char cmdchar = Char.ToLower(cmd[3]);
+            switch(cmdchar)
+            {
+                case 'g':
+                    PlanetGift(cmd, planet);
+                    break;
+                case '=':
+                    PlanetName(cmd, planet);
+                    break;
+                case 'a':
+                    PlanetAttack(cmd, planet);
+                    break;
+                case 'b':
+                    PlanetBuild(cmd, planet);
+                    break;
+                case 'x':
+                    PlanetTrans(cmd, planet);
+                    break;
+                case 'd':
+                    PlanetDeploy(cmd, planet);
+                    break;
+                default:
+                    throw new CommandParseException($"Planet command not understood {cmd}");
+
+            }
+        }
+
+        private void PlanetGift(string cmd, int planet) {
+            // 123GJohn
+            priority = CommandOrder.GIFTPLAN;
+            strings.Add("recipient", cmd.Substring(3));
+        }
+
+        private void PlanetName(string cmd, int planet) {
+            // 123=Arakis
+            priority = CommandOrder.NAMEPLAN;
+            numbers.Add("planet", planet);
+            strings.Add("name", cmd.Substring(4));
+        }
+
+        private void PlanetAttack(string cmd, int planet) { }
+        private void PlanetBuild(string cmd, int planet) { }
+        private void PlanetTrans(string cmd, int planet) { }
+        private void PlanetDeploy(string cmd, int planet) { }
+
+
+        private int ParseShip(string shp)
+            // Return ship number from a string like "S123"
+        {
+            int num;
+            bool good = Int32.TryParse(shp.Substring(1), out num);
+
+            if (shp[0] != 's') {
+                throw new CommandParseException($"Ship {shp} doesn't begin with an 'S'");
+            }
+            if (!good)
+            {
+                throw new CommandParseException($"Ship {shp} not understandable");
+            }
+
+            if (num < 100 || num > 356)
+            {
+                throw new CommandParseException($"Ship {shp} not a good ship number");
+            }
+            return num;
+        }
+
+        private int ParsePlanet(string plan)
+            // Return a planet number from a string like "123"
+        {
+            int num;
+            bool good = Int32.TryParse(plan, out num);
+
+            if (!good)
+            {
+                throw new CommandParseException($"Planet {plan} not understandable");
+            }
+
+            if (num < 100 || num > 356)
+            {
+                throw new CommandParseException($"Planet {plan} not a good planet number");
+            }
+            return num;
+        }
+    }
+}
+

@@ -23,6 +23,19 @@
             home_planet = -1;
         }
 
+        public IEnumerable<Command> ParseCommandStrings(List<string> aCommands)
+        {
+            foreach (string command in aCommands)
+            {
+                Command cmd = new(command, number);
+                yield return cmd;
+            }
+        }
+
+        public void ProcessCommand(Command cmd) {
+            Console.WriteLine($"Processing command {cmd.cmdstr}");
+        }
+
         public void InitPlayer(Galaxy aGalaxy, int aPlrNum)
         {
             galaxy = aGalaxy;
