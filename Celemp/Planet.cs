@@ -16,7 +16,6 @@ namespace Celemp
         public int indleft { get; set; }
         public int pdu { get; set; }
         public int[] link { get; set; } = new int[4];
-        public bool[] knows { get; set; } = new bool[numPlayers];
         public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
         public int income { get; set; }
@@ -31,11 +30,9 @@ namespace Celemp
             owner = 0;
             research = false;
             spacemines = 0;
-            knows[0] = true;
             deployed = 0;
             for (int player=1;player<numPlayers;player++)
             {
-                knows[player] = false;
                 scanned[player] = false;
             }
             stndord = "";
@@ -75,10 +72,23 @@ namespace Celemp
 
         public void Scan(int plrNum)
         {
-            knows[plrNum] = true;
             scanned[plrNum] = true;
         }
 
+        public bool Knows(int plrNum)
+        // Does plrNum know about this planet this turn
+        {
+            if (owner == plrNum)
+                return true;
+            if (scanned[plrNum])
+                return true;
+            foreach(KeyValuePair<int, Ship> ship in galaxy!.ships)
+            {
+                if (ship.Value.owner == plrNum && ship.Value.planet == number)
+                    return true;
+            }
+            return false;
+        }
         private bool HasBeenScanned()
         {
             bool result = false;
@@ -92,10 +102,10 @@ namespace Celemp
 
         public void TurnPlanetDetails(StreamWriter outfh)
         {
-            outfh.Write("\\subsection*{" + DisplayNumber() + " " + name+ "}\n");
+            outfh.Write("\\subsection*{" + DisplayNumber() + " " + name);
             if (research)
                 outfh.Write(" --- Research Planet");
-            outfh.Write("\n");
+            outfh.Write("}\n");
             outfh.Write("\\begin{tabular}{r|llll}\n");
             outfh.Write("Owner & \\multicolumn{4}{l}{" + galaxy!.players[owner].name + "}\\\\\n");
             if (HasBeenScanned())

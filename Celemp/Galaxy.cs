@@ -104,9 +104,11 @@ namespace Celemp
                 players[plrNum] = new Player();
                 players[plrNum].home_planet = home_planets[plrNum].number;
                 players[plrNum].InitPlayer(this, plrNum);
-
-                InitShip1(players[plrNum], config);
-                InitShip2(players[plrNum], config);
+                if (plrNum != 0)
+                {
+                    InitShip1(players[plrNum], config);
+                    InitShip2(players[plrNum], config);
+                }
             }
             players[0].name = "NEUTRAL";
         }
@@ -301,7 +303,6 @@ namespace Celemp
             home.pdu = config.homePDU;
             home.industry = config.homeIndustry;
             home.indleft = home.industry;
-            home.knows[plrnum] = true;
             // Ensure no A-ring planets are defended or industrial to make things more even
             for (int link=0;link<4; link++)
             {

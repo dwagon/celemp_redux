@@ -98,7 +98,7 @@ namespace Celemp
         {
             for(int planNum=0;planNum<numPlanets;planNum++)
             {
-                if (galaxy!.planets[planNum].knows[number])
+                if (galaxy!.planets[planNum].Knows(number))
                 {
                     galaxy.planets[planNum].TurnPlanetDetails(outfh);
                     foreach (KeyValuePair<int, Ship> ship in galaxy.ships)
