@@ -1,4 +1,6 @@
-﻿namespace Celemp
+﻿using static Celemp.Constants;
+
+namespace Celemp
 {
     [Serializable]
     public class Planet
@@ -8,14 +10,13 @@
         public int owner { get; set; }
         public int spacemines { get; set; }
         public int deployed { get; set; }
-        public int[] ore { get; set; } = new int[10];
-        public int[] mine { get; set; } = new int[10];
+        public int[] ore { get; set; } = new int[numOreTypes];
+        public int[] mine { get; set; } = new int[numOreTypes];
         public int industry { get; set; }
         public int indleft { get; set; }
         public int pdu { get; set; }
         public int[] link { get; set; } = new int[4];
-        public bool[] knows { get; set; } = new bool[9];
-        public bool scanned { get; set; }
+        public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
         public int income { get; set; }
         public String stndord { get; set; }
@@ -26,15 +27,14 @@
             galaxy = null;
             number = -1;
             name = "TODO";
-            owner = -1;
+            owner = 0;
             research = false;
             spacemines = 0;
             deployed = 0;
-            for (int player=0;player<9;player++)
+            for (int player=1;player<numPlayers;player++)
             {
-                knows[player] = false;
+                scanned[player] = false;
             }
-            scanned = false;
             stndord = "";
         }
 
@@ -56,21 +56,59 @@
             SetIndustry(config.galHasInd);
         }
 
+        public void InitialiseTurn()
+        // Initialise a planet at start of turn
+        {
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
+                scanned[plrNum] = false;
+            indleft = industry;
+        }
+
         public String DisplayNumber(int num=-1)
         {
             if (num < 0) { num = number; }
             return (num + 100).ToString();
         }
 
+        public void Scan(int plrNum)
+        {
+            scanned[plrNum] = true;
+        }
+
+        public bool Knows(int plrNum)
+        // Does plrNum know about this planet this turn
+        {
+            if (owner == plrNum)
+                return true;
+            if (scanned[plrNum])
+                return true;
+            foreach(KeyValuePair<int, Ship> ship in galaxy!.ships)
+            {
+                if (ship.Value.owner == plrNum && ship.Value.planet == number)
+                    return true;
+            }
+            return false;
+        }
+        private bool HasBeenScanned()
+        {
+            bool result = false;
+            for (int plrNum=0;plrNum<numPlayers;plrNum++)
+            {
+                if (scanned[plrNum])
+                    result = true;
+            }
+            return result;
+        }
+
         public void TurnPlanetDetails(StreamWriter outfh)
         {
-            outfh.Write("\\subsection*{" + DisplayNumber() + " " + name+ "}\n");
+            outfh.Write("\\subsection*{" + DisplayNumber() + " " + name);
             if (research)
                 outfh.Write(" --- Research Planet");
-            outfh.Write("\n");
+            outfh.Write("}\n");
             outfh.Write("\\begin{tabular}{r|llll}\n");
             outfh.Write("Owner & \\multicolumn{4}{l}{" + galaxy!.players[owner].name + "}\\\\\n");
-            if (scanned)
+            if (HasBeenScanned())
             {
                 outfh.Write("Scanned & \\multicolumn{4}{l}{Planet scanned this turn}\\\\\n");
             };
@@ -92,19 +130,19 @@
 
             outfh.Write("\\begin{tabular}{r|cccccccccc}\n");
             outfh.Write("Mine Type");
-            for (int oreType = 0; oreType < 10; oreType++)
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
             {
                 outfh.Write("& " + oreType);
             }
             outfh.Write("\\\\ \\hline \n");
             outfh.Write("Amount stored");
-            for (int oreType = 0; oreType < 10; oreType++)
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
             {
                 outfh.Write($"& {ore[oreType]}");
             }
             outfh.Write("\\\\\n");
             outfh.Write("Production");
-            for (int mineType = 0; mineType < 10; mineType++)
+            for (int mineType = 0; mineType < numOreTypes; mineType++)
             {
                 outfh.Write($"& {mine[mineType]}");
             }
@@ -133,7 +171,7 @@
         {
             var rnd = new Random();
 
-            for (int ore_type = 0; ore_type < 10; ore_type++)
+            for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
             {
                 if (mine[ore_type] != 0)
                 {
@@ -217,7 +255,7 @@
             int mines = num_mines;
             while (mines != 0)
             {
-                int ore_type = (int)rnd.Next(10);
+                int ore_type = (int)rnd.Next(numOreTypes);
                 if (mine[ore_type] == 0)
                 {
                     if (rnd.Next(100) > 85)

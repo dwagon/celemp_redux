@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -24,7 +25,7 @@ namespace Celemp
                     pc.NewGame(game_path);
                     break;
                 case "turn":
-                    pc.ProcessTurns(game_number, game_path);
+                    pc.ProcessTurns(game_path);
                     break;
                 case "sheet":
                     pc.GenerateTurnSheets(game_number, game_path);
@@ -81,11 +82,39 @@ namespace Celemp
             galaxy.GenerateTurnSheets(celemp_path);
         }
 
-        void ProcessTurns(int game_number, string celemp_path) {
+        void ProcessTurns(string celemp_path) {
             string save_file = Path.Join(celemp_path, "celemp.json");
             Galaxy galaxy = LoadGame(save_file);
-            // TODO the processing of the turn
+            List<string>[] cmdstrings = LoadCommandStrings(celemp_path);
+            List<Command> commands = galaxy.ParseCommandStrings(cmdstrings);
+            commands.Sort();
+            galaxy.InitialiseTurn();
+            galaxy.ProcessCommands(commands);
             galaxy.SaveGame(save_file);
+        }
+
+        List<string>[] LoadCommandStrings(string celemp_path)
+        // Load the commands from the players
+        {
+            string cmd_fname;
+            List<string>[] commands = new List<string>[numPlayers];
+
+            for (int plrNum = 1; plrNum < numPlayers; plrNum++)
+            {
+                commands[plrNum] = new List<string>();
+                cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
+                Console.WriteLine($"Loading commands for {plrNum} from file {cmd_fname}");
+                try {
+                    foreach (string line in File.ReadLines(cmd_fname))
+                    {
+                        commands[plrNum].Add(line.Trim());
+                    }
+                }
+                catch (Exception exc) {
+                    Console.WriteLine($"Couldn't read commands from {cmd_fname}: {exc.Message}");
+                }
+            }
+            return commands;
         }
 
         public Galaxy LoadGame(string save_file)
@@ -107,9 +136,9 @@ namespace Celemp
                 Console.WriteLine($"Failed to load from {save_file}");
                 System.Environment.Exit(1);
             }
-            for (int plrNum = 0; plrNum < 9; plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 galaxy.players[plrNum].InitPlayer(galaxy);
-            for (int planNum = 0; planNum < 256; planNum++)
+            for (int planNum = 0; planNum < numPlanets; planNum++)
                 galaxy.planets[planNum].setGalaxy(galaxy);
             foreach (KeyValuePair<int, Ship> kvp in galaxy.ships)
             {
