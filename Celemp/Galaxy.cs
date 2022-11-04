@@ -103,13 +103,13 @@ namespace Celemp
                 players[plrNum] = new Player();
                 players[plrNum].home_planet = home_planets[plrNum].number;
                 players[plrNum].InitPlayer(this, plrNum);
+                players[plrNum].name = config.plrNames[plrNum];
                 if (plrNum != 0)    // NEUTRAL
                 {
                     InitShip1(players[plrNum], config);
                     InitShip2(players[plrNum], config);
                 }
             }
-            players[0].name = "NEUTRAL";
         }
 
         private void InitShip1(Player owner, Config config) {

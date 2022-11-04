@@ -32,6 +32,7 @@ namespace Celemp
         public int ship1_tractor, ship2_tractor;
         public int ship1_eff, ship2_eff;
         public String turn_directory;
+        public String[] plrNames = new string[numPlayers];
 
         public Config(String protofile)
         {
@@ -46,6 +47,9 @@ namespace Celemp
                 earthOre[oretype] = 10;
                 earthMines[oretype] = 0;
             }
+            for (int plrNum = 1; plrNum < numPlayers; plrNum++)
+                plrNames[plrNum] = $"Unknown {plrNum}";
+            plrNames[0] = "NEUTRAL";
 
             earthAmnesty = 10;
             winning_terms = new Dictionary<string, Tuple<bool, int>>();
@@ -131,6 +135,33 @@ namespace Celemp
                             {
                                 earthMines[ore_type] = Convert.ToInt16(bits[ore_type]);
                             }
+                            break;
+                        case "plr_name_1":
+                            plrNames[1] = tokens[1];
+                            break;
+                        case "plr_name_2":
+                            plrNames[2] = tokens[1];
+                            break;
+                        case "plr_name_3":
+                            plrNames[3] = tokens[1];
+                            break;
+                        case "plr_name_4":
+                            plrNames[4] = tokens[1];
+                            break;
+                        case "plr_name_5":
+                            plrNames[5] = tokens[1];
+                            break;
+                        case "plr_name_6":
+                            plrNames[6] = tokens[1];
+                            break;
+                        case "plr_name_7":
+                            plrNames[7] = tokens[1];
+                            break;
+                        case "plr_name_8":
+                            plrNames[8] = tokens[1];
+                            break;
+                        case "plr_name_9":
+                            plrNames[9] = tokens[1];
                             break;
                         case "earth_pdu":
                             earthPDU = Convert.ToInt16(tokens[1]);
