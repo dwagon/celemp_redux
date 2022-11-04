@@ -84,7 +84,6 @@ namespace Celemp
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             string jsonString = JsonSerializer.Serialize(this, options);
-
             File.WriteAllText(save_file, jsonString);
         }
 

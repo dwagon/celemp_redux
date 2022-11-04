@@ -287,7 +287,6 @@ namespace Celemp
         private void ShipLoadOre(string cmd, int ship, int amount) {
             // S123L120R2
             int type = (int) Char.GetNumericValue(cmd[cmd.Length - 1]);
-            Console.WriteLine($"DBG {cmd} Last = '{cmd[cmd.Length - 1]}' type={type}");
 
             priority = CommandOrder.LOADORE;
             numbers.Add("ship", ship);

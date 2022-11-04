@@ -12,6 +12,8 @@ namespace Celemp
         public int earthCredit { get; set; }
         public int desired_endturn { get; set; }
         public int home_planet { get; set; }
+        public List<string> executed { get; set; }
+
         private Galaxy? galaxy;
         private int scans;
 
@@ -25,11 +27,13 @@ namespace Celemp
             desired_endturn = 30;
             home_planet = -1;
             scans = 0;
+            executed = new();
         }
 
         public void InitialiseTurn()
         {
             scans = galaxy!.NumberResearchPlanetsOwned(number) + 1;
+            executed = new();
         }
 
         public IEnumerable<Command> ParseCommandStrings(List<string> aCommands)
@@ -69,7 +73,6 @@ namespace Celemp
                 case CommandOrder.LOADDEF:
                     Cmd_LoadPDU(cmd);
                     break;
-
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
@@ -81,10 +84,9 @@ namespace Celemp
             int ship = cmd.numbers["ship"];
             int planet = galaxy!.ships[ship].planet;
 
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            }
+
             for (int oretype=1;oretype<numOreTypes;oretype++)
             {
                 int amount = galaxy.planets[planet].ore[oretype];
@@ -93,7 +95,9 @@ namespace Celemp
                 galaxy.planets[planet].ore[oretype] -= amount;
                 galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
             }
+            executed.Add($"{cmd.cmdstr} - OK");
         }
+
         private void Cmd_LoadOre(Command cmd)
         {
             int ship = cmd.numbers["ship"];
@@ -101,66 +105,65 @@ namespace Celemp
             int amount = cmd.numbers["amount"];
             int oretype = cmd.numbers["oretype"];
 
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            Console.WriteLine($"Cmd_LoadOre({cmd.cmdstr})");
+            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            }
             if (galaxy.ships[ship].cargoleft < amount)
                 amount = galaxy.ships[ship].cargoleft;
             if (galaxy.planets[planet].ore[oretype] < amount)
                 amount = galaxy.planets[planet].ore[oretype];
             galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
             galaxy.planets[planet].ore[oretype] -= amount;
+            executed.Add($"{cmd.cmdstr} - Loaded {amount}");
         }
 
         private void Cmd_LoadIndustry(Command cmd) {
             int ship = cmd.numbers["ship"];
             int planet = galaxy!.ships[ship].planet;
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            }
         }
+
         private void Cmd_LoadMine(Command cmd) {
             int ship = cmd.numbers["ship"];
             int planet = galaxy!.ships[ship].planet;
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            }
         }
         private void Cmd_LoadSpacemine(Command cmd) {
             int ship = cmd.numbers["ship"];
             int planet = galaxy!.ships[ship].planet;
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            }
         }
+
         private void Cmd_LoadPDU(Command cmd) {
             int ship = cmd.numbers["ship"];
             int planet = galaxy!.ships[ship].planet;
-            if (!CheckShipOwnership(ship) || !CheckPlanetOwnership(planet))
-            {
+            if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet,cmd))
                 return;
-            }
         }
 
         private void Cmd_NameShip(Command cmd)
         {
             int ship = cmd.numbers["ship"];
-            if (!CheckShipOwnership(ship)) {
+            if (!CheckShipOwnership(ship, cmd))
                 return;
-            }
             galaxy!.ships[ship].name = cmd.strings["name"];
+            executed.Add($"{cmd.cmdstr} - OK");
         }
 
         private void Cmd_Scan(Command cmd)
         {
-            if (scans >= 0)
+            if (scans > 0)
             {
                 galaxy!.planets[cmd.numbers["planet"]].Scan(cmd.plrNum);
+                executed.Add($"{cmd.cmdstr} - OK");
                 scans--;
+            }
+            else
+            {
+                executed.Add($"{cmd.cmdstr} - Failed: no more scans");
             }
         }
 
@@ -171,10 +174,26 @@ namespace Celemp
             return false;
         }
 
+        private bool CheckShipOwnership(int shipnum, Command cmd)
+        {
+            if (galaxy!.ships[shipnum].owner == number)
+                return true;
+            executed.Add($"{cmd.cmdstr} - Failed: You do not own ship");
+            return false;
+        }
+
         private bool CheckPlanetOwnership(int plannum)
         {
             if (galaxy!.planets[plannum].owner == number)
                 return true;
+            return false;
+        }
+
+        private bool CheckPlanetOwnership(int plannum, Command cmd)
+        {
+            if (galaxy!.planets[plannum].owner == number)
+                return true;
+            executed.Add($"{cmd.cmdstr} - Failed: You do not own planet {plannum}");
             return false;
         }
 
@@ -205,6 +224,7 @@ namespace Celemp
                 TurnPlanetSummary(sw);
                 TurnShipSummary(sw);
                 TurnPlanetDetails(sw);
+                TurnCommandHistory(sw);
                 TurnFooter(sw);
             }
         }
@@ -223,6 +243,17 @@ namespace Celemp
                     }
                 }
             }
+        }
+
+        private void TurnCommandHistory(StreamWriter outfh)
+        {
+            outfh.WriteLine("\\section*{Command history}");
+            outfh.WriteLine("\\begin{itemize}");
+            foreach(string cmd in executed)
+                outfh.WriteLine($"\\item {cmd}");
+            if (executed.Count == 0)
+                outfh.WriteLine("\\item No commands entered");
+            outfh.WriteLine("\\end{itemize}");
         }
 
         private void TurnOwnerSummary(StreamWriter outfh)
