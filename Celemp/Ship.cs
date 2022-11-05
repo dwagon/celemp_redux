@@ -84,6 +84,11 @@ namespace Celemp
             return false;
         }
 
+        public int FuelRequired(int distance)
+        {
+            return driveEfficiency[EffectiveEfficiency(), distance-1];
+        }
+
         public String DisplayNumber(int num = -1)
         {
             if (num < 0) { num = number; }
@@ -97,9 +102,54 @@ namespace Celemp
             carrying[cargotype] += amount;
         }
 
-        public int EffectiveEfficiency()
+        public bool CheckDest(int dest)
         {
+            Planet plan = galaxy!.planets[planet];
+            bool found = false;
+            foreach (int linknum in plan.link)
+            {
+                if (dest == linknum)
+                {
+                    planet = dest;
+                    found = true;
+                }
+            }
+            return found;
+        }
 
+        public bool UseFuel(int dist)
+        // Use fuel for jumping - return false if not enough
+        {
+            int fuel = FuelRequired(dist);
+            if (carrying["Ore 0"] < fuel)
+                return false;
+            carrying["Ore 0"] -= fuel;
+            return true;
+        }
+
+        public bool MoveTo(int dest, bool ongoing=false)
+        // Move a ship to a planet
+        {
+            Planet plan = galaxy!.planets[dest];
+            planet = dest;
+            if (engaging >= 0)
+                galaxy!.ships[engaging].planet = dest;
+
+            if (ongoing)
+            {
+                plan.ShipTransitting(number);
+                if (engaging >= 0)
+                    plan.ShipTransitting(engaging);
+            }
+            plan.ShipArriving(number);
+            if (engaging >= 0)
+                plan.ShipArriving(engaging);
+          
+            return false;
+        }
+
+        private int EffectiveEfficiency()
+        {
             int total;
 
             total = cargo + fighter + tractor + shield;
