@@ -19,6 +19,10 @@ namespace Celemp
         public int planet { get; set; }
         public int efficiency { get; set; }
         public String stndord { get; set; }
+
+        private bool moved;     // Moved this turn
+        private bool engaged;   // Engaged by a tractor beam
+        private int engaging;   // Ship engaged by our tractor
         private Galaxy? galaxy;
 
         public Ship()
@@ -32,6 +36,9 @@ namespace Celemp
             shield = 0;
             tractor = 0;
             type = 0;
+            moved = false;
+            engaged = false;
+            engaging = -1;
             carrying = new Dictionary<string, int>();
             for (int oreType = 0;oreType<numOreTypes; oreType++)
             {
@@ -45,6 +52,22 @@ namespace Celemp
             efficiency = 0;
             planet = -1;
             stndord = "";
+        }
+
+        public bool HasMoved()
+        {
+            return moved;
+        }
+
+        public bool IsEngaged()
+        {
+            return engaged;
+        }
+
+        public void InitialiseTurn()
+        {
+            moved = false;
+            engaged = false;
         }
 
         public void SetGalaxy(Galaxy aGalaxy)

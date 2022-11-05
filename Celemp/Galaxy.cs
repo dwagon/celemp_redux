@@ -64,6 +64,8 @@ namespace Celemp
             }
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].InitialiseTurn();
+            foreach (var kvp in ships)
+                kvp.Value.InitialiseTurn();
         }
 
         public void InitGalaxy(Config config)
