@@ -18,7 +18,6 @@ namespace Celemp
         public int[] link { get; set; } = new int[4];
         public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
-        public int income { get; set; }
         public String stndord { get; set; }
         private Galaxy? galaxy;
 
@@ -102,6 +101,15 @@ namespace Celemp
                 owner = newowner;
                 stndord = "";
             }
+        }
+
+        public int Income()
+        {
+            // Calc Planet Income
+            int income = 20 + industry * 5;
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                income += mine[oreType];
+            return income;
         }
 
         private int OwnershipCheck()
@@ -190,7 +198,7 @@ namespace Celemp
                 else
                     outfh.Write(" & ");
             outfh.Write("\\\\\n");
-            outfh.Write($"Industry & Industry={industry} & PDU={pdu}({PduValue()}) & Income={income} &\\\\\n");
+            outfh.Write($"Industry & Industry={industry} & PDU={pdu}({PduValue()}) & Income={Income()} &\\\\\n");
             outfh.Write($"Spacemines & Stored={spacemines} & Deployed={deployed} & \\\\\n");
             outfh.Write("Standing Order & ");
             if (stndord.Length > 0)

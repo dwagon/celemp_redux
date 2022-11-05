@@ -6,7 +6,6 @@ namespace Celemp
     public class Player
     {
         public int score { get; set; }
-        public int income { get; set; }
         public String name { get; set; }
         public int number { get; set; }
         public int earthCredit { get; set; }
@@ -20,7 +19,6 @@ namespace Celemp
         public Player()
         {
             score = 0;
-            income = 0;
             name = "Unknown";
             number = -1;
             earthCredit = 0;
@@ -43,6 +41,27 @@ namespace Celemp
                 Command cmd = new(command, number);
                 yield return cmd;
             }
+        }
+
+        public void EndTurn()
+        {
+            score += Income();
+        }
+
+        private int Income()
+        {
+            int inc = 0;
+            for (int planNum=0; planNum < numPlanets; planNum++)
+            {
+                inc += galaxy!.planets[planNum].Income();
+            }
+            int numrp = galaxy!.NumberResearchPlanetsOwned(number);
+            if (numrp < 4) {
+                inc += numrp * numrp * numrp * numrp;
+            } else {
+                inc += 256;
+            }
+            return inc;
         }
 
         public void ProcessCommand(Command cmd) {
@@ -484,7 +503,7 @@ namespace Celemp
             outfh.Write("\\item score=" + score + "\n");
             /* Print out due date, and player scores */
             outfh.Write("\\item date due= before " + galaxy.duedate + "\n");
-            outfh.Write("\\item your income=", income + "\n");
+            outfh.Write("\\item your income=", Income() + "\n");
             outfh.Write("\\item Earth credits=" + earthCredit + "\n");
             outfh.Write("\\item Credits:Score=" + galaxy.earthMult + "\n");
             outfh.Write($"\\item You have {scans} scans this turn\n");

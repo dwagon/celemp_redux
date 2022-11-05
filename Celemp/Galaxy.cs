@@ -103,6 +103,8 @@ namespace Celemp
         {
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].EndTurn();
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
+                players[plrNum].EndTurn();
         }
 
         private void InitPlayers(Config config)
