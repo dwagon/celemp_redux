@@ -64,6 +64,77 @@ namespace Celemp
             indleft = industry;
         }
 
+        public void ShipArriving(int shipnum)
+        {
+            // A ship has arrived at the planet
+
+        }
+
+        public void ShipTransitting(int shipnum)
+        {
+            // A ship is going through the system, but not stopping
+
+        }
+        public int SpacemineAttack(int shipnum) {
+            // Have the spacemines attack the ship
+            // Return the number of hits
+            // TODO
+            return 0;
+        }
+
+        public int PDUAttack(int shipnum)
+        {
+            // Attack ship transitting
+            // TODO
+            return 0;
+        }
+
+        public void EndTurn()
+        // All end of turn processing
+        {
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                ore[oreType] += mine[oreType];
+            // Ownership check
+            int newowner = OwnershipCheck();
+            if (newowner != owner)
+            {
+                Console.WriteLine($"Planet {DisplayNumber()} changed owner from {owner} to {newowner}");
+                owner = newowner;
+                stndord = "";
+            }
+        }
+
+        private int OwnershipCheck()
+        // Return new owner of planet
+        {
+            List<Ship> orbitting = ShipsOrbitting();
+            HashSet<int> owners = new();
+            if (pdu > 0)
+                return owner;
+            if (orbitting.Count == 0)
+                return owner;
+            foreach (Ship shp in orbitting)
+            {
+                owners.Add(shp.owner);
+            }
+            if (owners.Count == 1)
+                foreach (int own in owners)
+                    return own;
+
+            return owner;
+        }
+
+        private List<Ship> ShipsOrbitting()
+        // Return list of ships orbitting planet
+        {
+            List<Ship> orbitting = new();
+            foreach (KeyValuePair<int, Ship> shp in galaxy!.ships) {
+                if (shp.Value.planet == number)
+                    orbitting.Add(shp.Value);
+                    }
+            return orbitting;
+        }
+
         public String DisplayNumber(int num=-1)
         {
             if (num < 0) { num = number; }

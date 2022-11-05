@@ -73,16 +73,189 @@ namespace Celemp
                 case CommandOrder.LOADDEF:
                     Cmd_LoadPDU(cmd);
                     break;
+                case CommandOrder.JUMP1:
+                    Cmd_Jump1(cmd);
+                    break;
+                case CommandOrder.JUMP2:
+                    Cmd_Jump2(cmd);
+                    break;
+                case CommandOrder.JUMP3:
+                    Cmd_Jump3(cmd);
+                    break;
+                case CommandOrder.JUMP4:
+                    Cmd_Jump4(cmd);
+                    break;
+                case CommandOrder.JUMP5:
+                    Cmd_Jump5(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
         }
 
+        private void Cmd_Jump1(Command cmd) {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int dest1 = cmd.numbers["jump1"];
+
+            if (!JumpChecks(ship, cmd, 2))
+                return;
+            if (!CheckDest(ship, dest1, cmd))
+                return;
+            ship.MoveTo(dest1);
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        private void Cmd_Jump2(Command cmd) {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
+            if (!JumpChecks(ship, cmd, 2))
+                return;
+
+            int dest1 = cmd.numbers["jump1"];
+            if (!CheckDest(ship, dest1, cmd))
+                return;
+            ship.MoveTo(dest1, true);
+            int dest2 = cmd.numbers["jump2"];
+            if (!CheckDest(ship, dest2, cmd))
+                return;
+            ship.MoveTo(dest2);
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        private void Cmd_Jump3(Command cmd) {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
+            if (!JumpChecks(ship, cmd, 3))
+                return;
+
+            int dest1 = cmd.numbers["jump1"];
+            if (!CheckDest(ship, dest1, cmd))
+                return;
+            ship.MoveTo(dest1, true);
+            int dest2 = cmd.numbers["jump2"];
+            if (!CheckDest(ship, dest2, cmd))
+                return;
+            ship.MoveTo(dest2, true);
+            int dest3 = cmd.numbers["jump3"];
+            if (!CheckDest(ship, dest3, cmd))
+                return;
+            ship.MoveTo(dest3);
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        private void Cmd_Jump4(Command cmd) {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
+            if (!JumpChecks(ship, cmd, 4))
+                return;
+
+            int dest1 = cmd.numbers["jump1"];
+            if (!CheckDest(ship, dest1, cmd))
+                return;
+            ship.MoveTo(dest1, true);
+            int dest2 = cmd.numbers["jump2"];
+            if (!CheckDest(ship, dest2, cmd))
+                return;
+            ship.MoveTo(dest2, true);
+            int dest3 = cmd.numbers["jump3"];
+            if (!CheckDest(ship, dest3, cmd))
+                return;
+            ship.MoveTo(dest3, true);
+            int dest4 = cmd.numbers["jump4"];
+            if (!CheckDest(ship, dest4, cmd))
+                return;
+            ship.MoveTo(dest4);
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        private void Cmd_Jump5(Command cmd) {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
+            if (!JumpChecks(ship, cmd, 5))
+                return;
+
+            int dest1 = cmd.numbers["jump1"];
+            if (!CheckDest(ship, dest1, cmd))
+                return;
+            ship.MoveTo(dest1, true);
+            int dest2 = cmd.numbers["jump2"];
+            if (!CheckDest(ship, dest2, cmd))
+                return;
+            ship.MoveTo(dest2, true);
+            int dest3 = cmd.numbers["jump3"];
+            if (!CheckDest(ship, dest3, cmd))
+                return;
+            ship.MoveTo(dest3, true);
+            int dest4 = cmd.numbers["jump4"];
+            if (!CheckDest(ship, dest4, cmd))
+                return;
+            ship.MoveTo(dest4, true);
+            int dest5 = cmd.numbers["jump5"];
+            if (!CheckDest(ship, dest5, cmd))
+                return;
+            ship.MoveTo(dest5);
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        private bool JumpChecks(Ship ship, Command cmd, int jumplength)
+        // Standard checks for every jump
+        {
+            if (!CheckShipOwnership(ship, cmd))
+                return false;
+            if (!CheckShipMoved(ship, cmd))
+                return false;
+            if (!CheckFuel(ship, cmd, jumplength))
+                return false;
+            return true;
+        }
+
+        private bool CheckFuel(Ship aShip, Command cmd, int distance) {
+            if (!aShip.UseFuel(distance))
+            {
+                executed.Add($"{cmd.cmdstr} - Failed to jump, insufficient fuel");
+                return false;
+            }
+            return true;
+        }
+
+        private bool CheckDest(Ship aShip, int dest, Command cmd)
+        {
+            if (!aShip.CheckDest(dest))
+            {
+                executed.Add($"{cmd.cmdstr} - Failed to jump, invalid destination");
+            }
+            return true;
+        }
+
+        private bool CheckShipMoved(Ship aShip, Command cmd)
+        {
+            // Check for the ship having moved this turn
+            if (!aShip.HasMoved())
+                return true;
+            executed.Add($"{cmd.cmdstr} - Failed: Ship has already moved this turn");
+            return false;
+        }
+
+        private bool CheckShipEngaged(Ship aShip, Command cmd)
+        {
+            if (aShip.IsEngaged())
+                return true;
+            executed.Add($"{cmd.cmdstr} - Failed: Ship is engaged by a tractor beam");
+            return false;
+        }
+
+
         private void Cmd_LoadAll(Command cmd) {
             // Load all available ore (Except type 0) onto ship
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
@@ -90,66 +263,76 @@ namespace Celemp
             for (int oretype=1;oretype<numOreTypes;oretype++)
             {
                 int amount = galaxy.planets[planet].ore[oretype];
-                if (galaxy.ships[ship].cargoleft < amount)
-                    amount = galaxy.ships[ship].cargoleft;
+                if (ship.cargoleft < amount)
+                    amount = ship.cargoleft;
                 galaxy.planets[planet].ore[oretype] -= amount;
-                galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
+                ship.LoadShip($"Ore {oretype}", amount);
             }
             executed.Add($"{cmd.cmdstr} - OK");
         }
 
         private void Cmd_LoadOre(Command cmd)
         {
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
             int amount = cmd.numbers["amount"];
             int oretype = cmd.numbers["oretype"];
 
-            Console.WriteLine($"Cmd_LoadOre({cmd.cmdstr})");
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            if (galaxy.ships[ship].cargoleft < amount)
-                amount = galaxy.ships[ship].cargoleft;
+            if (galaxy.ships[shipNum].cargoleft < amount)
+                amount = ship.cargoleft;
             if (galaxy.planets[planet].ore[oretype] < amount)
                 amount = galaxy.planets[planet].ore[oretype];
-            galaxy.ships[ship].LoadShip($"Ore {oretype}", amount);
+            ship.LoadShip($"Ore {oretype}", amount);
             galaxy.planets[planet].ore[oretype] -= amount;
             executed.Add($"{cmd.cmdstr} - Loaded {amount}");
         }
 
         private void Cmd_LoadIndustry(Command cmd) {
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
+
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
         }
 
         private void Cmd_LoadMine(Command cmd) {
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
+
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
         }
         private void Cmd_LoadSpacemine(Command cmd) {
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
+
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
         }
 
         private void Cmd_LoadPDU(Command cmd) {
-            int ship = cmd.numbers["ship"];
-            int planet = galaxy!.ships[ship].planet;
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            int planet = ship.planet;
+
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet,cmd))
                 return;
         }
 
         private void Cmd_NameShip(Command cmd)
         {
-            int ship = cmd.numbers["ship"];
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            galaxy!.ships[ship].name = cmd.strings["name"];
+            ship.name = cmd.strings["name"];
             executed.Add($"{cmd.cmdstr} - OK");
         }
 
@@ -167,18 +350,18 @@ namespace Celemp
             }
         }
 
-        private bool CheckShipOwnership(int shipnum)
+        private bool CheckShipOwnership(Ship aShip)
         {
-            if (galaxy!.ships[shipnum].owner == number)
+            if (aShip.owner == number)
                 return true;
             return false;
         }
 
-        private bool CheckShipOwnership(int shipnum, Command cmd)
+        private bool CheckShipOwnership(Ship aShip, Command cmd)
         {
-            if (galaxy!.ships[shipnum].owner == number)
+            if (aShip.owner == number)
                 return true;
-            executed.Add($"{cmd.cmdstr} - Failed: You do not own ship");
+            executed.Add($"{cmd.cmdstr} - Failed: You do not own ship {aShip.number+100}");
             return false;
         }
 
@@ -193,7 +376,7 @@ namespace Celemp
         {
             if (galaxy!.planets[plannum].owner == number)
                 return true;
-            executed.Add($"{cmd.cmdstr} - Failed: You do not own planet {plannum}");
+            executed.Add($"{cmd.cmdstr} - Failed: You do not own planet {plannum+100}");
             return false;
         }
 

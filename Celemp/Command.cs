@@ -157,7 +157,46 @@ namespace Celemp
             strings.Add("recipient", cmd.Substring(4));
         }
 
-        private void ShipJump(string cmd, int ship) { }
+        private void ShipJump(string cmd, int ship) {
+            // S123J120
+            numbers.Add("ship", ship);
+            switch(cmd.Length)
+            {
+                case 8:
+                    priority = CommandOrder.JUMP1;
+                    numbers.Add("jump1", ParsePlanet(cmd.Substring(5)));
+                    break;
+                case 12:
+                    priority = CommandOrder.JUMP2;
+                    numbers.Add("jump1", ParsePlanet(cmd.Substring(5, 3)));
+                    numbers.Add("jump2", ParsePlanet(cmd.Substring(9, 3)));
+                    break;
+                case 16:
+                    priority = CommandOrder.JUMP3;
+                    numbers.Add("jump1", ParsePlanet(cmd.Substring(5, 3)));
+                    numbers.Add("jump2", ParsePlanet(cmd.Substring(9, 3)));
+                    numbers.Add("jump3", ParsePlanet(cmd.Substring(13, 3)));
+                    break;
+                case 20:
+                    priority = CommandOrder.JUMP4;
+                    numbers.Add("jump1", ParsePlanet(cmd.Substring(5, 3)));
+                    numbers.Add("jump2", ParsePlanet(cmd.Substring(9, 3)));
+                    numbers.Add("jump3", ParsePlanet(cmd.Substring(13, 3)));
+                    numbers.Add("jump4", ParsePlanet(cmd.Substring(17, 3)));
+                    break;
+                case 24:
+                    priority = CommandOrder.JUMP5;
+                    numbers.Add("jump1", ParsePlanet(cmd.Substring(5, 3)));
+                    numbers.Add("jump2", ParsePlanet(cmd.Substring(9, 3)));
+                    numbers.Add("jump3", ParsePlanet(cmd.Substring(13, 3)));
+                    numbers.Add("jump4", ParsePlanet(cmd.Substring(17, 3)));
+                    numbers.Add("jump5", ParsePlanet(cmd.Substring(21, 3)));
+                    break;
+                default:
+                    throw new CommandParseException($"Ship jump command not understood {cmd}");
+            }
+        }
+
         private void ShipLoad(string cmd, int ship) {
             // S123L = Load all
             if (cmd.Length == 5)

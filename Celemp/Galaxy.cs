@@ -64,6 +64,8 @@ namespace Celemp
             }
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].InitialiseTurn();
+            foreach (var kvp in ships)
+                kvp.Value.InitialiseTurn();
         }
 
         public void InitGalaxy(Config config)
@@ -94,6 +96,13 @@ namespace Celemp
                 Console.WriteLine($"Generate turn sheet for player {plrNum}");
                 players[plrNum].GenerateTurnSheet(celemp_path);
             }
+        }
+
+        public void EndTurn()
+        // All the end of turn processing
+        {
+            for (int planNum = 0; planNum < numPlanets; planNum++)
+                planets[planNum].EndTurn();
         }
 
         private void InitPlayers(Config config)
