@@ -90,6 +90,7 @@ namespace Celemp
             commands.Sort();
             galaxy.InitialiseTurn();
             galaxy.ProcessCommands(commands);
+            galaxy.EndTurn();
             galaxy.SaveGame(save_file);
         }
 

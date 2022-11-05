@@ -98,6 +98,13 @@ namespace Celemp
             }
         }
 
+        public void EndTurn()
+        // All the end of turn processing
+        {
+            for (int planNum = 0; planNum < numPlanets; planNum++)
+                planets[planNum].EndTurn();
+        }
+
         private void InitPlayers(Config config)
         {
             for (int plrNum = 0; plrNum < numPlayers; plrNum++)
