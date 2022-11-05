@@ -86,7 +86,7 @@ namespace Celemp
 
         public int FuelRequired(int distance)
         {
-            return driveEfficiency[EffectiveEfficiency(), distance-1];
+            return driveEfficiency[distance-1,EffectiveEfficiency()+1];
         }
 
         public String DisplayNumber(int num = -1)
@@ -121,6 +121,7 @@ namespace Celemp
         // Use fuel for jumping - return false if not enough
         {
             int fuel = FuelRequired(dist);
+            Console.WriteLine($"fr={fuel}");
             if (carrying["Ore 0"] < fuel)
                 return false;
             carrying["Ore 0"] -= fuel;
@@ -163,10 +164,10 @@ namespace Celemp
             float tmpshots;
             float ratio;
 
-            if (galaxy!.turn < galaxy.earthAmnesty && galaxy.planets[planet].IsEarth())
-                return 0; // Zero shots due to Earth amnesty
+            //if (galaxy!.turn < galaxy.earthAmnesty && galaxy.planets[planet].IsEarth())
+            //    return 0; // Zero shots due to Earth amnesty
 
-            ratio = shts / weight;
+            ratio = (float) shts / (float) weight;
             if (ratio >= 10)  // Class three ratio
                 tmpshots = 3 * shts;
             else if (ratio < 1) // Class one ratio
@@ -179,10 +180,12 @@ namespace Celemp
         public int CalcWeight()
         // Return the weight of the ships
         {
-            int weight;
+            int weight =1;
 
-            weight = 1 + cargo + tractor / 2 + shield + (cargo - cargoleft) / 2;
-            weight += fighter / 10 - shield / 2;
+            weight += cargo + (cargo - cargoleft) / 2;
+            weight += tractor / 2;
+            weight += fighter / 10;
+            weight += shield / 2;
             return weight;
         }
 
@@ -275,7 +278,7 @@ namespace Celemp
             return (int)(shield * shldrat);
         }
 
-        ShipType CalcType()
+        public ShipType CalcType()
         // Calculate the type of ship that it is
         {
             int ratio;
@@ -296,7 +299,7 @@ namespace Celemp
             return CalcCargoType();
         }
 
-        ShipType CalcDeathStarType()
+        private ShipType CalcDeathStarType()
         {
             if (fighter > 250)
                 return ShipType.UltraDeathstar;
@@ -311,7 +314,7 @@ namespace Celemp
             return ShipType.SmallDeathstar;
         }
 
-        ShipType CalcBattleType()
+        private ShipType CalcBattleType()
         {
             if (fighter > 250)
                 return ShipType.UltraBattle;
@@ -342,7 +345,7 @@ namespace Celemp
             return ShipType.SmallShip;
         }
         
-        ShipType CalcCargoType()        
+        private ShipType CalcCargoType()        
         {
             if (cargo > 250)
                 return ShipType.UltraCargo;

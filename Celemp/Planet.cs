@@ -66,14 +66,17 @@ namespace Celemp
         public void ShipArriving(int shipnum)
         {
             // A ship has arrived at the planet
+            // TODO
 
         }
 
         public void ShipTransitting(int shipnum)
         {
             // A ship is going through the system, but not stopping
+            // TODO
 
         }
+
         public int SpacemineAttack(int shipnum) {
             // Have the spacemines attack the ship
             // Return the number of hits
@@ -93,6 +96,7 @@ namespace Celemp
         {
             for (int oreType = 0; oreType < numOreTypes; oreType++)
                 ore[oreType] += mine[oreType];
+
             // Ownership check
             int newowner = OwnershipCheck();
             if (newowner != owner)
@@ -229,7 +233,7 @@ namespace Celemp
             outfh.Write("\\end{tabular}\n");
         }
 
-        int PduValue()
+        public int PduValue()
         {
             if (pdu > 500)
                 return pdu * 4;
