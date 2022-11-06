@@ -5,7 +5,7 @@ using Celemp;
 public class CommandTest
 {
     [TestMethod]
-    public void TestJump1()
+    public void Test_Jump1()
     {
         Command cmd = new("S123J234", 1);
         Assert.AreEqual(134, cmd.numbers["jump1"]);
@@ -15,7 +15,7 @@ public class CommandTest
     }
 
     [TestMethod]
-    public void TestJump5()
+    public void Test_Jump5()
     {
         Command cmd = new("S101J120J131J142J153J164", 2);
         Assert.AreEqual(20, cmd.numbers["jump1"]);
@@ -25,4 +25,49 @@ public class CommandTest
         Assert.AreEqual(64, cmd.numbers["jump5"]);
         Assert.AreEqual(CommandOrder.JUMP5, cmd.priority);
     }
+
+    [TestMethod]
+    public void Test_Scan()
+    {
+        Command cmd = new("SCAN123", 3);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(CommandOrder.SCAN, cmd.priority);
+    }
+
+    [TestMethod]
+    public void Test_ShipName()
+    {
+        Command cmd = new("S123=Blackguard", 5);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual("Blackguard", cmd.strings["name"]);
+        Assert.AreEqual(CommandOrder.NAMESHIP, cmd.priority);
+    }
+
+    [TestMethod]
+    public void Test_PlanetName()
+    {
+        Command cmd = new("259=Arakis", 5);
+        Assert.AreEqual(159, cmd.numbers["planet"]);
+        Assert.AreEqual("Arakis", cmd.strings["name"]);
+        Assert.AreEqual(CommandOrder.NAMEPLAN, cmd.priority);
+    }
+
+    [TestMethod]
+    public void Test_ShipGift()
+    {
+        Command cmd = new("S123GDavid", 5);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual("David", cmd.strings["recipient"]);
+        Assert.AreEqual(CommandOrder.GIFTSHIP, cmd.priority);
+    }
+
+    [TestMethod]
+    public void Test_PlanetGift()
+    {
+        Command cmd = new("259GMary", 5);
+        Assert.AreEqual(159, cmd.numbers["planet"]);
+        Assert.AreEqual("Mary", cmd.strings["recipient"]);
+        Assert.AreEqual(CommandOrder.GIFTPLAN, cmd.priority);
+    }
+
 }
