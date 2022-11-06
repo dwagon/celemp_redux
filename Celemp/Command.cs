@@ -154,7 +154,8 @@ namespace Celemp
         private void ShipGift(string cmd, int ship) {
             // S123GJohn
             priority = CommandOrder.GIFTSHIP;
-            strings.Add("recipient", cmd.Substring(4));
+            strings.Add("recipient", cmd.Substring(5));
+            numbers.Add("ship", ship);
         }
 
         private void ShipJump(string cmd, int ship) {
@@ -392,7 +393,8 @@ namespace Celemp
         private void PlanetGift(string cmd, int planet) {
             // 123GJohn
             priority = CommandOrder.GIFTPLAN;
-            strings.Add("recipient", cmd.Substring(3));
+            strings.Add("recipient", cmd.Substring(4));
+            numbers.Add("planet", planet);
         }
 
         private void PlanetName(string cmd, int planet) {

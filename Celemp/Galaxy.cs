@@ -196,10 +196,25 @@ namespace Celemp
             int plrnum = 0;
             int[] home_planet_list = { 228, 214, 68, 222, 143, 139, 147, 64, 218, 72 };  // Home planets
             foreach (int hp in home_planet_list)
-            {
                 SetHome(trans[hp], plrnum++, config);
+        }
+
+        public int GuessPlayerName(string name)
+        // Return the player number from the name
+        {
+            for(int plrNum=0;plrNum< numPlayers;plrNum++)
+            {
+                if (players[plrNum] is null)
+                {   // So we don't need to define everyone for testing
+                    Console.WriteLine($"GuessPlayerName - Ignoring undefined player {plrNum}");
+                    continue;
+                }
+                Console.WriteLine($"Comparing {name} with {players[plrNum].name}");
+                if (String.Equals(players[plrNum].name, name, StringComparison.OrdinalIgnoreCase))
+                    return plrNum;
             }
-    }
+            return -1;
+        }
 
         private static int[] GeneratePlanetShuffle() 
         // Shuffle planet numbers around so they aren't always the same

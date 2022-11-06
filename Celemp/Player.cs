@@ -16,10 +16,10 @@ namespace Celemp
         private Galaxy? galaxy;
         private int scans;
 
-        public Player()
+        public Player(string aName="Unknown")
         {
             score = 0;
-            name = "Unknown";
+            name = aName;
             number = -1;
             earthCredit = 0;
             desired_endturn = 30;
@@ -107,10 +107,51 @@ namespace Celemp
                 case CommandOrder.JUMP5:
                     Cmd_Jump5(cmd);
                     break;
+                case CommandOrder.GIFTSHIP:
+                    Cmd_GiftShip(cmd);
+                    break;
+                case CommandOrder.GIFTPLAN:
+                    Cmd_GiftPlan(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
+        }
+
+        public void Cmd_GiftShip(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            String recip = cmd.strings["recipient"];
+
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            int new_owner =galaxy.GuessPlayerName(recip);
+            if (new_owner < 0)
+            {
+                executed.Add($"{cmd.cmdstr} - Unknown player {recip} ");
+                return;
+            }
+            ship.owner = new_owner;
+            executed.Add($"{cmd.cmdstr} - OK");
+        }
+
+        public void Cmd_GiftPlan(Command cmd)
+            // Gift a planet
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            String recip = cmd.strings["recipient"];
+            int new_owner = galaxy.GuessPlayerName(recip);
+
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            if (new_owner < 0)
+            {
+                executed.Add($"{cmd.cmdstr} - Unknown player {recip}");
+                return;
+            }
+            plan.owner = new_owner;
+            executed.Add($"{cmd.cmdstr} - OK");
         }
 
         private void Cmd_Jump1(Command cmd) {
@@ -269,22 +310,21 @@ namespace Celemp
             return false;
         }
 
-
         private void Cmd_LoadAll(Command cmd) {
             // Load all available ore (Except type 0) onto ship
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
 
             for (int oretype=1;oretype<numOreTypes;oretype++)
             {
-                int amount = galaxy.planets[planet].ore[oretype];
+                int amount = planet.ore[oretype];
                 if (ship.cargoleft < amount)
                     amount = ship.cargoleft;
-                galaxy.planets[planet].ore[oretype] -= amount;
+                planet.ore[oretype] -= amount;
                 ship.LoadShip($"Ore {oretype}", amount);
             }
             executed.Add($"{cmd.cmdstr} - OK");
@@ -294,7 +334,8 @@ namespace Celemp
         {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
+
             int amount = cmd.numbers["amount"];
             int oretype = cmd.numbers["oretype"];
 
@@ -302,17 +343,17 @@ namespace Celemp
                 return;
             if (galaxy.ships[shipNum].cargoleft < amount)
                 amount = ship.cargoleft;
-            if (galaxy.planets[planet].ore[oretype] < amount)
-                amount = galaxy.planets[planet].ore[oretype];
+            if (planet.ore[oretype] < amount)
+                amount = planet.ore[oretype];
             ship.LoadShip($"Ore {oretype}", amount);
-            galaxy.planets[planet].ore[oretype] -= amount;
+            planet.ore[oretype] -= amount;
             executed.Add($"{cmd.cmdstr} - Loaded {amount}");
         }
 
         private void Cmd_LoadIndustry(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
@@ -321,7 +362,8 @@ namespace Celemp
         private void Cmd_LoadMine(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
+
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
@@ -329,7 +371,7 @@ namespace Celemp
         private void Cmd_LoadSpacemine(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
 
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
@@ -338,7 +380,7 @@ namespace Celemp
         private void Cmd_LoadPDU(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
-            int planet = ship.planet;
+            Planet planet = galaxy!.planets[ship.planet];
 
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet,cmd))
                 return;
@@ -384,18 +426,18 @@ namespace Celemp
             return false;
         }
 
-        private bool CheckPlanetOwnership(int plannum)
+        private bool CheckPlanetOwnership(Planet aPlanet)
         {
-            if (galaxy!.planets[plannum].owner == number)
+            if (aPlanet.owner == number)
                 return true;
             return false;
         }
 
-        private bool CheckPlanetOwnership(int plannum, Command cmd)
+        private bool CheckPlanetOwnership(Planet aPlanet, Command cmd)
         {
-            if (galaxy!.planets[plannum].owner == number)
+            if (aPlanet.owner == number)
                 return true;
-            executed.Add($"{cmd.cmdstr} - Failed: You do not own planet {plannum+100}");
+            executed.Add($"{cmd.cmdstr} - Failed: You do not own planet {aPlanet.DisplayNumber()}");
             return false;
         }
 
