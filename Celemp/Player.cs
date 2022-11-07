@@ -89,7 +89,7 @@ namespace Celemp
                 case CommandOrder.LOADSPM:
                     Cmd_LoadSpacemine(cmd);
                     break;
-                case CommandOrder.LOADDEF:
+                case CommandOrder.LOADPDU:
                     Cmd_LoadPDU(cmd);
                     break;
                 case CommandOrder.JUMP1:
@@ -341,11 +341,9 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
-            if (galaxy.ships[shipNum].cargoleft < amount)
-                amount = ship.cargoleft;
             if (planet.ore[oretype] < amount)
                 amount = planet.ore[oretype];
-            ship.LoadShip($"Ore {oretype}", amount);
+            amount = ship.LoadShip($"Ore {oretype}", amount);
             planet.ore[oretype] -= amount;
             executed.Add($"{cmd.cmdstr} - Loaded {amount}");
         }
@@ -377,13 +375,19 @@ namespace Celemp
                 return;
         }
 
-        private void Cmd_LoadPDU(Command cmd) {
+        public void Cmd_LoadPDU(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             Planet planet = galaxy!.planets[ship.planet];
+            int amount = cmd.numbers["amount"];
 
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet,cmd))
                 return;
+            if (planet.pdu < amount)
+                amount = planet.pdu;
+            amount = ship.LoadShip("PDU", amount);
+            planet.pdu -= amount;
+            executed.Add($"{cmd.cmdstr} - Loaded {amount}");
         }
 
         private void Cmd_NameShip(Command cmd)
@@ -470,6 +474,15 @@ namespace Celemp
                 TurnPlanetDetails(sw);
                 TurnCommandHistory(sw);
                 TurnFooter(sw);
+            }
+        }
+
+        public void OutputLog()
+            // Dump executed output for debugging purposes
+        {
+            foreach (string str in executed)
+            {
+                Console.WriteLine(str);
             }
         }
 

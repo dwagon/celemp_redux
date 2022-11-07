@@ -312,7 +312,7 @@ namespace Celemp
 
         private void ShipLoadPDU(string cmd, int ship, int amount) {
             // S123L34D
-            priority = CommandOrder.LOADDEF;
+            priority = CommandOrder.LOADPDU;
             numbers.Add("amount", amount);
             numbers.Add("ship", ship);
         }

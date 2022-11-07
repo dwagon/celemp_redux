@@ -70,4 +70,12 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.GIFTPLAN, cmd.priority);
     }
 
+    [TestMethod]
+    public void Test_LoadPDU()
+    {
+        Command cmd = new("S323L23D", 1);
+        Assert.AreEqual(223, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.LOADPDU, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+    }
 }

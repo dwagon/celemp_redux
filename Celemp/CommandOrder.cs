@@ -19,7 +19,7 @@ namespace Celemp
         UNLODALL,
         LOADIND,
         LOADSPM,
-        LOADDEF,
+        LOADPDU,
         LOADORE,
         LOADMIN,
         LOADPRI,
