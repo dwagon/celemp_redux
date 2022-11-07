@@ -63,4 +63,32 @@ public class PlayerTest
         p1.Cmd_GiftPlan(cmd);
         Assert.AreEqual(1, p.owner);
     }
+
+    [TestMethod]
+    public void Cmd_LoadPDU()
+    {
+        Galaxy g = new();
+        Planet pt = new();
+        Player pr = new("Max");
+        Ship s = new();
+        s.SetGalaxy(g);
+        s.planet = 123;
+        s.cargo = 10;
+        s.owner = 2;
+        s.number = 33;
+        s.cargoleft = 10;
+        g.ships[33] = s;
+        g.planets[123] = pt;
+        pt.pdu = 9;
+        pt.owner = 2;
+        pr.InitPlayer(g, 2);
+
+        Command cmd = new("S133L6D", 2);
+        pr.Cmd_LoadPDU(cmd);
+      
+        // Should be constrained by available cargo
+        Assert.AreEqual(4, pt.pdu);
+        Assert.AreEqual(5, s.carrying["PDU"]);
+        Assert.AreEqual(0, s.cargoleft);
+    }
 }

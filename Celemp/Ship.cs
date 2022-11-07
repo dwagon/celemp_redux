@@ -95,11 +95,18 @@ namespace Celemp
             return (num + 100).ToString();
         }
 
-        public void LoadShip(string cargotype, int amount)
+        public int LoadShip(string cargotype, int amount)
         {
             // Load cargo onto the ship - doesn't remove it from source
-            cargoleft -= amount;
+            // Return the amount actually loaded based on cargo left.
+            int scale = 1;
+            if (String.Equals(cargotype, "PDU"))
+                scale = 2;
+            if (cargoleft < amount * scale)
+                amount = cargoleft / scale;
+            cargoleft -= amount * scale;
             carrying[cargotype] += amount;
+            return amount;
         }
 
         public bool CheckDest(int dest)
