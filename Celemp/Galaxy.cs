@@ -15,6 +15,8 @@ namespace Celemp
         public int earthAmnesty { get; set; }
         public int earthMult { get; set; }
         public Dictionary<int, Ship> ships { get; set; }
+        public int earth_planet { get; set; }
+        public int[] earth_price { get; set; }
 
         private Dictionary<int, Planet> home_planets;
         private int ship_num;
@@ -33,7 +35,11 @@ namespace Celemp
             earthBids.Add("Cargo", 1);
             earthBids.Add("Fighter", 1);
             earthBids.Add("Shield", 1);
+            earthBids.Add("Tractor", 1);
+
             players = new Player[numPlayers];
+            earth_price = new int[numOreTypes];
+
             home_planets = new Dictionary<int, Planet>();
         }
 
@@ -276,12 +282,16 @@ namespace Celemp
         private void SetEarth(int plannum, Config config)
         {
             Planet earth = planets[plannum];
+            Random rnd = new Random();
+
+            earth_planet = plannum;
             earth.name = "**** EARTH ****";
             earth.industry = config.earthInd;
             earth.pdu = config.earthPDU;
             for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
             {
-                earth.ore[ore_type] = config.earthOre[ore_type];
+                earth.ore[ore_type] = rnd.Next(config.earthOre[ore_type]);
+                earth_price[ore_type] = 33 - (earth.ore[ore_type] * 3) / 10;
                 earth.mine[ore_type] = config.earthMines[ore_type];
             }
         }
