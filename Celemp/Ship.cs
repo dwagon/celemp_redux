@@ -128,7 +128,6 @@ namespace Celemp
         // Use fuel for jumping - return false if not enough
         {
             int fuel = FuelRequired(dist);
-            Console.WriteLine($"fr={fuel}");
             if (carrying["Ore 0"] < fuel)
                 return false;
             carrying["Ore 0"] -= fuel;
