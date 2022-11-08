@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using static Celemp.Constants;
 
 namespace Celemp
@@ -49,7 +50,8 @@ namespace Celemp
             {
                 if (galaxy!.planets[planNum].Knows(plr.number))
                 {
-                    galaxy.planets[planNum].TurnPlanetDetails(outfh);
+                    Planet planet = galaxy.planets[planNum];
+                    TurnPlanetDetails(outfh, planet);
                     foreach (KeyValuePair<int, Ship> ship in galaxy.ships)
                     {
                         if (ship.Value.planet == planNum)
@@ -172,6 +174,56 @@ namespace Celemp
                 outfh.Write($"\\item Desired end turn={plr.desired_endturn}\n");
             }
             outfh.Write("\\end{itemize}\n");
+        }
+
+        public void TurnPlanetDetails(StreamWriter outfh, Planet p)
+        {
+            outfh.Write("\\subsection*{" + p.DisplayNumber() + " " + p.name);
+            if (p.research)
+                outfh.Write(" --- Research Planet");
+            outfh.Write("}\n");
+            outfh.Write("\\begin{tabular}{r|llll}\n");
+            outfh.Write("Owner & \\multicolumn{4}{l}{" + galaxy!.players[p.owner].name + "}\\\\\n");
+            if (p.HasBeenScanned())
+            {
+                outfh.Write("Scanned & \\multicolumn{4}{l}{Planet scanned this turn}\\\\\n");
+            };
+            outfh.Write("Nearby Planets");
+            for (int count = 0; count < 4; count++)
+                if (p.link[count] >= 0)
+                    outfh.Write("& " + p.DisplayNumber(p.link[count]));
+                else
+                    outfh.Write(" & ");
+            outfh.Write("\\\\\n");
+            outfh.Write($"Industry & Industry={p.industry} & PDU={p.pdu}({p.PduValue()}) & Income={p.Income()} &\\\\\n");
+            outfh.Write($"Spacemines & Stored={p.spacemines} & Deployed={p.deployed} & \\\\\n");
+            outfh.Write("Standing Order & ");
+            if (p.stndord.Length == 0)
+                outfh.Write("\\multicolumn{4}{l}{None}\\\\\n");
+            else
+                outfh.Write("\\multicolumn{4}{l}{" + (p.number + 100) + p.stndord + "}\\\\\n");
+            outfh.Write("\\end{tabular}\n\n");
+
+            outfh.Write("\\begin{tabular}{r|cccccccccc}\n");
+            outfh.Write("Mine Type");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+            {
+                outfh.Write("& " + oreType);
+            }
+            outfh.Write("\\\\ \\hline \n");
+            outfh.Write("Amount stored");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+            {
+                outfh.Write($"& {p.ore[oreType]}");
+            }
+            outfh.Write("\\\\\n");
+            outfh.Write("Production");
+            for (int mineType = 0; mineType < numOreTypes; mineType++)
+            {
+                outfh.Write($"& {p.mine[mineType]}");
+            }
+            outfh.Write("\\\\\n");
+            outfh.Write("\\end{tabular}\n");
         }
     }
 }
