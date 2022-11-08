@@ -109,25 +109,24 @@ namespace Celemp
 
         private void TurnSheetHeadings(StreamWriter outfh, Player plr)
         {
-            outfh.Write("\n");
-            outfh.Write("\\section*{" + plr.name + "}\n");
+            outfh.WriteLine("\\section*{" + plr.name + "}");
             /* Print out score and gm and turn numbers */
-            outfh.Write("\\subsection*{Turn " + galaxy!.turn + "}\n");
-            outfh.Write("\\begin{itemize}\n");
-            outfh.Write("\\item score=" + plr.score + "\n");
+            outfh.WriteLine("\\subsection*{Turn " + galaxy!.turn + "}");
+            outfh.WriteLine("\\begin{itemize}");
+            outfh.WriteLine("\\item Score=" + plr.score);
             /* Print out due date, and player scores */
-            outfh.Write("\\item date due= before " + galaxy.duedate + "\n");
-            outfh.Write("\\item your income=", plr.Income() + "\n");
-            outfh.Write("\\item Earth credits=" + plr.earthCredit + "\n");
-            outfh.Write("\\item Credits:Score=" + galaxy.earthMult + "\n");
-            outfh.Write($"\\item You have {plr.NumScans()} scans this turn\n");
-            outfh.Write("\\item \\begin{tabular}{c|c|c}\n");
-            outfh.Write("\\multicolumn{3}{c}{Player Scores}\\\\ \\hline \n");
-            outfh.Write($"{galaxy!.players[0].score} & {galaxy.players[1].score}& {galaxy.players[2].score}\\\\ \n");
-            outfh.Write($"{galaxy!.players[3].score} & {galaxy.players[4].score} & {galaxy.players[5].score}\\\\ \n");
-            outfh.Write($"{galaxy!.players[6].score} & {galaxy.players[7].score} & {galaxy.players[8].score}\\\\ \n");
-            outfh.Write("\\end{tabular}\n\n");
-            outfh.Write("\\end{itemize}\n\n");
+            outfh.WriteLine("\\item Date due= before " + galaxy.duedate);
+            outfh.WriteLine("\\item Your income=" + plr.Income());
+            outfh.WriteLine("\\item Earth credits=" + plr.earthCredit);
+            outfh.WriteLine("\\item Credits:Score=" + galaxy.earthMult);
+            outfh.WriteLine($"\\item You have {plr.NumScans()} scans this turn");
+            outfh.WriteLine("\\item \\begin{tabular}{c|c|c}");
+            outfh.WriteLine("\\multicolumn{3}{c}{Player Scores}\\\\ \\hline");
+            outfh.WriteLine($"{galaxy.players[1].score} & {galaxy.players[2].score} & {galaxy.players[3].score}\\\\");
+            outfh.WriteLine($"{galaxy.players[4].score} & {galaxy.players[5].score} & {galaxy.players[6].score}\\\\");
+            outfh.WriteLine($"{galaxy.players[7].score} & {galaxy.players[8].score} & {galaxy.players[9].score}\\\\");
+            outfh.WriteLine("\\end{tabular}");
+            outfh.WriteLine("\\end{itemize}\n");
         }
 
         private void TurnEarthBids(StreamWriter outfh)
