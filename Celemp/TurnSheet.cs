@@ -32,9 +32,10 @@ namespace Celemp
             {
                 TitlePage(sw);
                 TurnSheetHeadings(sw, plr);
-                TurnWinningConditions(sw, plr);
-                TurnEarthBids(sw);
-                TurnShipTypeSummary(sw);
+                Winning_Conditions(sw, plr);
+                Earth_Details(sw);
+                Earth_Bids(sw);
+                Ship_Type_Summary(sw);
                 TurnOwnerSummary(sw);
                 TurnPlanetSummary(sw);
                 TurnShipSummary(sw);
@@ -42,6 +43,42 @@ namespace Celemp
                 TurnCommandHistory(sw, plr);
                 TurnFooter(sw);
             }
+        }
+
+        private void Earth_Details(StreamWriter outfh)
+        {
+            Planet earth = galaxy.planets[galaxy.earth_planet];
+            outfh.WriteLine("\\section*{Earth}");
+            outfh.WriteLine("\\begin{itemize}");
+            /*
+            if(gamedet.earth.flag & WBUYALLORE)
+            fprintf(output, "\\item Unlimited Selling\n");
+            if(gamedet.earth.flag & WBUY100ORE)
+            fprintf(output, "\\item Limited Selling\n");
+            */
+            outfh.WriteLine("\\item Planet: " + earth.DisplayNumber());
+            if (galaxy.turn < galaxy.earthAmnesty)
+                outfh.WriteLine("\\item Earth amnesty in effect. No shots allowed.");
+            outfh.WriteLine($"\\item Nearby Planets {earth.DisplayNumber(earth.link[0])} {earth.DisplayNumber(earth.link[1])} {earth.DisplayNumber(earth.link[2])}");
+            outfh.WriteLine("\\end{itemize}");
+
+            outfh.WriteLine("\\subsection*{Earth Trading Prices}");
+            outfh.WriteLine("\\begin{tabular}{rllllllllll}");
+            outfh.Write("Ore Type");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                outfh.Write($" & {oreType}");
+            outfh.WriteLine("\\\\");
+            outfh.Write("Price");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                outfh.Write($" & {galaxy.earth_price[oreType]}");
+            outfh.WriteLine("\\\\");
+            outfh.Write("Amount");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                outfh.Write($" & {earth.ore[oreType]}");
+            outfh.WriteLine("\\\\");
+
+            outfh.WriteLine("\\end{tabular}");
+            outfh.WriteLine("");
         }
 
         private void TurnPlanetDetails(StreamWriter outfh, Player plr)
@@ -55,7 +92,7 @@ namespace Celemp
                     foreach (KeyValuePair<int, Ship> ship in galaxy.ships)
                     {
                         if (ship.Value.planet == planNum)
-                            ship.Value.TurnFriendShip(outfh);
+                            Friend_Ship(outfh, ship.Value);
                     }
                 }
             }
@@ -69,33 +106,120 @@ namespace Celemp
                 outfh.WriteLine($"\\item {cmd.ToUpper()}");
             if (plr.executed.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
-            outfh.WriteLine("\\end{itemize}");
+            outfh.WriteLine("\\end{itemize}\n");
         }
 
         private void TurnOwnerSummary(StreamWriter outfh)
         {
-            outfh.WriteLine("Owner Summary");   // TODO - Complete
+            // outfh.WriteLine("Owner Summary");   // TODO - Complete
         }
 
-        private void TurnShipTypeSummary(StreamWriter outfh)
+        private void Ship_Type_Summary(StreamWriter outfh)
         {
-            outfh.WriteLine("Ship Type Summary");   // TODO - Complete
+            Dictionary<ShipType, int> stypes = new();
+            ShipType st;
+
+            foreach (KeyValuePair<int, Ship> s in galaxy.ships)
+            {
+                st = s.Value.CalcType();
+                if (!stypes.ContainsKey(st))
+                    stypes[st] = 0;
+                stypes[st]++;
+            }
+
+            outfh.WriteLine("\\section*{Summary of ship types}");
+            outfh.WriteLine("\\begin{tabular}{lr|lr}");
+            int count = 0;
+            foreach(KeyValuePair<ShipType, int> styp in stypes) {
+                outfh.Write($"{styp.Key} & {styp.Value}");
+                if (count % 2 == 0)
+                    outfh.Write(" & ");
+                else
+                    outfh.WriteLine("\\\\");
+                count++;
+            }
+            if (count % 2 == 0)
+                outfh.WriteLine("\\\\");
+            outfh.WriteLine("\\end{tabular}\n");
         }
 
         private void TurnShipSummary(StreamWriter outfh)
         {
-            outfh.WriteLine("Ship Summary");    // TODO - Complete
+            // outfh.WriteLine("Ship Summary");    // TODO - Complete
         }
 
         private void TurnPlanetSummary(StreamWriter outfh)
         {
-            outfh.WriteLine("Planet Summary");  // TODO - Complete
+            // outfh.WriteLine("Planet Summary");  // TODO - Complete
         }
 
         private void TurnFooter(StreamWriter outfh)
         {
             outfh.Write("\\end{document}\n");
         }
+
+        public void Friend_Ship(StreamWriter outfh, Ship s)
+        {
+            bool hasCargo = false;
+            String ownerName = galaxy!.players[s.owner].name;
+            ShipType type = s.CalcType();
+
+            outfh.WriteLine("\n");
+            outfh.WriteLine("\\frame{\\");
+            outfh.WriteLine("\\begin{tabular}{rlll}");
+            outfh.WriteLine("S" + s.DisplayNumber() + " & \\multicolumn{2}{l}{" + s.name + "} & " + type + "\\\\");
+            outfh.WriteLine($"Owner {ownerName} & f={s.fighter} & t={s.tractor} & s={s.shield}({s.ShieldPower()})\\\\");
+            outfh.WriteLine($" & cargo={s.cargo} & cargoleft={s.cargoleft} & \\\\");
+            outfh.WriteLine($" & eff={s.efficiency}(" + s.EffectiveEfficiency() + ") & shots=" + s.Shots(s.fighter) + " & \\\\");
+
+            outfh.Write("Standing & \\multicolumn{3}{l}{");
+            if (s.stndord.Length == 0)
+            {
+                outfh.Write("None");
+            }
+            else
+            {
+                outfh.Write($"S{s.DisplayNumber()}{s.stndord}");
+            };
+            outfh.WriteLine("}\\\\");
+
+            /* Print out cargo details */
+            outfh.Write("Cargo & \\multicolumn{3}{l}{");
+            if (s.carrying["Industry"] != 0)
+            {
+                outfh.Write("Ind {" + s.carrying["Industry"] + ";");
+                hasCargo = true;
+            }
+            if (s.carrying["Mines"] != 0)
+            {
+                outfh.Write("Mine " + s.carrying["Mines"] + ";");
+                hasCargo = true;
+            }
+            if (s.carrying["PDU"] != 0)
+            {
+                outfh.Write("PDU " + s.carrying["PDU"] + ";");
+                hasCargo = true;
+            }
+            if (s.carrying["Spacemines"] != 0)
+            {
+                outfh.Write("SpcMines " + s.carrying["Spacemines"] + ";");
+                hasCargo = true;
+            }
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                if (s.carrying[$"Ore {oreType}"] != 0)
+                {
+                    outfh.Write($"R{oreType}" + s.carrying[$"Ore {oreType}"] + ";");
+                    hasCargo = true;
+                }
+            if (!hasCargo)
+            {
+                outfh.Write("None");
+            };
+            outfh.WriteLine("}\\\\");
+            outfh.WriteLine("\\end{tabular}");
+            outfh.WriteLine("}");
+        }
+
 
         private void TitlePage(StreamWriter outfh)
         {
@@ -129,50 +253,39 @@ namespace Celemp
             outfh.WriteLine("\\end{itemize}\n");
         }
 
-        private void TurnEarthBids(StreamWriter outfh)
+        private void Earth_Bids(StreamWriter outfh)
         {
-            outfh.Write("Minimum bids:\n");
-            outfh.Write("\\begin{itemize}\n");
-            outfh.Write($"\\item Cargo={galaxy!.earthBids["Cargo"]}\n");
-            outfh.Write($"\\item Fighter={galaxy!.earthBids["Fighter"]}\n");
-            outfh.Write($"\\item Shield={galaxy!.earthBids["Shield"]}\n");
-            outfh.Write("\\end{itemize}\n");
+            outfh.WriteLine("\\subsection*{Minimum Bids}");
+            outfh.WriteLine("\\begin{itemize}");
+            outfh.WriteLine($"\\item Cargo={galaxy!.earthBids["Cargo"]}");
+            outfh.WriteLine($"\\item Fighter={galaxy!.earthBids["Fighter"]}");
+            outfh.WriteLine($"\\item Shield={galaxy!.earthBids["Shield"]}");
+            outfh.WriteLine($"\\item Tractor={galaxy!.earthBids["Tractor"]}");
+            outfh.WriteLine("\\end{itemize}");
+            outfh.WriteLine("");
         }
 
-        private void TurnWinningConditions(StreamWriter outfh, Player plr)
+        private void Winning_Conditions(StreamWriter outfh, Player plr)
         {
             /* Print winning conditions */
-            outfh.Write("\\subsection*{Winning Conditions}\n");
-            outfh.Write("\\begin{itemize}\n");
+            outfh.WriteLine("\\subsection*{Winning Conditions}");
+            outfh.WriteLine("\\begin{itemize}");
             if (galaxy!.winning_terms!["Earth Ownership"].Item1)
-            {
-                outfh.Write("\\item Earth\n");
-            }
+                outfh.WriteLine("\\item Earth");
             if (galaxy!.winning_terms["Credit"].Item1)
-            {
-                outfh.Write("\\item Credits=" + galaxy.winning_terms["Credit"].Item2 + "\n");
-            }
+                outfh.WriteLine("\\item Credits=" + galaxy.winning_terms["Credit"].Item2);
             if (galaxy!.winning_terms["Income"].Item1)
-            {
-                outfh.Write("\\item Income=" + galaxy.winning_terms["Income"].Item2 + "\n");
-            }
+                outfh.WriteLine("\\item Income=" + galaxy.winning_terms["Income"].Item2);
             if (galaxy!.winning_terms["Score"].Item1)
-            {
-                outfh.Write("\\item Score=" + galaxy.winning_terms["Score"].Item2 + "\n");
-            }
+                outfh.WriteLine("\\item Score=" + galaxy.winning_terms["Score"].Item2);
             if (galaxy!.winning_terms["Planets"].Item1)
-            {
-                outfh.Write("\\item Planets=" + galaxy.winning_terms["Planets"].Item2 + "\n");
-            }
+                outfh.WriteLine("\\item Planets=" + galaxy.winning_terms["Planets"].Item2);
             if (galaxy!.winning_terms["Fixed Turn"].Item1)
-            {
-                outfh.Write("\\item Turn=" + galaxy.winning_terms["Fixed Turn"].Item2 + "\n");
-            }
+                outfh.WriteLine("\\item Turn=" + galaxy.winning_terms["Fixed Turn"].Item2);
             if (galaxy!.winning_terms["Variable Turn"].Item1)
-            {
-                outfh.Write($"\\item Desired end turn={plr.desired_endturn}\n");
-            }
-            outfh.Write("\\end{itemize}\n");
+                outfh.WriteLine($"\\item Desired end turn={plr.desired_endturn}");
+            outfh.WriteLine("\\end{itemize}");
+            outfh.WriteLine("\n");
         }
 
         public void TurnPlanetDetails(StreamWriter outfh, Planet p)

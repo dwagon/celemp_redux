@@ -14,7 +14,6 @@ namespace Celemp
         public int cargoleft { get; set; }
         public int shield { get; set; }
         public int tractor { get; set; }
-        public ShipType type { get; set; }
         public Dictionary<String, int> carrying { get; set; }
         public int planet { get; set; }
         public int efficiency { get; set; }
@@ -35,7 +34,6 @@ namespace Celemp
             cargoleft = 0;
             shield = 0;
             tractor = 0;
-            type = 0;
             moved = false;
             engaged = false;
             engaging = -1;
@@ -175,7 +173,7 @@ namespace Celemp
             return false;
         }
 
-        private int EffectiveEfficiency()
+        public int EffectiveEfficiency()
         {
             int total;
 
@@ -213,68 +211,6 @@ namespace Celemp
             weight += fighter / 10;
             weight += shield / 2;
             return weight;
-        }
-
-        public void TurnFriendShip(StreamWriter outfh)
-        {
-            bool hasCargo = false;
-            String ownerName = galaxy!.players[owner].name;
-            type = CalcType();
-
-            outfh.WriteLine("\n");
-            outfh.WriteLine("\\frame{\\");
-            outfh.WriteLine("\\begin{tabular}{rlll}");
-            outfh.WriteLine("S" + DisplayNumber() + " & \\multicolumn{2}{l}{" + name + "} & " + type + "\\\\");
-            outfh.WriteLine($"Owner {ownerName} & f={fighter} & t={tractor} & s={shield}({ShieldPower()})\\\\");
-            outfh.WriteLine($" & cargo={cargo} & cargoleft={cargoleft} & \\\\");
-            outfh.WriteLine($" & eff={efficiency}(" + EffectiveEfficiency() + ") & shots=" + Shots(fighter) + " & \\\\");
-
-            outfh.Write("Standing & \\multicolumn{3}{l}{");
-            if (stndord.Length == 0)
-            {
-                outfh.Write("None");
-            }
-            else
-            {
-                outfh.Write($"S{DisplayNumber()}{stndord}");
-            };
-            outfh.WriteLine("}\\\\");
-
-            /* Print out cargo details */
-            outfh.Write("Cargo & \\multicolumn{3}{l}{");
-            if (carrying["Industry"] != 0)
-            {
-                outfh.Write("Ind {" + carrying["Industry"] + ";");
-                hasCargo = true;
-            }
-            if (carrying["Mines"] != 0)
-            {
-                outfh.Write("Mine " + carrying["Mines"] + ";");
-                hasCargo = true;
-            }
-            if (carrying["PDU"] != 0)
-            {
-                outfh.Write("PDU " + carrying["PDU"] + ";");
-                hasCargo = true;
-            }
-            if (carrying["Spacemines"] != 0)
-            {
-                outfh.Write("SpcMines " + carrying["Spacemines"]  + ";");
-                hasCargo = true;
-            }
-            for (int oreType = 0; oreType < numOreTypes; oreType++)
-                if (carrying[$"Ore {oreType}"] != 0)
-                {
-                    outfh.Write($"R{oreType}" + carrying[$"Ore {oreType}"] + ";");
-                    hasCargo = true;
-                }
-            if (!hasCargo)
-            {
-                outfh.Write("None");
-            };
-            outfh.WriteLine("}\\\\");
-            outfh.WriteLine("\\end{tabular}");
-            outfh.WriteLine("}");
         }
 
         public int ShieldPower()
@@ -355,7 +291,6 @@ namespace Celemp
             return ShipType.SmallBattle;
         }
 
-       
         ShipType CalcShipType()
         {
             if (fighter > 250)
