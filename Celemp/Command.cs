@@ -405,7 +405,48 @@ namespace Celemp
         }
 
         private void PlanetAttack(string cmd, int planet) { }
-        private void PlanetBuild(string cmd, int planet) { }
+
+        private void PlanetBuild(string cmd, int planet)
+        {
+            (int amount, int offset) = ExtractAmount(cmd, 4);
+            char cmdchar = Char.ToLower(cmd[4 + offset]);
+            switch (cmdchar)
+            {
+                case 'd':
+                    PlanetBuildPDU(cmd, planet, amount);
+                    break;
+                case 'm':
+                    PlanetBuildMine(cmd, planet, amount);
+                    break;
+                case 'i':
+                    PlanetBuildIndustry(cmd, planet, amount);
+                    break;
+                case 's':
+                    PlanetBuildShip(cmd, planet, amount);
+                    break;
+                case 'h':
+                    PlanetBuildHyperdrive(cmd, planet, amount);
+                    break;
+                default:
+                    throw new CommandParseException($"Planet build command not understood {cmd}");
+            }
+        }
+
+        private void PlanetBuildPDU(string cmd, int planet, int amount) { }
+
+        private void PlanetBuildMine(string cmd, int planet, int amount) {
+            // 235B5M8 - Build 5 mines of ore type 8 on planet 235
+            priority = CommandOrder.BUILDMIN;
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            numbers.Add("amount", amount);
+            numbers.Add("planet", planet);
+            numbers.Add("oretype", type);
+        }
+
+        private void PlanetBuildIndustry(string cmd, int planet, int amount) { }
+        private void PlanetBuildShip(string cmd, int planet, int amount) { }
+        private void PlanetBuildHyperdrive(string cmd, int planet, int amount) { }
+
         private void PlanetTrans(string cmd, int planet) { }
         private void PlanetDeploy(string cmd, int planet) { }
 
