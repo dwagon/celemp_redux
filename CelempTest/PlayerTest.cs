@@ -116,4 +116,33 @@ public class PlayerTest
         Assert.AreEqual(20 - 4 * 5, pt.ore[9]);
         Assert.AreEqual(4, pt.mine[8]);
     }
+
+    [TestMethod]
+    public void Cmd_UnloadPDU()
+    {
+        Galaxy g = new();
+        Planet pln = new();
+        Player plr = new("Max");
+        Ship s = new();
+
+        g.planets[100] = pln;
+        g.ships[0] = s;
+        pln.pdu = 0;
+        plr.InitPlayer(g, 1);
+
+        s.cargo = 20;
+        s.cargoleft = 0;
+        s.carrying["PDU"] = 10;
+        s.owner = 1;
+        s.planet = 100;
+        s.SetGalaxy(g);
+        
+        Command cmd = new("S100U10D", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(pln.pdu, 10);
+        Assert.AreEqual(0, s.carrying["PDU"]);
+        Assert.AreEqual(20, s.cargoleft);
+    }
 }
