@@ -58,6 +58,7 @@ namespace Celemp
 
         public void InitialiseTurn()
         {
+            turn++;
             for (int plrNum=0; plrNum<numPlayers; plrNum++)
             {
                 players[plrNum].InitialiseTurn();

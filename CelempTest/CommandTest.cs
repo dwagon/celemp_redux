@@ -78,4 +78,13 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.LOADPDU, cmd.priority);
         Assert.AreEqual(23, cmd.numbers["amount"]);
     }
+
+    [TestMethod]
+    public void Test_BuildMine()
+    {
+        Command cmd = new("235B5M8", 1);
+        Assert.AreEqual(135, cmd.numbers["planet"]);
+        Assert.AreEqual(5, cmd.numbers["amount"]);
+        Assert.AreEqual(8, cmd.numbers["oretype"]);
+    }
 }

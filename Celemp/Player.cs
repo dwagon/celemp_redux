@@ -1,4 +1,5 @@
-﻿using static Celemp.Constants;
+﻿using System.Numerics;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -124,10 +125,32 @@ namespace Celemp
                 case CommandOrder.GIFTPLAN:
                     Cmd_GiftPlan(cmd);
                     break;
+                case CommandOrder.BUILDMIN:
+                    Cmd_BuildMine(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
+        }
+
+        public void Cmd_BuildMine(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            if (plan.indleft < amount * 10)
+                amount = plan.indleft / 10;
+            if (plan.ore[8] < amount * 5)
+                amount = plan.ore[8] / 5;
+            if (plan.ore[9] < amount * 5)
+                amount = plan.ore[9] / 5;
+            plan.indleft -= amount * 10;
+            plan.ore[8] -= amount * 5;
+            plan.ore[9] -= amount * 5;
+            plan.mine[cmd.numbers["oretype"]] += amount;
+            executed.Add($"{cmd.cmdstr} - Built {amount}");
         }
 
         public void Cmd_GiftShip(Command cmd)
