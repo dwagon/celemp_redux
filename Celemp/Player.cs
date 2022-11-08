@@ -103,6 +103,9 @@ namespace Celemp
                 case CommandOrder.LOADPDU:
                     Cmd_LoadPDU(cmd);
                     break;
+                case CommandOrder.UNLOADPDU:
+                    Cmd_UnloadPDU(cmd);
+                    break;
                 case CommandOrder.JUMP1:
                     Cmd_Jump1(cmd);
                     break;
@@ -421,6 +424,23 @@ namespace Celemp
             amount = ship.LoadShip("PDU", amount);
             planet.pdu -= amount;
             executed.Add($"{cmd.cmdstr} - Loaded {amount}");
+        }
+
+        public void Cmd_UnloadPDU(Command cmd)
+        {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+
+            Planet planet = galaxy!.planets[ship.planet];
+            int amount = cmd.numbers["amount"];
+
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (ship.carrying["PDU"] < amount)
+                amount = ship.carrying["PDU"];
+            amount = ship.UnloadShip("PDU", amount);
+            planet.pdu += amount;
+            executed.Add($"{cmd.cmdstr} - Unloaded {amount}");
         }
 
         private void Cmd_NameShip(Command cmd)

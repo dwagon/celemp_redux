@@ -5,7 +5,7 @@ using Celemp;
 public class ShipTest
 {
     [TestMethod]
-    public void TestHull()
+    public void Test_Hull()
     {
         Ship empty = new();
         empty.number = 23;
@@ -16,7 +16,7 @@ public class ShipTest
     }
 
     [TestMethod]
-    public void TestSmallShip()
+    public void Test_SmallShip()
     {
         Ship s = new();
         Galaxy g = new();
@@ -36,5 +36,22 @@ public class ShipTest
         Assert.AreEqual(4, s.FuelRequired(2));
         Assert.AreEqual(true, s.UseFuel(2));
         Assert.AreEqual(4, s.carrying["Ore 0"], "Fuel level after use");
+    }
+
+    [TestMethod]
+    public void Test_CargoScale()
+    {
+        Assert.AreEqual(1, Ship.CargoScale("Ore 1"));
+        Assert.AreEqual(2, Ship.CargoScale("PDU"));
+    }
+
+    [TestMethod]
+    public void Test_UnloadShip()
+    {
+        Ship s = new();
+        s.cargo = 20;
+        s.carrying["PDU"] = 10;
+
+        Assert.AreEqual(10, s.UnloadShip("PDU", 20));
     }
 }

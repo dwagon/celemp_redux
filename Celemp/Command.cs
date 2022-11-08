@@ -295,7 +295,13 @@ namespace Celemp
             numbers.Add("oretype", type);
         }
 
-        private void ShipUnloadPDU(string cmd, int ship, int amount) { }
+        private void ShipUnloadPDU(string cmd, int ship, int amount) {
+            // S322U23D
+            priority = CommandOrder.UNLOADPDU;
+            numbers.Add("amount", amount);
+            numbers.Add("ship", ship);
+        }
+
         private void ShipUnloadIndustry(string cmd, int ship, int amount) { }
         private void ShipUnloadOre(string cmd, int ship, int amount) { }
         private void ShipUnloadSpacemines(string cmd, int ship, int amount) { }

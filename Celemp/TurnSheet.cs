@@ -66,7 +66,7 @@ namespace Celemp
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
             foreach (string cmd in plr.executed)
-                outfh.WriteLine($"\\item {cmd}");
+                outfh.WriteLine($"\\item {cmd.ToUpper()}");
             if (plr.executed.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
             outfh.WriteLine("\\end{itemize}");

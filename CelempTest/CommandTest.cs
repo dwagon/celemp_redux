@@ -80,6 +80,15 @@ public class CommandTest
     }
 
     [TestMethod]
+    public void Test_UnloadPDU()
+    {
+        Command cmd = new("S323U23D", 1);
+        Assert.AreEqual(223, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.UNLOADPDU, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
     public void Test_BuildMine()
     {
         Command cmd = new("235B5M8", 1);
