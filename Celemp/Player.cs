@@ -25,7 +25,6 @@ namespace Celemp
             earthCredit = 0;
             desired_endturn = 30;
             home_planet = -1;
-            scans = 0;
             executed = new();
         }
 
@@ -65,14 +64,14 @@ namespace Celemp
             int inc = 0;
             for (int planNum=0; planNum < numPlanets; planNum++)
             {
-                inc += galaxy!.planets[planNum].Income();
+                if (galaxy!.planets[planNum].owner == number) 
+                    inc += galaxy!.planets[planNum].Income();
             }
             int numrp = galaxy!.NumberResearchPlanetsOwned(number);
-            if (numrp < 4) {
+            if (numrp < 4)
                 inc += numrp * numrp * numrp * numrp;
-            } else {
+            else
                 inc += 256;
-            }
             return inc;
         }
 

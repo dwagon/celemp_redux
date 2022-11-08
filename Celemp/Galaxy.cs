@@ -51,18 +51,14 @@ namespace Celemp
         public void ProcessCommands(List<Command> commands)
         {
             foreach (Command cmd in commands)
-            {
                 players[cmd.plrNum].ProcessCommand(cmd);
-            }
         }
 
         public void InitialiseTurn()
         {
             turn++;
             for (int plrNum=0; plrNum<numPlayers; plrNum++)
-            {
                 players[plrNum].InitialiseTurn();
-            }
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].InitialiseTurn();
             foreach (var kvp in ships)
