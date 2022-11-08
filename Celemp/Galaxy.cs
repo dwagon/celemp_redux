@@ -89,15 +89,6 @@ namespace Celemp
             File.WriteAllText(save_file, jsonString);
         }
 
-        public void GenerateTurnSheets(string celemp_path)
-        {
-            for (int plrNum = 0; plrNum < numPlayers; plrNum ++)
-            {
-                Console.WriteLine($"Generate turn sheet for player {plrNum}");
-                players[plrNum].GenerateTurnSheet(celemp_path);
-            }
-        }
-
         public void EndTurn()
         // All the end of turn processing
         {

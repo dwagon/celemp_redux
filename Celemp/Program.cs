@@ -79,7 +79,8 @@ namespace Celemp
             string save_file = Path.Join(celemp_path, "celemp.json");
 
             Galaxy galaxy = LoadGame(save_file);
-            galaxy.GenerateTurnSheets(celemp_path);
+            TurnSheet ts = new TurnSheet(galaxy);
+            ts.GenerateTurnSheets(celemp_path);
         }
 
         void ProcessTurns(string celemp_path) {
