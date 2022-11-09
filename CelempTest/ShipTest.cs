@@ -12,7 +12,7 @@ public class ShipTest
         Assert.AreEqual(1, empty.CalcWeight());
         Assert.AreEqual(ShipType.Hull, empty.CalcType());
         Assert.AreEqual(true, empty.IsEmpty());
-        Assert.AreEqual("123", empty.DisplayNumber());
+        Assert.AreEqual("S123", empty.DisplayNumber());
     }
 
     [TestMethod]

@@ -110,6 +110,8 @@ public class PlayerTest
         pr.ProcessCommand(cmd);
         pr.OutputLog();
 
+        Assert.IsTrue(pr.executed[0].Contains("Insufficient Ore 9"));
+
         // Should be constrained to building 4
         Assert.AreEqual(50 - 4 *10, pt.indleft);
         Assert.AreEqual(40 - 4 * 5, pt.ore[8]);

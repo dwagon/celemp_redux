@@ -103,7 +103,7 @@ namespace Celemp
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
             foreach (string cmd in plr.executed)
-                outfh.WriteLine($"\\item {cmd.ToUpper()}");
+                outfh.WriteLine($"\\item {cmd}");
             if (plr.executed.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
             outfh.WriteLine("\\end{itemize}\n");
@@ -167,7 +167,7 @@ namespace Celemp
             outfh.WriteLine("\n");
             outfh.WriteLine("\\frame{\\");
             outfh.WriteLine("\\begin{tabular}{rlll}");
-            outfh.WriteLine("S" + s.DisplayNumber() + " & \\multicolumn{2}{l}{" + s.name + "} & " + type + "\\\\");
+            outfh.WriteLine(s.DisplayNumber() + " & \\multicolumn{2}{l}{" + s.name + "} & " + type + "\\\\");
             outfh.WriteLine($"Owner {ownerName} & f={s.fighter} & t={s.tractor} & s={s.shield}({s.ShieldPower()})\\\\");
             outfh.WriteLine($" & cargo={s.cargo} & cargoleft={s.cargoleft} & \\\\");
             outfh.WriteLine($" & eff={s.efficiency}(" + s.EffectiveEfficiency() + ") & shots=" + s.Shots(s.fighter) + " & \\\\");
@@ -179,7 +179,7 @@ namespace Celemp
             }
             else
             {
-                outfh.Write($"S{s.DisplayNumber()}{s.stndord}");
+                outfh.Write($"{s.DisplayNumber()}{s.stndord}");
             };
             outfh.WriteLine("}\\\\");
 
