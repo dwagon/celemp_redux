@@ -90,7 +90,7 @@ namespace Celemp
         public String DisplayNumber(int num = -1)
         {
             if (num < 0) { num = number; }
-            return (num + 100).ToString();
+            return "S"+(num + 100).ToString();
         }
 
         public int LoadShip(string cargotype, int amount)
