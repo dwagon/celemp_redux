@@ -52,8 +52,18 @@ namespace Celemp
         {
             foreach (string command in aCommands)
             {
-                Command cmd = new(command, number);
+                Command cmd;
+                try
+                {
+                    cmd = new(command, number);
+                }
+                catch
+                {
+                    executed.Add($"{command} - Command not understood error");
+                    continue;
+                }
                 yield return cmd;
+
             }
         }
 
