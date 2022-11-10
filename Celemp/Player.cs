@@ -93,23 +93,26 @@ namespace Celemp
                 case CommandOrder.LOADALL:
                     Cmd_LoadAll(cmd);
                     break;
-                case CommandOrder.LOADORE:
+                case CommandOrder.LOAD_ORE:
                     Cmd_LoadOre(cmd);
                     break;
-                case CommandOrder.LOADIND:
+                case CommandOrder.LOAD_IND:
                     Cmd_LoadIndustry(cmd);
                     break;
-                case CommandOrder.LOADMIN:
+                case CommandOrder.LOAD_MINE:
                     Cmd_LoadMine(cmd);
                     break;
-                case CommandOrder.LOADSPM:
+                case CommandOrder.LOAD_SPCM:
                     Cmd_LoadSpacemine(cmd);
                     break;
-                case CommandOrder.LOADPDU:
+                case CommandOrder.LOAD_PDU:
                     Cmd_LoadPDU(cmd);
                     break;
-                case CommandOrder.UNLOADPDU:
+                case CommandOrder.UNLOAD_PDU:
                     Cmd_UnloadPDU(cmd);
+                    break;
+                case CommandOrder.UNLOAD_ALL:
+                    Cmd_UnloadAll(cmd);
                     break;
                 case CommandOrder.JUMP1:
                     Cmd_Jump1(cmd);

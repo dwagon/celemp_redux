@@ -302,7 +302,7 @@ namespace Celemp
         private void ShipUnload(string cmd, int ship) {
             // S123U
             if (cmd.Length==5) {
-                priority = CommandOrder.UNLODALL;
+                priority = CommandOrder.UNLOAD_ALL;
                 numbers.Add("ship", ship);
                 return;
             }
@@ -343,7 +343,7 @@ namespace Celemp
 
         private void ShipUnloadPDU(string cmd, int ship, int amount) {
             // S322U23D
-            priority = CommandOrder.UNLOADPDU;
+            priority = CommandOrder.UNLOAD_PDU;
             numbers.Add("amount", amount);
             numbers.Add("ship", ship);
         }
@@ -356,7 +356,7 @@ namespace Celemp
         {
             // S123L23M2 - Load 23 Mines of type 2
             int type = Convert.ToInt16(cmd[cmd.Length - 1]);
-            priority = CommandOrder.LOADMIN;
+            priority = CommandOrder.LOAD_MINE;
             numbers.Add("ship", ship);
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
@@ -364,14 +364,14 @@ namespace Celemp
 
         private void ShipLoadPDU(string cmd, int ship, int amount) {
             // S123L34D
-            priority = CommandOrder.LOADPDU;
+            priority = CommandOrder.LOAD_PDU;
             numbers.Add("amount", amount);
             numbers.Add("ship", ship);
         }
 
         private void ShipLoadIndustry(string cmd, int ship, int amount) {
             // S345L3I
-            priority = CommandOrder.LOADIND;
+            priority = CommandOrder.LOAD_IND;
             numbers.Add("amount", amount);
             numbers.Add("ship", ship);
         }
@@ -380,7 +380,7 @@ namespace Celemp
             // S123L120R2
             int type = (int) Char.GetNumericValue(cmd[cmd.Length - 1]);
 
-            priority = CommandOrder.LOADORE;
+            priority = CommandOrder.LOAD_ORE;
             numbers.Add("ship", ship);
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
@@ -388,7 +388,7 @@ namespace Celemp
 
         private void ShipLoadSpacemines(string cmd, int ship, int amount) {
             // S234L34S
-            priority = CommandOrder.LOADSPM;
+            priority = CommandOrder.LOAD_SPCM;
             numbers.Add("amount", amount);
             numbers.Add("ship", ship);
         }
