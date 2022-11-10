@@ -274,4 +274,42 @@ public class PlayerTest
         Assert.AreEqual(20 - 6, plan.ore[5]);
         Assert.AreEqual(20 - 6, plan.ore[6]);
     }
+
+    [TestMethod]
+    public void Cmd_UnloadAll()
+    {
+        Galaxy g = new();
+        Planet pln = new();
+        Player plr = new("Max");
+        Ship s = new();
+
+        g.planets[100] = pln;
+        g.ships[0] = s;
+        pln.ore[0] = 0;
+        pln.ore[1] = 0;
+        pln.ore[3] = 0;
+        plr.InitPlayer(g, 1);
+
+        s.cargo = 20;
+        s.cargoleft = 5;
+        s.carrying["0"] = 5;
+        s.carrying["1"] = 5;
+        s.carrying["3"] = 5;
+
+        s.owner = 1;
+        s.planet = 100;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100U", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(5, s.carrying["0"]);
+        Assert.AreEqual(0, s.carrying["1"]);
+        Assert.AreEqual(0, s.carrying["3"]);
+        Assert.AreEqual(0, pln.ore[0]);
+        Assert.AreEqual(5, pln.ore[1]);
+        Assert.AreEqual(5, pln.ore[3]);
+        Assert.AreEqual(20 - 5, s.cargoleft);
+    }
 }

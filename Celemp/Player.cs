@@ -540,7 +540,28 @@ namespace Celemp
                 amount = planet.pdu;
             amount = ship.LoadShip("PDU", amount);
             planet.pdu -= amount;
-            results.Add($"Loaded {amount}");
+            results.Add($"Loaded {amount} PDU");
+        }
+
+        public void Cmd_UnloadAll(Command cmd)
+        {
+            int shipNum = cmd.numbers["ship"];
+            Ship ship = galaxy!.ships[shipNum];
+            Planet planet = galaxy!.planets[ship.planet];
+
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            int amount;
+            results.Add($"Unloaded");
+
+            for (int oreType = 1; oreType < numOreTypes; oreType++) {
+                amount = ship.carrying[$"{oreType}"];
+                if (amount == 0)
+                    continue;
+                amount = ship.UnloadShip($"{oreType}", amount);
+                planet.ore[oreType] += amount;
+                results.Add($"{amount} x R{oreType}");
+            }
         }
 
         public void Cmd_UnloadPDU(Command cmd)

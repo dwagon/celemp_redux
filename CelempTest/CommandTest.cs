@@ -133,4 +133,12 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.BUILD_SHIELD, cmd.priority);
         Assert.AreEqual(10, cmd.numbers["amount"]);
     }
+
+    [TestMethod]
+    public void Test_UnloadAll()
+    {
+        Command cmd = new("S101U", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_ALL, cmd.priority);
+        Assert.AreEqual(1, cmd.numbers["ship"]);
+    }
 }
