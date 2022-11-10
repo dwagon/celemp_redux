@@ -75,7 +75,6 @@ public class PlayerTest
         s.planet = 123;
         s.cargo = 10;
         s.owner = 2;
-        s.cargoleft = 10;
         g.ships[33] = s;
         g.planets[123] = pt;
         pt.pdu = 9;
@@ -88,7 +87,7 @@ public class PlayerTest
         // Should be constrained by available cargo
         Assert.AreEqual(4, pt.pdu);
         Assert.AreEqual(5, s.carrying["PDU"]);
-        Assert.AreEqual(0, s.cargoleft);
+        Assert.AreEqual(0, s.CargoLeft());
     }
 
     [TestMethod]
@@ -133,7 +132,6 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 20;
-        s.cargoleft = 0;
         s.carrying["PDU"] = 10;
         s.owner = 1;
         s.planet = 100;
@@ -145,7 +143,7 @@ public class PlayerTest
 
         Assert.AreEqual(pln.pdu, 10);
         Assert.AreEqual(0, s.carrying["PDU"]);
-        Assert.AreEqual(20, s.cargoleft);
+        Assert.AreEqual(20, s.CargoLeft());
     }
 
     [TestMethod]
@@ -173,7 +171,7 @@ public class PlayerTest
         plr.OutputLog();
 
         Assert.AreEqual(10, s.cargo);
-        Assert.AreEqual(10, s.cargoleft);
+        Assert.AreEqual(10, s.CargoLeft());
         Assert.AreEqual(20 - 10, plan.indleft);
         Assert.AreEqual(20 - 10, plan.ore[1]);
     }
@@ -291,7 +289,6 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 20;
-        s.cargoleft = 5;
         s.carrying["0"] = 5;
         s.carrying["1"] = 5;
         s.carrying["3"] = 5;
@@ -310,6 +307,6 @@ public class PlayerTest
         Assert.AreEqual(0, pln.ore[0]);
         Assert.AreEqual(5, pln.ore[1]);
         Assert.AreEqual(5, pln.ore[3]);
-        Assert.AreEqual(20 - 5, s.cargoleft);
+        Assert.AreEqual(20 - 5, s.CargoLeft());
     }
 }

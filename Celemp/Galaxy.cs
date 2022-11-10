@@ -145,7 +145,6 @@ namespace Celemp
             newship.SetGalaxy(this);
             newship.fighter = fight;
             newship.cargo = cargo;
-            newship.cargoleft = cargo;
             newship.shield = shield;
             newship.tractor = tractor;
             newship.efficiency = eff;

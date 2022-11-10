@@ -169,7 +169,7 @@ namespace Celemp
             outfh.WriteLine("\\begin{tabular}{rlll}");
             outfh.WriteLine(s.DisplayNumber() + " & \\multicolumn{2}{l}{" + s.name + "} & " + type + "\\\\");
             outfh.WriteLine($"Owner {ownerName} & f={s.fighter} & t={s.tractor} & s={s.shield}({s.ShieldPower()})\\\\");
-            outfh.WriteLine($" & cargo={s.cargo} & cargoleft={s.cargoleft} & \\\\");
+            outfh.WriteLine($" & cargo={s.cargo} & cargoleft={s.CargoLeft()} & \\\\");
             outfh.WriteLine($" & eff={s.efficiency}(" + s.EffectiveEfficiency() + ") & shots=" + s.Shots(s.fighter) + " & \\\\");
 
             outfh.Write("Standing & \\multicolumn{3}{l}{");
