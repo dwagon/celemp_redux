@@ -323,24 +323,26 @@ namespace Celemp
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int dest1 = cmd.numbers["jump1"];
+            int distance = 1;
 
-            if (!JumpChecks(ship, cmd, 2))
+            if (!JumpChecks(ship, cmd, distance))
                 return;
-            ship.UseFuel(1);
+            ship.UseFuel(distance);
 
             if (!CheckDest(ship, dest1, cmd))
                 return;
             ship.MoveTo(dest1);
-            results.Add($"OK - Used {ship.FuelRequired(1)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump2(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
+            int distance = 2;
 
-            if (!JumpChecks(ship, cmd, 2))
+            if (!JumpChecks(ship, cmd, distance))
                 return;
-            ship.UseFuel(2);
+            ship.UseFuel(distance);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -350,16 +352,17 @@ namespace Celemp
             if (!CheckDest(ship, dest2, cmd))
                 return;
             ship.MoveTo(dest2);
-            results.Add($"OK - Used {ship.FuelRequired(2)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump3(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
+            int distance = 3;
 
-            if (!JumpChecks(ship, cmd, 3))
+            if (!JumpChecks(ship, cmd, distance))
                 return;
-            ship.UseFuel(3);
+            ship.UseFuel(distance);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -373,16 +376,17 @@ namespace Celemp
             if (!CheckDest(ship, dest3, cmd))
                 return;
             ship.MoveTo(dest3);
-            results.Add($"OK - Used {ship.FuelRequired(3)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump4(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
+            int distance = 4;
 
-            if (!JumpChecks(ship, cmd, 4))
+            if (!JumpChecks(ship, cmd, distance))
                 return;
-            ship.UseFuel(4);
+            ship.UseFuel(distance);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -400,16 +404,17 @@ namespace Celemp
             if (!CheckDest(ship, dest4, cmd))
                 return;
             ship.MoveTo(dest4);
-            results.Add($"OK - Used {ship.FuelRequired(4)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump5(Command cmd) {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
+            int distance = 5;
 
-            if (!JumpChecks(ship, cmd, 5))
+            if (!JumpChecks(ship, cmd, distance))
                 return;
-            ship.UseFuel(5);
+            ship.UseFuel(distance);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -431,7 +436,7 @@ namespace Celemp
             if (!CheckDest(ship, dest5, cmd))
                 return;
             ship.MoveTo(dest5);
-            results.Add($"OK - Used {ship.FuelRequired(5)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private bool JumpChecks(Ship ship, Command cmd, int jumplength)

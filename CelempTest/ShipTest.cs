@@ -65,4 +65,34 @@ public class ShipTest
         s.carrying["3"] = 3;
         Assert.AreEqual(7, s.CargoLeft());
     }
+
+    [TestMethod]
+    public void FuelRequired()
+    {
+        Ship s = new();
+        s.cargo = 20;
+
+        Assert.AreEqual(1, s.FuelRequired(1));
+        Assert.AreEqual(4, s.FuelRequired(2));
+        Assert.AreEqual(9, s.FuelRequired(3));
+        s.efficiency = 1;
+        Assert.AreEqual(1, s.FuelRequired(1));
+        Assert.AreEqual(2, s.FuelRequired(2));
+        Assert.AreEqual(6, s.FuelRequired(3));
+    }
+
+    [TestMethod]
+    public void EffectiveEfficiency()
+    {
+        Ship s = new();
+        s.cargo = 20;
+
+        Assert.AreEqual(0, s.EffectiveEfficiency());
+
+        s.cargo = 200;
+        Assert.AreEqual(-1, s.EffectiveEfficiency());
+
+        s.efficiency = 1;
+        Assert.AreEqual(0, s.EffectiveEfficiency());
+    }
 }
