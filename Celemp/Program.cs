@@ -87,7 +87,7 @@ namespace Celemp
             string save_file = Path.Join(celemp_path, "celemp.json");
             Galaxy galaxy = LoadGame(save_file);
             System.IO.File.Move(save_file, $"{save_file}.{galaxy.turn}");
-            List<string>[] cmdstrings = LoadCommandStrings(celemp_path);
+            List<string>[] cmdstrings = LoadCommandStrings(celemp_path, galaxy);
             List<Command> commands = galaxy.ParseCommandStrings(cmdstrings);
             commands.Sort();
             galaxy.InitialiseTurn();
@@ -96,7 +96,7 @@ namespace Celemp
             galaxy.SaveGame(save_file);
         }
 
-        List<string>[] LoadCommandStrings(string celemp_path)
+        List<string>[] LoadCommandStrings(string celemp_path, Galaxy galaxy)
         // Load the commands from the players
         {
             string cmd_fname;
@@ -112,6 +112,7 @@ namespace Celemp
                     {
                         commands[plrNum].Add(line.Trim());
                     }
+                    System.IO.File.Move(cmd_fname, $"{cmd_fname}.{galaxy.turn}");
                 }
                 catch (Exception exc) {
                     Console.WriteLine($"Couldn't read commands from {cmd_fname}: {exc.Message}");
