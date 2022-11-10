@@ -99,7 +99,7 @@ namespace Celemp
             }
             catch (Exception exc)
             {
-                Console.WriteLine($"Couldn't read prototype from {filename} - using defaults");
+                Console.WriteLine($"Couldn't read prototype from {filename} ({exc.Message}) - using defaults");
                 return;
             }
             Console.WriteLine($"Loading prototype from {filename}");

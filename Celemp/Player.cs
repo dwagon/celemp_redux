@@ -263,6 +263,7 @@ namespace Celemp
             if (!CheckPlanetOwnership(plan, cmd))
                 return;
             int amount = cmd.numbers["amount"];
+            int oretype = cmd.numbers["oretype"];
             amount = CheckIndustry(amount, plan, 10);
             amount = CheckOre(amount, plan, 5, 8);
             amount = CheckOre(amount, plan, 5, 9);
@@ -270,8 +271,8 @@ namespace Celemp
             plan.indleft -= amount * 10;
             plan.ore[8] -= amount * 5;
             plan.ore[9] -= amount * 5;
-            plan.mine[cmd.numbers["oretype"]] += amount;
-            results.Add($"Built {amount}");
+            plan.mine[oretype] += amount;
+            results.Add($"Built {amount} mine type {oretype}");
         }
 
         public void Cmd_GiftShip(Command cmd)
@@ -316,10 +317,12 @@ namespace Celemp
 
             if (!JumpChecks(ship, cmd, 2))
                 return;
+            ship.UseFuel(1);
+
             if (!CheckDest(ship, dest1, cmd))
                 return;
             ship.MoveTo(dest1);
-            results.Add("OK");
+            results.Add($"OK - Used {ship.FuelRequired(1)} Fuel");
         }
 
         private void Cmd_Jump2(Command cmd) {
@@ -328,6 +331,7 @@ namespace Celemp
 
             if (!JumpChecks(ship, cmd, 2))
                 return;
+            ship.UseFuel(2);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -337,7 +341,7 @@ namespace Celemp
             if (!CheckDest(ship, dest2, cmd))
                 return;
             ship.MoveTo(dest2);
-            results.Add("OK");
+            results.Add($"OK - Used {ship.FuelRequired(2)} Fuel");
         }
 
         private void Cmd_Jump3(Command cmd) {
@@ -346,6 +350,7 @@ namespace Celemp
 
             if (!JumpChecks(ship, cmd, 3))
                 return;
+            ship.UseFuel(3);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -359,7 +364,7 @@ namespace Celemp
             if (!CheckDest(ship, dest3, cmd))
                 return;
             ship.MoveTo(dest3);
-            results.Add("OK");
+            results.Add($"OK - Used {ship.FuelRequired(3)} Fuel");
         }
 
         private void Cmd_Jump4(Command cmd) {
@@ -368,6 +373,7 @@ namespace Celemp
 
             if (!JumpChecks(ship, cmd, 4))
                 return;
+            ship.UseFuel(4);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -385,7 +391,7 @@ namespace Celemp
             if (!CheckDest(ship, dest4, cmd))
                 return;
             ship.MoveTo(dest4);
-            results.Add("OK");
+            results.Add($"OK - Used {ship.FuelRequired(4)} Fuel");
         }
 
         private void Cmd_Jump5(Command cmd) {
@@ -394,6 +400,7 @@ namespace Celemp
 
             if (!JumpChecks(ship, cmd, 5))
                 return;
+            ship.UseFuel(5);
 
             int dest1 = cmd.numbers["jump1"];
             if (!CheckDest(ship, dest1, cmd))
@@ -415,7 +422,7 @@ namespace Celemp
             if (!CheckDest(ship, dest5, cmd))
                 return;
             ship.MoveTo(dest5);
-            results.Add("OK");
+            results.Add($"OK - Used {ship.FuelRequired(5)} Fuel");
         }
 
         private bool JumpChecks(Ship ship, Command cmd, int jumplength)
@@ -425,15 +432,16 @@ namespace Celemp
                 return false;
             if (!CheckShipMoved(ship, cmd))
                 return false;
-            if (!CheckFuel(ship, cmd, jumplength))
+            if (!CheckFuel(ship, jumplength))
                 return false;
             return true;
         }
 
-        private bool CheckFuel(Ship aShip, Command cmd, int distance) {
-            if (!aShip.UseFuel(distance))
+        private bool CheckFuel(Ship aShip, int distance) {
+            int required = aShip.FuelRequired(distance);
+            if (aShip.carrying["0"] < required)
             {
-                results.Add($"Failed to jump, insufficient fuel");
+                results.Add($"Insufficient fuel ({required} required)");
                 return false;
             }
             return true;
@@ -443,7 +451,7 @@ namespace Celemp
         {
             if (!aShip.CheckDest(dest))
             {
-                results.Add("Failed to jump, invalid destination");
+                results.Add("Invalid destination");
                 return false;
             }
             return true;
@@ -454,7 +462,7 @@ namespace Celemp
             // Check for the ship having moved this turn
             if (!aShip.HasMoved())
                 return true;
-            results.Add("Ship has already moved this turn");
+            results.Add("Already moved this turn");
             return false;
         }
 
@@ -462,7 +470,7 @@ namespace Celemp
         {
             if (aShip.IsEngaged())
                 return true;
-            results.Add("Ship is engaged by a tractor beam");
+            results.Add("Engaged by a tractor beam");
             return false;
         }
 
@@ -475,13 +483,16 @@ namespace Celemp
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
 
+            results.Add("Loaded");
             for (int oretype=1;oretype<numOreTypes;oretype++)
             {
                 int amount = planet.ore[oretype];
                 if (ship.cargoleft < amount)
                     amount = ship.cargoleft;
                 planet.ore[oretype] -= amount;
-                ship.LoadShip($"Ore {oretype}", amount);
+                ship.LoadShip($"{oretype}", amount);
+                if(amount != 0) 
+                    results.Add($"{amount} x R{oretype}");
             }
             results.Add("OK");
         }
@@ -499,9 +510,9 @@ namespace Celemp
                 return;
             if (planet.ore[oretype] < amount)
                 amount = planet.ore[oretype];
-            amount = ship.LoadShip($"Ore {oretype}", amount);
+            amount = ship.LoadShip($"{oretype}", amount);
             planet.ore[oretype] -= amount;
-            results.Add($"Loaded {amount}");
+            results.Add($"Loaded {amount} R{oretype}");
         }
 
         private void Cmd_LoadIndustry(Command cmd) {
@@ -511,6 +522,7 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
+            // TODO
         }
 
         private void Cmd_LoadMine(Command cmd) {
@@ -521,6 +533,7 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
+            // TODO
         }
         private void Cmd_LoadSpacemine(Command cmd) {
             int shipNum = cmd.numbers["ship"];
@@ -529,6 +542,7 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
+            // TODO
         }
 
         public void Cmd_LoadPDU(Command cmd) {
@@ -581,7 +595,7 @@ namespace Celemp
                 amount = ship.carrying["PDU"];
             amount = ship.UnloadShip("PDU", amount);
             planet.pdu += amount;
-            results.Add($"Unloaded {amount}");
+            results.Add($"Unloaded {amount} PDU");
         }
 
         private void Cmd_NameShip(Command cmd)
