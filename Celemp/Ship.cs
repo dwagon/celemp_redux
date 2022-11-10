@@ -191,7 +191,7 @@ namespace Celemp
             int total;
 
             total = cargo + fighter + tractor + shield;
-            return Math.Min(4, efficiency - total / 200);
+            return Math.Min(4, efficiency - (int)(total / 200.0D));
         }
 
         public int Shots(int shts)
