@@ -40,7 +40,7 @@ namespace Celemp
             carrying = new Dictionary<string, int>();
             for (int oreType = 0;oreType<numOreTypes; oreType++)
             {
-                carrying.Add($"Ore {oreType}", 0);
+                carrying.Add($"{oreType}", 0);
             }
             carrying.Add("Industry", 0);
             carrying.Add("Mines", 0);
@@ -109,7 +109,6 @@ namespace Celemp
         public int UnloadShip(string cargotype, int amount)
         {
             // Unload cargo from the ship - doesn't add it to the destination
-            // Return the amount actually unloaded based on cargo left.
             int scale = CargoScale(cargotype);
       
             if (carrying[cargotype] < amount)
@@ -146,9 +145,10 @@ namespace Celemp
         // Use fuel for jumping - return false if not enough
         {
             int fuel = FuelRequired(dist);
-            if (carrying["Ore 0"] < fuel)
+            if (carrying["0"] < fuel)
                 return false;
-            carrying["Ore 0"] -= fuel;
+            carrying["0"] -= fuel;
+            cargoleft += fuel;
             return true;
         }
 

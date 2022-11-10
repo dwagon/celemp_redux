@@ -27,21 +27,21 @@ public class ShipTest
         s.cargoleft = 10;
         s.fighter = 10;
         Assert.AreEqual(12, s.CalcWeight(), "CalcWeight - empty");
-        s.LoadShip("Ore 0", 8);
+        s.LoadShip("0", 8);
         Assert.AreEqual(2, s.cargoleft, "foo");
-        Assert.AreEqual(8, s.carrying["Ore 0"]);
+        Assert.AreEqual(8, s.carrying["0"]);
         Assert.AreEqual(16, s.CalcWeight(), "CalcWeight - Loaded");
         Assert.AreEqual(ShipType.SmallShip, s.CalcType());
         Assert.AreEqual(6, s.Shots(10));
         Assert.AreEqual(4, s.FuelRequired(2));
         Assert.AreEqual(true, s.UseFuel(2));
-        Assert.AreEqual(4, s.carrying["Ore 0"], "Fuel level after use");
+        Assert.AreEqual(4, s.carrying["0"], "Fuel level after use");
     }
 
     [TestMethod]
     public void Test_CargoScale()
     {
-        Assert.AreEqual(1, Ship.CargoScale("Ore 1"));
+        Assert.AreEqual(1, Ship.CargoScale("1"));
         Assert.AreEqual(2, Ship.CargoScale("PDU"));
     }
 

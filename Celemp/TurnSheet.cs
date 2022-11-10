@@ -206,9 +206,9 @@ namespace Celemp
                 hasCargo = true;
             }
             for (int oreType = 0; oreType < numOreTypes; oreType++)
-                if (s.carrying[$"Ore {oreType}"] != 0)
+                if (s.carrying[$"{oreType}"] != 0)
                 {
-                    outfh.Write($"R{oreType}" + s.carrying[$"Ore {oreType}"] + ";");
+                    outfh.Write($"R{oreType}: " + s.carrying[$"{oreType}"] + ";");
                     hasCargo = true;
                 }
             if (!hasCargo)
