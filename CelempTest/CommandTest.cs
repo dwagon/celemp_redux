@@ -95,5 +95,42 @@ public class CommandTest
         Assert.AreEqual(135, cmd.numbers["planet"]);
         Assert.AreEqual(5, cmd.numbers["amount"]);
         Assert.AreEqual(8, cmd.numbers["oretype"]);
+        Assert.AreEqual(CommandOrder.BUILD_MINE, cmd.priority);
+    }
+
+    [TestMethod]
+    public void Test_BuildCargo()
+    {
+        Command cmd = new("S340B10C", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.BUILD_CARGO, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_BuildFighter()
+    {
+        Command cmd = new("S140B1F", 1);
+        Assert.AreEqual(40, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.BUILD_FIGHTER, cmd.priority);
+        Assert.AreEqual(1, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_BuildTractor()
+    {
+        Command cmd = new("S341B100T", 1);
+        Assert.AreEqual(241, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.BUILD_TRACTOR, cmd.priority);
+        Assert.AreEqual(100, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_BuildShield()
+    {
+        Command cmd = new("S340B10S", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.BUILD_SHIELD, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
     }
 }

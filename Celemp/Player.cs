@@ -80,6 +80,7 @@ namespace Celemp
 
         public void ProcessCommand(Command cmd) {
             Console.WriteLine($"Processing command {cmd.cmdstr}");
+            results = new();
             results.Add(cmd.cmdstr.ToUpper());
             switch (cmd.priority)
             {
@@ -131,8 +132,20 @@ namespace Celemp
                 case CommandOrder.GIFTPLAN:
                     Cmd_GiftPlan(cmd);
                     break;
-                case CommandOrder.BUILDMIN:
+                case CommandOrder.BUILD_MINE:
                     Cmd_BuildMine(cmd);
+                    break;
+                case CommandOrder.BUILD_CARGO:
+                    Cmd_BuildCargo(cmd);
+                    break;
+                case CommandOrder.BUILD_FIGHTER:
+                    Cmd_BuildFighter(cmd);
+                    break;
+                case CommandOrder.BUILD_TRACTOR:
+                    Cmd_BuildTractor(cmd);
+                    break;
+                case CommandOrder.BUILD_SHIELD:
+                    Cmd_BuildShield(cmd);
                     break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
@@ -140,6 +153,86 @@ namespace Celemp
             }                
             executed.Add(String.Join(": ", results));
         }
+
+        public void Cmd_BuildCargo(Command cmd) {
+            // Build Cargo units on a ship
+            // A cargo takes 1 industry and one ore type 1
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 1);
+            amount = CheckOre(amount, plan, 1, 1);
+
+            plan.indleft -= amount;
+            plan.ore[1] -= amount;
+            ship.cargo += amount;
+            ship.cargoleft += amount;
+            results.Add($"Built {amount} cargo");
+        }
+
+        public void Cmd_BuildFighter(Command cmd)
+            // Build Fighter units on a ship
+            // A fighter takes 2 industry and one each of ore 2 and 3
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            amount = CheckOre(amount, plan, 1, 2);
+            amount = CheckOre(amount, plan, 1, 3);
+
+            plan.indleft -= amount * 2;
+            plan.ore[2] -= amount;
+            plan.ore[3] -= amount;
+            ship.fighter += amount;
+            results.Add($"Built {amount} fighter");
+        }
+
+        public void Cmd_BuildTractor(Command cmd) {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            amount = CheckOre(amount, plan, 2, 7);
+
+            plan.indleft -= amount * 2;
+            plan.ore[7] -= amount * 2;
+            ship.tractor += amount;
+            results.Add($"Built {amount} tractor");
+        }
+
+        public void Cmd_BuildShield(Command cmd) {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            amount = CheckOre(amount, plan, 1, 5);
+            amount = CheckOre(amount, plan, 1, 6);
+
+            plan.indleft -= amount * 2;
+            plan.ore[5] -= amount;
+            plan.ore[6] -= amount;
+
+            ship.shield += amount;
+            results.Add($"Built {amount} shields");
+        }
+
 
         public int CheckIndustry(int amount, Planet plan, int scale)
         {

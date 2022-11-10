@@ -147,7 +147,53 @@ namespace Celemp
         }
 
         private void ShipAttack(string cmd, int ship) { }
-        private void ShipBuild(string cmd, int ship) { }
+
+        private void ShipBuild(string cmd, int ship) {
+            // S123B10C
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            char cmdchar = Char.ToLower(cmd[5 + offset]);
+            switch (cmdchar)
+            {
+                case 'c':
+                    ShipBuildCargo(cmd, ship, amount);
+                    break;
+                case 'f':
+                    ShipBuildFighter(cmd, ship, amount);
+                    break;
+                case 't':
+                    ShipBuildTractor(cmd, ship, amount);
+                    break;
+                case 's':
+                    ShipBuildShield(cmd, ship, amount);
+                    break;
+                default: throw new CommandParseException($"Ship build command not understood {cmd}");
+            }
+        }
+
+        private void ShipBuildCargo(string cmd, int ship, int amount) {
+            priority = CommandOrder.BUILD_CARGO;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+        }
+
+        private void ShipBuildFighter(string cmd, int ship, int amount) {
+            priority = CommandOrder.BUILD_FIGHTER;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+        }
+
+        private void ShipBuildTractor(string cmd, int ship, int amount) {
+            priority = CommandOrder.BUILD_TRACTOR;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+        }
+
+        private void ShipBuildShield(string cmd, int ship, int amount) {
+            priority = CommandOrder.BUILD_SHIELD;
+            numbers.Add("ship", ship);
+            numbers.Add("amount", amount);
+        }
+
         private void ShipDeploy(string cmd, int ship) { }
         private void ShipEngageTractor(string cmd, int ship) { }
 
@@ -442,7 +488,7 @@ namespace Celemp
 
         private void PlanetBuildMine(string cmd, int planet, int amount) {
             // 235B5M8 - Build 5 mines of ore type 8 on planet 235
-            priority = CommandOrder.BUILDMIN;
+            priority = CommandOrder.BUILD_MINE;
             int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
             numbers.Add("amount", amount);
             numbers.Add("planet", planet);
