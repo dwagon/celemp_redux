@@ -147,4 +147,131 @@ public class PlayerTest
         Assert.AreEqual(0, s.carrying["PDU"]);
         Assert.AreEqual(20, s.cargoleft);
     }
+
+    [TestMethod]
+    public void Cmd_BuildCargo()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new();
+        Ship s = new();
+
+        g.planets[1] = plan;
+        g.ships[0] = s;
+        plr.InitPlayer(g, 1);
+
+        plan.owner = 1;
+        plan.industry = 20;
+        plan.indleft = 20;
+        plan.ore[1] = 20;
+        s.owner = 1;
+        s.planet = 1;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100B10C", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(10, s.cargo);
+        Assert.AreEqual(10, s.cargoleft);
+        Assert.AreEqual(20 - 10, plan.indleft);
+        Assert.AreEqual(20 - 10, plan.ore[1]);
+    }
+
+    [TestMethod]
+    public void Cmd_BuildFighter()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new();
+        Ship s = new();
+
+        g.planets[1] = plan;
+        g.ships[0] = s;
+        plr.InitPlayer(g, 1);
+
+        plan.owner = 1;
+        plan.industry = 20;
+        plan.indleft = 20;
+        plan.ore[2] = 10;
+        plan.ore[3] = 8;
+        s.owner = 1;
+        s.planet = 1;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100B10F", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.IsTrue(plr.executed[0].Contains("Insufficient Ore 3"));
+        Assert.AreEqual(8, s.fighter);
+        Assert.AreEqual(20 - (8*2), plan.indleft);
+        Assert.AreEqual(10 - 8, plan.ore[2]);
+        Assert.AreEqual(8 - 8, plan.ore[3]);
+    }
+
+    [TestMethod]
+    public void Cmd_BuildTractor()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new();
+        Ship s = new();
+
+        g.planets[1] = plan;
+        g.ships[0] = s;
+        plr.InitPlayer(g, 1);
+
+        plan.owner = 1;
+        plan.industry = 20;
+        plan.indleft = 20;
+        plan.ore[7] = 15;
+        s.owner = 1;
+        s.planet = 1;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100B10T", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.IsTrue(plr.executed[0].Contains("Insufficient Ore 7"));
+
+        Assert.AreEqual(7, s.tractor);
+        Assert.AreEqual(20 - (7*2), plan.indleft);
+        Assert.AreEqual(15 - (7*2), plan.ore[7]);
+    }
+
+    [TestMethod]
+    public void Cmd_BuildShield()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new();
+        Ship s = new();
+
+        g.planets[1] = plan;
+        g.ships[0] = s;
+        plr.InitPlayer(g, 1);
+
+        plan.owner = 1;
+        plan.industry = 20;
+        plan.indleft = 12;
+        plan.ore[5] = 20;
+        plan.ore[6] = 20;
+
+        s.owner = 1;
+        s.planet = 1;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100B10S", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.IsTrue(plr.executed[0].Contains("Insufficient Industry"));
+
+        Assert.AreEqual(6, s.shield);
+        Assert.AreEqual(12 - (6*2), plan.indleft);
+        Assert.AreEqual(20 - 6, plan.ore[5]);
+        Assert.AreEqual(20 - 6, plan.ore[6]);
+    }
 }
