@@ -11,7 +11,6 @@ namespace Celemp
         public int owner { get; set; }
         public int fighter { get; set; }
         public int cargo { get; set; }
-        public int cargoleft { get; set; }
         public int shield { get; set; }
         public int tractor { get; set; }
         public Dictionary<String, int> carrying { get; set; }
@@ -31,7 +30,6 @@ namespace Celemp
             owner = -1;
             fighter = 0;
             cargo = 0;
-            cargoleft = 0;
             shield = 0;
             tractor = 0;
             moved = false;
@@ -50,6 +48,18 @@ namespace Celemp
             efficiency = 0;
             planet = -1;
             stndord = "";
+        }
+
+        public int CargoLeft() {
+            // Return how much cargo capacity is left
+            int cargoleft = cargo;
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                cargoleft -= carrying[$"{oreType}"] * CargoScale($"{oreType}");
+            cargoleft -= carrying["Industry"] * CargoScale("Industry");
+            cargoleft -= carrying["Mines"] * CargoScale("Mines");
+            cargoleft -= carrying["PDU"] * CargoScale("PDU");
+            cargoleft -= carrying["Spacemines"] * CargoScale("Spacemines");
+            return cargoleft;
         }
 
         public bool HasMoved()
@@ -99,9 +109,8 @@ namespace Celemp
             // Return the amount actually loaded based on cargo left.
             int scale = CargoScale(cargotype);
 
-            if (cargoleft < amount * scale)
-                amount = cargoleft / scale;
-            cargoleft -= amount * scale;
+            if (CargoLeft() < amount * scale)
+                amount = CargoLeft() / scale;
             carrying[cargotype] += amount;
             return amount;
         }
@@ -113,7 +122,6 @@ namespace Celemp
       
             if (carrying[cargotype] < amount)
                 amount = carrying[cargotype];
-            cargoleft += amount * scale;
             carrying[cargotype] -= amount;
             return amount;
         }
@@ -121,8 +129,14 @@ namespace Celemp
         public static int CargoScale(string cargotype)
         {
             int scale = 1;
+            if (String.Equals(cargotype, "Spacemine"))
+                scale = 1;
             if (String.Equals(cargotype, "PDU"))
                 scale = 2;
+            if (String.Equals(cargotype, "Industry"))
+                scale = 10;
+            if (String.Equals(cargotype, "Mine"))
+                scale = 20;
             return scale;
         }
 
@@ -148,7 +162,6 @@ namespace Celemp
             if (carrying["0"] < fuel)
                 return false;
             carrying["0"] -= fuel;
-            cargoleft += fuel;
             return true;
         }
 
@@ -206,7 +219,7 @@ namespace Celemp
         {
             int weight =1;
 
-            weight += cargo + (cargo - cargoleft) / 2;
+            weight += cargo + (cargo - CargoLeft()) / 2;
             weight += tractor / 2;
             weight += fighter / 10;
             weight += shield / 2;

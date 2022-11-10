@@ -24,11 +24,10 @@ public class ShipTest
         g.earthAmnesty = 10;
         s.SetGalaxy(g);
         s.cargo = 10;
-        s.cargoleft = 10;
         s.fighter = 10;
         Assert.AreEqual(12, s.CalcWeight(), "CalcWeight - empty");
         s.LoadShip("0", 8);
-        Assert.AreEqual(2, s.cargoleft, "foo");
+        Assert.AreEqual(2, s.CargoLeft());
         Assert.AreEqual(8, s.carrying["0"]);
         Assert.AreEqual(16, s.CalcWeight(), "CalcWeight - Loaded");
         Assert.AreEqual(ShipType.SmallShip, s.CalcType());
@@ -53,5 +52,17 @@ public class ShipTest
         s.carrying["PDU"] = 10;
 
         Assert.AreEqual(10, s.UnloadShip("PDU", 20));
+    }
+
+    [TestMethod]
+    public void CargoLeft()
+    {
+        Ship s = new();
+        s.cargo = 20;
+        Assert.AreEqual(20, s.CargoLeft());
+        s.carrying["Industry"] = 1;
+        Assert.AreEqual(10, s.CargoLeft());
+        s.carrying["3"] = 3;
+        Assert.AreEqual(7, s.CargoLeft());
     }
 }

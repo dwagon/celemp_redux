@@ -87,10 +87,11 @@ namespace Celemp
             string save_file = Path.Join(celemp_path, "celemp.json");
             Galaxy galaxy = LoadGame(save_file);
             System.IO.File.Move(save_file, $"{save_file}.{galaxy.turn}");
+            galaxy.InitialiseTurn();
+
             List<string>[] cmdstrings = LoadCommandStrings(celemp_path, galaxy);
             List<Command> commands = galaxy.ParseCommandStrings(cmdstrings);
             commands.Sort();
-            galaxy.InitialiseTurn();
             galaxy.ProcessCommands(commands);
             galaxy.EndTurn();
             galaxy.SaveGame(save_file);

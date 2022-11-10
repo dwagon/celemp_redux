@@ -183,7 +183,6 @@ namespace Celemp
             plan.indleft -= amount;
             plan.ore[1] -= amount;
             ship.cargo += amount;
-            ship.cargoleft += amount;
             results.Add($"Built {amount} cargo");
         }
 
@@ -497,8 +496,8 @@ namespace Celemp
             for (int oretype=1;oretype<numOreTypes;oretype++)
             {
                 int amount = planet.ore[oretype];
-                if (ship.cargoleft < amount)
-                    amount = ship.cargoleft;
+                if (ship.CargoLeft() < amount)
+                    amount = ship.CargoLeft();
                 planet.ore[oretype] -= amount;
                 ship.LoadShip($"{oretype}", amount);
                 if(amount != 0) 
