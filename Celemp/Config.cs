@@ -31,7 +31,6 @@ namespace Celemp
         public int ship1_shield, ship2_shield;
         public int ship1_tractor, ship2_tractor;
         public int ship1_eff, ship2_eff;
-        public String turn_directory;
         public String[] plrNames = new string[numPlayers];
 
         public Config(String protofile)
@@ -88,17 +87,24 @@ namespace Celemp
             ship2_tractor = 0;
             ship2_eff = 1;
 
-            turn_directory = "/tmp";
-
             LoadProto(protofile);
         }
 
         private void LoadProto(string filename)
         {
-        string text = File.ReadAllText(filename);
+            string text;
+            try
+            {
+                text = File.ReadAllText(filename);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Couldn't read prototype from {filename} - using defaults");
+                return;
+            }
             Console.WriteLine($"Loading prototype from {filename}");
 
-        using (StringReader sr = new StringReader(text))
+            using (StringReader sr = new StringReader(text))
             {
                 string? line;
                 while ((line = sr.ReadLine()) != null)
