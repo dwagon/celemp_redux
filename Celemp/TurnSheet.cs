@@ -187,28 +187,28 @@ namespace Celemp
             outfh.Write("Cargo & \\multicolumn{3}{l}{");
             if (s.carrying["Industry"] != 0)
             {
-                outfh.Write("Ind {" + s.carrying["Industry"] + ";");
+                outfh.Write("Ind: {" + s.carrying["Industry"] + ";");
                 hasCargo = true;
             }
             if (s.carrying["Mines"] != 0)
             {
-                outfh.Write("Mine " + s.carrying["Mines"] + ";");
+                outfh.Write("Mine: " + s.carrying["Mines"] + ";");
                 hasCargo = true;
             }
             if (s.carrying["PDU"] != 0)
             {
-                outfh.Write("PDU " + s.carrying["PDU"] + ";");
+                outfh.Write("PDU: " + s.carrying["PDU"] + ";");
                 hasCargo = true;
             }
             if (s.carrying["Spacemines"] != 0)
             {
-                outfh.Write("SpcMines " + s.carrying["Spacemines"] + ";");
+                outfh.Write("SpcMines: " + s.carrying["Spacemines"] + ";");
                 hasCargo = true;
             }
             for (int oreType = 0; oreType < numOreTypes; oreType++)
-                if (s.carrying[$"Ore {oreType}"] != 0)
+                if (s.carrying[$"{oreType}"] != 0)
                 {
-                    outfh.Write($"R{oreType}" + s.carrying[$"Ore {oreType}"] + ";");
+                    outfh.Write($"R{oreType}: " + s.carrying[$"{oreType}"] + ";");
                     hasCargo = true;
                 }
             if (!hasCargo)

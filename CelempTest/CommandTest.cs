@@ -75,7 +75,7 @@ public class CommandTest
     {
         Command cmd = new("S323L23D", 1);
         Assert.AreEqual(223, cmd.numbers["ship"]);
-        Assert.AreEqual(CommandOrder.LOADPDU, cmd.priority);
+        Assert.AreEqual(CommandOrder.LOAD_PDU, cmd.priority);
         Assert.AreEqual(23, cmd.numbers["amount"]);
     }
 
@@ -84,7 +84,7 @@ public class CommandTest
     {
         Command cmd = new("S323U23D", 1);
         Assert.AreEqual(223, cmd.numbers["ship"]);
-        Assert.AreEqual(CommandOrder.UNLOADPDU, cmd.priority);
+        Assert.AreEqual(CommandOrder.UNLOAD_PDU, cmd.priority);
         Assert.AreEqual(23, cmd.numbers["amount"]);
     }
 
@@ -132,5 +132,13 @@ public class CommandTest
         Assert.AreEqual(240, cmd.numbers["ship"]);
         Assert.AreEqual(CommandOrder.BUILD_SHIELD, cmd.priority);
         Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_UnloadAll()
+    {
+        Command cmd = new("S101U", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_ALL, cmd.priority);
+        Assert.AreEqual(1, cmd.numbers["ship"]);
     }
 }
