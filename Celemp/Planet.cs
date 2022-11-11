@@ -16,6 +16,7 @@ namespace Celemp
         public int indleft { get; set; }
         public int pdu { get; set; }
         public int[] link { get; set; } = new int[4];
+        public bool[] visited { get; set; } = new bool[numPlayers];  // Knows links
         public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
         public String stndord { get; set; }
@@ -33,6 +34,7 @@ namespace Celemp
             for (int player=1;player<numPlayers;player++)
             {
                 scanned[player] = false;
+                visited[player] = false;
             }
             stndord = "";
         }
@@ -40,6 +42,11 @@ namespace Celemp
         public void setGalaxy(Galaxy? aGalaxy)
         {
             galaxy = aGalaxy;
+        }
+
+        public bool IsResearch()
+        {
+            return research;
         }
 
         public void InitPlanet(Config config)
@@ -67,7 +74,8 @@ namespace Celemp
         {
             // A ship has arrived at the planet
             // TODO
-
+            Ship ship = galaxy!.ships[shipnum];
+            visited[ship.owner] = true;
         }
 
         public void ShipTransitting(int shipnum)
@@ -136,7 +144,7 @@ namespace Celemp
             return owner;
         }
 
-        private List<Ship> ShipsOrbitting()
+        public List<Ship> ShipsOrbitting()
         // Return list of ships orbitting planet
         {
             List<Ship> orbitting = new();
@@ -156,6 +164,7 @@ namespace Celemp
         public void Scan(int plrNum)
         {
             scanned[plrNum] = true;
+            visited[plrNum] = true;
         }
 
         public bool Knows(int plrNum)
@@ -172,6 +181,13 @@ namespace Celemp
             }
             return false;
         }
+
+        public bool HasVisited(int plrNum)
+        // Has the player ever visited this planet - knows links
+        {
+            return visited[plrNum];
+        }
+
         public bool HasBeenScanned()
         {
             bool result = false;

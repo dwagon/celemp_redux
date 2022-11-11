@@ -245,7 +245,6 @@ namespace Celemp
             results.Add($"Built {amount} shields");
         }
 
-
         public int CheckIndustry(int amount, Planet plan, int scale)
         {
             if (plan.indleft < amount * scale)
@@ -627,7 +626,8 @@ namespace Celemp
         {
             if (scans > 0)
             {
-                galaxy!.planets[cmd.numbers["planet"]].Scan(cmd.plrNum);
+                Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+                plan.Scan(cmd.plrNum);
                 results.Add("OK");
                 scans--;
             }

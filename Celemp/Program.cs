@@ -81,6 +81,9 @@ namespace Celemp
             Galaxy galaxy = LoadGame(save_file);
             TurnSheet ts = new TurnSheet(galaxy);
             ts.GenerateTurnSheets(celemp_path);
+
+            GraphMap gm = new GraphMap(galaxy);
+            gm.GenerateTurnSheets(celemp_path);
         }
 
         void ProcessTurns(string celemp_path) {
