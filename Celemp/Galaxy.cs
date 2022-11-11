@@ -293,6 +293,9 @@ namespace Celemp
                 earth_price[ore_type] = 33 - (earth.ore[ore_type] * 3) / 10;
                 earth.mine[ore_type] = config.earthMines[ore_type];
             }
+
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
+                earth.visited[plrNum] = true;
         }
 
         public int NumberResearchPlanetsOwned(int plr_num)
