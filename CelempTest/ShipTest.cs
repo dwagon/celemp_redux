@@ -67,7 +67,7 @@ public class ShipTest
     }
 
     [TestMethod]
-    public void FuelRequired()
+    public void Test_FuelRequired()
     {
         Ship s = new();
         s.cargo = 20;
@@ -82,7 +82,7 @@ public class ShipTest
     }
 
     [TestMethod]
-    public void EffectiveEfficiency()
+    public void Test_EffectiveEfficiency()
     {
         Ship s = new();
         s.cargo = 20;
@@ -94,5 +94,55 @@ public class ShipTest
 
         s.efficiency = 1;
         Assert.AreEqual(0, s.EffectiveEfficiency());
+    }
+
+    [TestMethod]
+    public void Test_Shots() {
+        Ship s = new();
+        s.cargo = 20;
+        s.carrying["0"] = 5;
+
+        s.fighter = 20;
+        Assert.AreEqual(16, s.Shots(20));
+
+        s.fighter = 40;
+        Assert.AreEqual(33, s.Shots(30));
+
+        s.fighter = 300;
+        Assert.AreEqual(61, s.Shots(30));
+    }
+
+    [TestMethod]
+    public void Test_CalcWeight()
+    {
+        Ship s = new();
+        s.cargo = 20;
+        s.carrying["0"] = 10;
+        s.fighter = 102;
+        s.tractor = 10;
+        s.shield = 20;
+        int weight = s.CalcWeight();
+        Assert.AreEqual(51, weight);
+            
+    }
+
+    [TestMethod]
+    public void Test_SufferDamage()
+    {
+        Ship s = new();
+        Galaxy g = new();
+        Player p1 = new();
+        p1.InitPlayer(g, 1);
+        g.players[1] = p1;
+
+        s.owner = 1;
+        s.fighter = 10;
+        s.tractor = 10;
+        s.cargo = 10;
+        s.SetGalaxy(g);
+        s.SufferShots(15);
+        s.SufferDamage();
+        Assert.AreEqual(0, s.fighter);
+        Assert.AreEqual(5, s.tractor);
     }
 }
