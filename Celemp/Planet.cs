@@ -94,9 +94,10 @@ namespace Celemp
 
         public int PDUAttack(int shipnum)
         {
-            // Attack ship transitting
-            // TODO
-            return 0;
+            // TODO - check for alliance, etc.
+            int hits = PduValue();
+            galaxy!.ships[shipnum].SufferShots(hits);
+            return hits;
         }
 
         public void EndTurn()
@@ -104,7 +105,7 @@ namespace Celemp
         {
             for (int oreType = 0; oreType < numOreTypes; oreType++)
                 if (owner!=0 || IsEarth())
-                ore[oreType] += mine[oreType];
+                    ore[oreType] += mine[oreType];
 
             // Ownership check
             int newowner = OwnershipCheck();
@@ -233,9 +234,7 @@ namespace Celemp
                         ore[ore_type] = rnd.Next(3);
                 }
                 else
-                {
                     ore[ore_type] = 0;
-                }
             }
         }
 
