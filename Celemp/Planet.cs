@@ -103,6 +103,7 @@ namespace Celemp
         // All end of turn processing
         {
             for (int oreType = 0; oreType < numOreTypes; oreType++)
+                if (owner!=0 || IsEarth())
                 ore[oreType] += mine[oreType];
 
             // Ownership check
