@@ -111,6 +111,8 @@ namespace Celemp
             if (newowner != owner)
             {
                 Console.WriteLine($"Planet {DisplayNumber()} changed owner from {owner} to {newowner}");
+                galaxy!.players[owner].messages.Add($"Lost control of {DisplayNumber()}");
+                galaxy.players[newowner].messages.Add($"Gained control of {DisplayNumber()}");
                 owner = newowner;
                 stndord = "";
             }
