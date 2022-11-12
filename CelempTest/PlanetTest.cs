@@ -37,11 +37,18 @@ public class PlanetTest
         Galaxy g = new();
         Planet p = new();
         Ship s1 = new();
+        Player p1 = new();
+        Player p2 = new();
+        g.players[1] = p1;
+        g.players[2] = p2;
+        p1.InitPlayer(g, 1);
+        p2.InitPlayer(g, 2);
 
         p.setGalaxy(g);
         p.owner = 1;
         p.number = 100;
         s1.planet = 100;
+        s1.cargo = 5;
         s1.owner = 2;
         g.ships[0] = s1;
 

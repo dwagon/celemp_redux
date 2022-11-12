@@ -110,7 +110,6 @@ namespace Celemp
             {
                 commands[plrNum] = new List<string>();
                 cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
-                Console.WriteLine($"Loading commands for {plrNum} from file {cmd_fname}");
                 try {
                     foreach (string line in File.ReadLines(cmd_fname))
                     {

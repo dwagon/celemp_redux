@@ -96,6 +96,8 @@ namespace Celemp
 
         private void Ship_Order(string cmd) {
             int ship = ParseShip(cmd.Substring(0, 4));
+            numbers.Add("ship", ship);
+
             char cmdchar = Char.ToLower(cmd[4]);
             switch (cmdchar)
             {
@@ -146,7 +148,74 @@ namespace Celemp
             }
         }
 
-        private void ShipAttack(string cmd, int ship) { }
+        private void ShipAttack(string cmd, int ship) {
+            // S123AS234 or S123A23S345
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            char cmdchar = Char.ToLower(cmd[5+offset]);
+            numbers.Add("amount", amount);
+
+            switch (cmdchar)
+            {
+                case 's':
+                    switch (Char.ToLower(cmd[6+offset]))
+                    {
+                        case 'm':
+                            ShipAttackSpacemines(cmd);
+                            break;
+                        default:
+                            ShipAttackShip(cmd);
+                            break;
+                    }
+                    break;
+                case 'd':
+                    ShipAttackPDU(cmd);
+                    break;
+                case 'm':
+                    ShipAttackMines(cmd);
+                    break;
+                case 'i':
+                    ShipAttackIndustry(cmd);
+                    break;
+                case 'r':
+                    ShipAttackOre(cmd);
+                    break;
+                default:
+                    throw new CommandParseException($"Ship attack command not understood {cmd}");
+            }
+        }
+
+        private void ShipAttackShip(string cmd) {
+            int victim = ParseShip(cmd.Substring(cmd.Length-4, 4));
+            priority = CommandOrder.ATTACK_SHIP;
+            numbers.Add("victim", victim);
+        }
+
+        private void ShipAttackPDU(string cmd) {
+            priority = CommandOrder.ATTACK_PDU;
+        }
+
+        private void ShipAttackMines(string cmd) {
+            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+
+            priority = CommandOrder.ATTACK_MINE;
+            numbers.Add("oretype", oreType);
+        }
+
+        private void ShipAttackIndustry(string cmd) {
+            priority = CommandOrder.ATTACK_IND;
+        }
+
+        private void ShipAttackOre(string cmd)
+        {
+            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+
+            priority = CommandOrder.ATTACK_ORE;
+            numbers.Add("oretype", oreType);
+        }
+
+        private void ShipAttackSpacemines(string cmd) {
+            priority = CommandOrder.ATTACK_SPCM;
+        }
 
         private void ShipBuild(string cmd, int ship) {
             // S123B10C
@@ -172,25 +241,21 @@ namespace Celemp
 
         private void ShipBuildCargo(string cmd, int ship, int amount) {
             priority = CommandOrder.BUILD_CARGO;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
         }
 
         private void ShipBuildFighter(string cmd, int ship, int amount) {
             priority = CommandOrder.BUILD_FIGHTER;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
         }
 
         private void ShipBuildTractor(string cmd, int ship, int amount) {
             priority = CommandOrder.BUILD_TRACTOR;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
         }
 
         private void ShipBuildShield(string cmd, int ship, int amount) {
             priority = CommandOrder.BUILD_SHIELD;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
         }
 
@@ -201,12 +266,10 @@ namespace Celemp
             // S123GJohn
             priority = CommandOrder.GIFTSHIP;
             strings.Add("recipient", cmd.Substring(5));
-            numbers.Add("ship", ship);
         }
 
         private void ShipJump(string cmd, int ship) {
             // S123J120
-            numbers.Add("ship", ship);
             switch(cmd.Length)
             {
                 case 8:
@@ -248,8 +311,7 @@ namespace Celemp
             // S123L = Load all
             if (cmd.Length == 5)
             {
-                priority = CommandOrder.LOADALL;
-                numbers.Add("ship", ship);
+                priority = CommandOrder.LOAD_ALL;
                 return;
             }
             (int amount, int offset) = ExtractAmount(cmd, 5);
@@ -278,7 +340,7 @@ namespace Celemp
 
         }
 
-        private (int, int) ExtractAmount(string str, int startidx)
+        public static (int, int) ExtractAmount(string str, int startidx)
         // Pull out the number from the str starting at index
         // Return the number and the number of characters it took
         {
@@ -291,7 +353,14 @@ namespace Celemp
                 else
                     break;
             }
-            amount = Int16.Parse(amountstr);
+            try
+            {
+                amount = Int16.Parse(amountstr);
+            }
+            catch (System.FormatException)
+            {
+                amount = -1;
+            }
 
             return (amount, amountstr.Length);
         }
@@ -303,7 +372,6 @@ namespace Celemp
             // S123U
             if (cmd.Length==5) {
                 priority = CommandOrder.UNLOAD_ALL;
-                numbers.Add("ship", ship);
                 return;
             }
             (int amount, int offset) = ExtractAmount(cmd, 5);
@@ -334,8 +402,7 @@ namespace Celemp
         private void ShipUnloadMine(string cmd, int ship, int amount) {
             // S123U23M2 - Unload 23 Mines of type 2
             int type = Convert.ToInt16(cmd[cmd.Length-1]);
-            priority = CommandOrder.UNLODMIN;
-            numbers.Add("ship", ship);
+            priority = CommandOrder.UNLOAD_MINE;
             numbers.Add("amount", amount);
             strings.Add("cargo", "mine");
             numbers.Add("oretype", type);
@@ -345,7 +412,6 @@ namespace Celemp
             // S322U23D
             priority = CommandOrder.UNLOAD_PDU;
             numbers.Add("amount", amount);
-            numbers.Add("ship", ship);
         }
 
         private void ShipUnloadIndustry(string cmd, int ship, int amount) { }
@@ -357,7 +423,6 @@ namespace Celemp
             // S123L23M2 - Load 23 Mines of type 2
             int type = Convert.ToInt16(cmd[cmd.Length - 1]);
             priority = CommandOrder.LOAD_MINE;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
         }
@@ -366,14 +431,12 @@ namespace Celemp
             // S123L34D
             priority = CommandOrder.LOAD_PDU;
             numbers.Add("amount", amount);
-            numbers.Add("ship", ship);
         }
 
         private void ShipLoadIndustry(string cmd, int ship, int amount) {
             // S345L3I
             priority = CommandOrder.LOAD_IND;
             numbers.Add("amount", amount);
-            numbers.Add("ship", ship);
         }
 
         private void ShipLoadOre(string cmd, int ship, int amount) {
@@ -381,7 +444,6 @@ namespace Celemp
             int type = (int) Char.GetNumericValue(cmd[cmd.Length - 1]);
 
             priority = CommandOrder.LOAD_ORE;
-            numbers.Add("ship", ship);
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
         }
@@ -390,7 +452,6 @@ namespace Celemp
             // S234L34S
             priority = CommandOrder.LOAD_SPCM;
             numbers.Add("amount", amount);
-            numbers.Add("ship", ship);
         }
 
         private void ShipSellOre(string cmd, int ship) { }
@@ -398,8 +459,7 @@ namespace Celemp
 
         private void ShipName(string cmd, int ship) {
             // S123=BLACKGUARD
-            priority = CommandOrder.NAMESHIP;
-            numbers.Add("ship", ParseShip(cmd.Substring(0, 4)));
+            priority = CommandOrder.NAME_SHIP;
             strings.Add("name", cmd.Substring(5));
         }
 

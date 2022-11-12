@@ -22,6 +22,8 @@ namespace Celemp
         private bool engaged;   // Engaged by a tractor beam
         private int engaging;   // Ship engaged by our tractor
         private Galaxy? galaxy;
+        private int shotsleft;
+        private int hits;
 
         public Ship()
         {
@@ -47,7 +49,16 @@ namespace Celemp
     
             efficiency = 0;
             planet = -1;
+            shotsleft = fighter;
             stndord = "";
+            hits = 0;
+        }
+
+        public Ship(Galaxy g, int n): this()
+        {
+            galaxy = g;
+            number = n;
+            g.ships[n] = this;
         }
 
         public int CargoLeft() {
@@ -72,10 +83,95 @@ namespace Celemp
             return engaged;
         }
 
+        public void EndTurn()
+        {
+            if (hits>0)
+                SufferDamage();
+            if(IsEmpty())
+            {
+                if (galaxy!.planets[planet].owner != owner)
+                {
+                    int newowner = galaxy!.planets[planet].owner;
+                    galaxy.players[newowner].messages.Add($"You now control {DisplayNumber()}");
+                    stndord = "";
+                    galaxy.players[owner].messages.Add($"You lost control of {DisplayNumber()}");
+                    owner = newowner;
+                }
+            }
+        }
+
+        public void SufferDamage() {
+            hits -= ShieldPower();
+            if (hits < 0)
+            {
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} All hits absorbed on shields");
+                return;
+            }
+            else
+            {
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {ShieldPower()} hits absorbed on shields");
+            }
+
+            int shield_destroyed = Math.Min(shield, hits);
+            shield -= shield_destroyed;
+            if(shield_destroyed > 0)
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {shield_destroyed} Shields units destroyed");
+            hits -= shield_destroyed;
+            if (hits < 0)
+                return;
+
+            int fight_destroyed = Math.Min(fighter, hits);
+            fighter -= fight_destroyed;
+            if (fight_destroyed>0)
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {fight_destroyed} Fighter units destroyed");
+            hits -= fight_destroyed;
+            if (hits < 0)
+                return;
+
+            int tractor_destroyed = Math.Min(tractor, hits);
+            tractor -= tractor_destroyed;
+            if (tractor_destroyed>0)
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {tractor_destroyed} Tractor units destroyed");
+            hits -= tractor_destroyed;
+            if (hits < 0)
+                return;
+
+            int cargo_destroyed = Math.Min(cargo, hits);
+            cargo -= cargo_destroyed;
+            if (cargo_destroyed>0)
+                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {cargo_destroyed} Cargo units destroyed");
+            RemoveCargo(cargo_destroyed);
+        }
+
+        public void RemoveCargo(int dmg)
+        {
+            // TODO 
+        }
+
         public void InitialiseTurn()
         {
             moved = false;
             engaged = false;
+            shotsleft = fighter;
+            hits = 0;
+        }
+
+        public int ShotsLeft()
+        {
+            return shotsleft;
+        }
+
+        public void FireShots(int funits) {
+            if (funits < 0)
+                funits = fighter;
+            shotsleft -= funits;
+            moved = true;
+        }
+
+        public void SufferShots(int shots) {
+            // Someone has attacked our ship
+            // Store how many hits we have taken and process at end of turn
+            hits += shots;
         }
 
         public void SetGalaxy(Galaxy aGalaxy)
@@ -194,7 +290,7 @@ namespace Celemp
             return Math.Min(4, efficiency - (int)(total / 200.0D));
         }
 
-        public int Shots(int shts)
+        public int Shots(int shts=-1)
         // How many shots does this ship have?
         {
             int weight = CalcWeight();
@@ -203,10 +299,11 @@ namespace Celemp
 
             //if (galaxy!.turn < galaxy.earthAmnesty && galaxy.planets[planet].IsEarth())
             //    return 0; // Zero shots due to Earth amnesty
-
-            ratio = (float) shts / (float) weight;
-            if (ratio >= 10)  // Class three ratio
-                tmpshots = 3 * shts;
+            if (shts < 0)
+                shts = fighter;
+            ratio = (float) fighter / (float) weight;
+            if (ratio >= 10)  // Class three ratio - unavailable in reality
+                tmpshots = 3.0F * shts;
             else if (ratio < 1) // Class one ratio
                 tmpshots = ratio * shts;
             else // Class two ratio
@@ -217,13 +314,13 @@ namespace Celemp
         public int CalcWeight()
         // Return the weight of the ships
         {
-            int weight =1;
+            float weight = 1;
 
-            weight += cargo + (cargo - CargoLeft()) / 2;
-            weight += tractor / 2;
-            weight += fighter / 10;
-            weight += shield / 2;
-            return weight;
+            weight += cargo + (cargo - CargoLeft()) / 2.0F;
+            weight += tractor / 2.0F;
+            weight += fighter / 10.0F;
+            weight += shield / 2.0F;
+            return (int) weight;
         }
 
         public int ShieldPower()

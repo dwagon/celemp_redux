@@ -94,22 +94,25 @@ namespace Celemp
 
         public int PDUAttack(int shipnum)
         {
-            // Attack ship transitting
-            // TODO
-            return 0;
+            // TODO - check for alliance, etc.
+            int hits = PduValue();
+            galaxy!.ships[shipnum].SufferShots(hits);
+            return hits;
         }
 
         public void EndTurn()
         // All end of turn processing
         {
             for (int oreType = 0; oreType < numOreTypes; oreType++)
-                ore[oreType] += mine[oreType];
+                if (owner!=0 || IsEarth())
+                    ore[oreType] += mine[oreType];
 
             // Ownership check
             int newowner = OwnershipCheck();
             if (newowner != owner)
             {
-                Console.WriteLine($"Planet {DisplayNumber()} changed owner from {owner} to {newowner}");
+                galaxy!.players[owner].messages.Add($"Lost control of {DisplayNumber()}");
+                galaxy.players[newowner].messages.Add($"Gained control of {DisplayNumber()}");
                 owner = newowner;
                 stndord = "";
             }
@@ -230,9 +233,7 @@ namespace Celemp
                         ore[ore_type] = rnd.Next(3);
                 }
                 else
-                {
                     ore[ore_type] = 0;
-                }
             }
         }
 

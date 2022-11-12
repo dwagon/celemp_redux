@@ -55,13 +55,11 @@ namespace Celemp
                 label += " (RP)";
 
             if (plan.owner == plr.number)
-            {
                 colour = "green";
-            }
             else if (plan.owner != 0)
-            {
                 colour = "firebrick1";
-            }
+            else if (plan.pdu != 0)
+                colour = "darkorange";
 
             outfh.Write($"{plan.DisplayNumber()} [");
             outfh.Write($"label=\"{label}\"; ");

@@ -40,7 +40,7 @@ public class CommandTest
         Command cmd = new("S123=Blackguard", 5);
         Assert.AreEqual(23, cmd.numbers["ship"]);
         Assert.AreEqual("Blackguard", cmd.strings["name"]);
-        Assert.AreEqual(CommandOrder.NAMESHIP, cmd.priority);
+        Assert.AreEqual(CommandOrder.NAME_SHIP, cmd.priority);
     }
 
     [TestMethod]
@@ -140,5 +140,98 @@ public class CommandTest
         Command cmd = new("S101U", 1);
         Assert.AreEqual(CommandOrder.UNLOAD_ALL, cmd.priority);
         Assert.AreEqual(1, cmd.numbers["ship"]);
+    }
+
+    [TestMethod]
+    public void Test_ExtractAmount()
+    {
+        int val;
+        int offset;
+        (val, offset) = Command.ExtractAmount("S123A23D", 5);
+        Assert.AreEqual(23, val);
+        Assert.AreEqual(2, offset);
+
+        (val, offset) = Command.ExtractAmount("S123AD", 5);
+        Assert.AreEqual(-1, val);
+        Assert.AreEqual(0, offset);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackShip()
+    {
+        Command cmd = new("S123AS345", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_SHIP, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(245, cmd.numbers["victim"]);
+
+        cmd = new("S123A23S345", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_SHIP, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+        Assert.AreEqual(245, cmd.numbers["victim"]);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackPDU()
+    {
+        Command cmd = new("S123AD", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_PDU, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+
+        cmd = new("S123A23D", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_PDU, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackIndustry()
+    {
+        Command cmd = new("S123AI", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_IND, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+
+        cmd = new("S123A2I", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_IND, cmd.priority);
+        Assert.AreEqual(2, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackMine()
+    {
+        Command cmd = new("S123AM2", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_MINE, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(2, cmd.numbers["oretype"]);
+
+        cmd = new("S123A200M9", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_MINE, cmd.priority);
+        Assert.AreEqual(200, cmd.numbers["amount"]);
+        Assert.AreEqual(9, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackSpacemines()
+    {
+        Command cmd = new("S123ASM", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_SPCM, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+
+        cmd = new("S123A20SM", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_SPCM, cmd.priority);
+        Assert.AreEqual(20, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_ShipAttackOre()
+    {
+        Command cmd = new("S123AR5", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_ORE, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(5, cmd.numbers["oretype"]);
+
+        cmd = new("S123A20R3", 1);
+        Assert.AreEqual(CommandOrder.ATTACK_ORE, cmd.priority);
+        Assert.AreEqual(20, cmd.numbers["amount"]);
+        Assert.AreEqual(3, cmd.numbers["oretype"]);
+
     }
 }

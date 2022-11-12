@@ -97,6 +97,8 @@ namespace Celemp
         {
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].EndTurn();
+            foreach (KeyValuePair<int, Ship> kvp in ships)
+                kvp.Value.EndTurn();
             for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 players[plrNum].EndTurn();
         }

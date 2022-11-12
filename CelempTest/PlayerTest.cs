@@ -109,7 +109,7 @@ public class PlayerTest
         pr.ProcessCommand(cmd);
         pr.OutputLog();
 
-        Assert.IsTrue(pr.executed[0].Contains("Insufficient Ore 9"));
+        Assert.IsTrue(pr.messages[0].Contains("Insufficient Ore 9"));
 
         // Should be constrained to building 4
         Assert.AreEqual(50 - 4 *10, pt.indleft);
@@ -201,7 +201,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.executed[0].Contains("Insufficient Ore 3"));
+        Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 3"));
         Assert.AreEqual(8, s.fighter);
         Assert.AreEqual(20 - (8*2), plan.indleft);
         Assert.AreEqual(10 - 8, plan.ore[2]);
@@ -232,7 +232,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.executed[0].Contains("Insufficient Ore 7"));
+        Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 7"));
 
         Assert.AreEqual(7, s.tractor);
         Assert.AreEqual(20 - (7*2), plan.indleft);
@@ -265,7 +265,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.executed[0].Contains("Insufficient Industry"));
+        Assert.IsTrue(plr.messages[0].Contains("Insufficient Industry"));
 
         Assert.AreEqual(6, s.shield);
         Assert.AreEqual(12 - (6*2), plan.indleft);
@@ -279,10 +279,9 @@ public class PlayerTest
         Galaxy g = new();
         Planet pln = new();
         Player plr = new("Max");
-        Ship s = new();
+        Ship s = new(g, 0);
 
         g.planets[100] = pln;
-        g.ships[0] = s;
         pln.ore[0] = 0;
         pln.ore[1] = 0;
         pln.ore[3] = 0;
@@ -295,7 +294,6 @@ public class PlayerTest
 
         s.owner = 1;
         s.planet = 100;
-        s.SetGalaxy(g);
 
         Command cmd = new("S100U", 1);
         plr.ProcessCommand(cmd);
@@ -308,5 +306,212 @@ public class PlayerTest
         Assert.AreEqual(5, pln.ore[1]);
         Assert.AreEqual(5, pln.ore[3]);
         Assert.AreEqual(20 - 5, s.CargoLeft());
+    }
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_PDU()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.pdu = 20;
+        plan.number = 100;
+        plan.owner = 2;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+
+        Command cmd = new("S123A10D", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(10, s.ShotsLeft());
+        Assert.AreEqual(20-7, plan.pdu);
+    }
+
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_Industry()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.industry = 20;
+        plan.number = 100;
+        plan.owner = 2;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+
+        Command cmd = new("S123AI", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(0, s.ShotsLeft());
+        Assert.AreEqual(20 - 4, plan.industry);
+    }
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_Mine()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.mine[3] = 2;
+        plan.ore[3] = 100;
+        plan.number = 100;
+        plan.owner = 2;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+
+        Command cmd = new("S123AM3", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(0, s.ShotsLeft());
+        Assert.AreEqual(2 - 2, plan.mine[3]);
+        Assert.AreEqual(100 - 25, plan.ore[3]);
+    }
+
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_Ore()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.ore[3] = 100;
+        plan.number = 100;
+        plan.owner = 2;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+
+        Command cmd = new("S123AR3", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(0, s.ShotsLeft());
+        Assert.AreEqual(100 - 45, plan.ore[3]);
+    }
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_Ship()
+    {
+        Galaxy g = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s_atk = new(g, 23);
+        Ship s_vic = new(g, 24);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);      
+
+        s_atk.fighter = 20;
+        s_atk.planet = 100;
+        s_atk.owner = 1;
+        s_atk.InitialiseTurn();
+
+        s_vic.shield = 10;
+        s_vic.cargo = 50;
+        s_vic.owner = 2;
+        s_vic.planet = 100;
+        s_vic.InitialiseTurn();
+
+        Command cmd = new("S123AS124", 1);
+        plr.ProcessCommand(cmd);
+        s_vic.EndTurn();
+
+        plr.OutputLog();
+        vic.OutputLog();
+
+        Assert.AreEqual(0, s_atk.ShotsLeft());
+        Assert.AreEqual(0, s_vic.shield);
+        Assert.AreEqual(50 - 17, s_vic.cargo);
+    }
+
+    [TestMethod]
+    public void Cmd_Ship_Attack_Spacemine()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.deployed = 100;
+        plan.number = 100;
+        plan.owner = 2;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+
+        Command cmd = new("S123ASM", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(0, s.ShotsLeft());
+        Assert.AreEqual(100 - 45, plan.deployed);
     }
 }
