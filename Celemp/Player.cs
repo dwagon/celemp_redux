@@ -42,10 +42,16 @@ namespace Celemp
             return scans;
         }
 
-        public void InitialiseTurn()
+        public int InitScans()
         {
             scans = galaxy!.NumberResearchPlanetsOwned(number) + 1;
-            executed = new();
+            return scans;
+        }
+
+        public void InitialiseTurn()
+        {
+            messages = new();
+            InitScans();
         }
 
         public IEnumerable<Command> ParseCommandStrings(List<string> aCommands)

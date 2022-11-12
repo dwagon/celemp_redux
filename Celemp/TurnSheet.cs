@@ -26,7 +26,6 @@ namespace Celemp
         // Generate the turn sheet output file
         {
             string output_filename = Path.Join(celemp_path, $"turn_{plrNum}_{galaxy!.turn}.tex");
-            Console.WriteLine($"Generating {output_filename}");
             Player plr = galaxy.players[plrNum];
             using (StreamWriter sw = File.CreateText(output_filename))
             {
@@ -102,9 +101,9 @@ namespace Celemp
         {
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
-            foreach (string cmd in plr.executed)
+            foreach (string cmd in plr.messages)
                 outfh.WriteLine($"\\item {cmd}");
-            if (plr.executed.Count == 0)
+            if (plr.messages.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
             outfh.WriteLine("\\end{itemize}\n");
         }
@@ -243,7 +242,7 @@ namespace Celemp
             outfh.WriteLine("\\item Your income=" + plr.Income());
             outfh.WriteLine("\\item Earth credits=" + plr.earthCredit);
             outfh.WriteLine("\\item Credits:Score=" + galaxy.earthMult);
-            outfh.WriteLine($"\\item You have {plr.NumScans()} scans this turn");
+            outfh.WriteLine($"\\item You have {plr.InitScans()} scans this turn");
             outfh.WriteLine("\\item \\begin{tabular}{c|c|c}");
             outfh.WriteLine("\\multicolumn{3}{c}{Player Scores}\\\\ \\hline");
             outfh.WriteLine($"{galaxy.players[1].score} & {galaxy.players[2].score} & {galaxy.players[3].score}\\\\");
