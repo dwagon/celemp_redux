@@ -77,7 +77,7 @@ public class PlanetTest
         Galaxy g = new();
         Planet p = new();
         Ship s1 = new();
-        Ship s2= new();
+        Ship s2 = new();
 
         p.setGalaxy(g);
         p.pdu = 0;

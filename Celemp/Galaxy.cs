@@ -204,7 +204,6 @@ namespace Celemp
                     Console.WriteLine($"GuessPlayerName - Ignoring undefined player {plrNum}");
                     continue;
                 }
-                Console.WriteLine($"Comparing {name} with {players[plrNum].name}");
                 if (String.Equals(players[plrNum].name, name, StringComparison.OrdinalIgnoreCase))
                     return plrNum;
             }

@@ -309,6 +309,87 @@ public class PlayerTest
     }
 
     [TestMethod]
+    public void Test_Cmd_UnloadPDU()
+    {
+        Galaxy g = new();
+        Planet pln = new();
+        Player plr = new("Max");
+        Ship s = new(g, 0);
+
+        g.planets[100] = pln;
+        pln.pdu = 0;
+        plr.InitPlayer(g, 1);
+
+        s.cargo = 20;
+        s.carrying["PDU"] = 5;
+
+        s.owner = 1;
+        s.planet = 100;
+
+        Command cmd = new("S100U4D", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(5 - 4, s.carrying["PDU"]);
+        Assert.AreEqual(20 - (1*2), s.CargoLeft());
+        Assert.AreEqual(4, pln.pdu);
+    }
+
+    [TestMethod]
+    public void Test_Cmd_UnloadMine()
+    {
+        Galaxy g = new();
+        Planet pln = new();
+        Player plr = new("Max");
+        Ship s = new(g, 0);
+
+        g.planets[100] = pln;
+        pln.mine[1] = 0;
+        plr.InitPlayer(g, 1);
+
+        s.cargo = 80;
+        s.carrying["Mine"] = 3;
+
+        s.owner = 1;
+        s.planet = 100;
+
+        Command cmd = new("S100U2M1", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(3 - 2, s.carrying["Mine"]);
+        Assert.AreEqual(80 - (1 * 20), s.CargoLeft());
+        Assert.AreEqual(2, pln.mine[1]);
+    }
+
+    [TestMethod]
+    public void Test_Cmd_UnloadIndustry()
+    {
+        Galaxy g = new();
+        Planet pln = new();
+        Player plr = new("Max");
+        Ship s = new(g, 0);
+
+        g.planets[100] = pln;
+        pln.industry = 0;
+        plr.InitPlayer(g, 1);
+
+        s.cargo = 20;
+        s.carrying["Industry"] = 2;
+
+        s.owner = 1;
+        s.planet = 100;
+
+        Command cmd = new("S100U1I", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(2 - 1, s.carrying["Industry"]);
+        Assert.AreEqual(20 - (1 * 10), s.CargoLeft());
+        Assert.AreEqual(1, pln.industry);
+    }
+
+    [TestMethod]
     public void Cmd_Ship_Attack_PDU()
     {
         Galaxy g = new();
@@ -448,6 +529,7 @@ public class PlayerTest
     public void Cmd_Ship_Attack_Ship()
     {
         Galaxy g = new();
+        Planet p1 = new();
         Player plr = new("Max");
         Player vic = new("Min");
         Ship s_atk = new(g, 23);
@@ -455,6 +537,7 @@ public class PlayerTest
 
         g.players[1] = plr;
         g.players[2] = vic;
+        g.planets[100] = p1;
 
         plr.InitPlayer(g, 1);
         vic.InitPlayer(g, 2);      

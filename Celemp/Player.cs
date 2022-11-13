@@ -5,7 +5,7 @@ using static Celemp.Constants;
 namespace Celemp
 {
     [Serializable]
-    public class Player
+    public partial class Player
     {
         public int score { get; set; }
         public String name { get; set; }
@@ -95,7 +95,6 @@ namespace Celemp
         }
 
         public void ProcessCommand(Command cmd) {
-            Console.WriteLine($"Processing command {cmd.cmdstr}");
             results = new();
             results.Add(cmd.cmdstr.ToUpper());
             switch (cmd.priority)
@@ -129,6 +128,18 @@ namespace Celemp
                     break;
                 case CommandOrder.UNLOAD_ALL:
                     Cmd_UnloadAll(cmd);
+                    break;
+                case CommandOrder.UNLOAD_ORE:
+                    Cmd_UnloadOre(cmd);
+                    break;
+                case CommandOrder.UNLOAD_SPCM:
+                    Cmd_UnloadSpacemine(cmd);
+                    break;
+                case CommandOrder.UNLOAD_IND:
+                    Cmd_UnloadIndustry(cmd);
+                    break;
+                case CommandOrder.UNLOAD_MINE:
+                    Cmd_UnloadMine(cmd);
                     break;
                 case CommandOrder.JUMP1:
                     Cmd_Jump1(cmd);
@@ -189,115 +200,6 @@ namespace Celemp
                     break;
             }
             messages.Add(String.Join(": ", results));
-        }
-
-        public void Cmd_Ship_Attack_Ship(Command cmd) {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Ship victim = galaxy!.ships[cmd.numbers["victim"]];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            if (ship.planet != victim.planet)
-            {
-                results.Add($"Not over same planet as {victim.DisplayNumber()}");
-                return;
-            }
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            results.Add($"Fired {shots} at {victim.DisplayNumber()}");
-            galaxy.players[victim.owner].messages.Add($"{ship.DisplayNumber()} attacked your ship {victim.DisplayNumber()} with {shots} shots");
-            victim.SufferShots(shots);
-        }
-
-        public void Cmd_Ship_Attack_PDU(Command cmd) {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Planet plan = galaxy!.planets[ship.planet];
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            int received = plan.PDUAttack(ship.number);
-            int destroyed = Math.Min(shots / 3, plan.pdu);
-            plan.pdu -= destroyed;
-            results.Add($"Fired {shots} at PDU, destroying {destroyed}; receiving {received} hits in return");
-            galaxy.players[plan.owner].messages.Add($"{ship.DisplayNumber()} fired on your PDUs around Planet {plan.DisplayNumber()} destroying {destroyed}; receiving {received} hits in return");
-        }
-
-        public void Cmd_Ship_Attack_Industry(Command cmd)
-        {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Planet plan = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            int destroyed = Math.Min(shots / 10, plan.industry);
-            galaxy.players[plan.owner].messages.Add($"{ship.DisplayNumber()} fired on your Industry on {plan.DisplayNumber()} destroying {destroyed}");
-            results.Add($"Fired {shots} at Industry destoying {destroyed} of them");
-            plan.industry -= destroyed;
-        }
-
-        public void Cmd_Ship_Attack_Mine(Command cmd) {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Planet plan = galaxy!.planets[ship.planet];
-            int oreType = cmd.numbers["oretype"];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            int destroyed = Math.Min(shots / 10, plan.mine[oreType]);
-            int ore_destroyed = shots - (destroyed*10);
-
-      galaxy.players[plan.owner].messages.Add($"{ship.DisplayNumber()} fired on your Mines R{oreType} on {plan.DisplayNumber()} destroying {destroyed} and {ore_destroyed} ore");
-            results.Add($"Fired {shots} at Mines R{oreType} destroying {destroyed} of them and {ore_destroyed} ore");
-            plan.mine[oreType] -= destroyed;
-            plan.ore[oreType] -= ore_destroyed;
-        }
-
-        public void Cmd_Ship_Attack_Spacmine(Command cmd) {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Planet plan = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            int destroyed = Math.Min(shots, plan.deployed);
-            results.Add($"Fired {shots} at Spacemines destroyed {destroyed} of them");
-            galaxy.players[plan.owner].messages.Add($"{ship.DisplayNumber()} fired on your spacemines on {plan.DisplayNumber()} destroying {destroyed}");
-            plan.deployed -= destroyed;
-        }
-
-        public void Cmd_Ship_Attack_Ore(Command cmd)
-        {
-            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
-            Planet plan = galaxy!.planets[ship.planet];
-            int oreType = cmd.numbers["oretype"];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int fight = CheckShotsLeft(ship, cmd.numbers["amount"]);
-            int shots = ship.Shots(fight);
-
-            ship.FireShots(fight);
-            int destroyed = Math.Min(shots, plan.ore[oreType]);
-
-            galaxy.players[plan.owner].messages.Add($"{ship.DisplayNumber()} fired on your Ore R{oreType} on {plan.DisplayNumber()} destroying {destroyed} ore");
-            results.Add($"Fired {shots} at Ore R{oreType} destroying {destroyed} of them");
-
-            plan.ore[oreType] -= destroyed;
         }
 
         public void Cmd_BuildCargo(Command cmd) {
@@ -484,7 +386,7 @@ namespace Celemp
             if (!CheckDest(ship, dest2, cmd))
                 return;
             ship.MoveTo(dest2);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump3(Command cmd) {
@@ -508,7 +410,7 @@ namespace Celemp
             if (!CheckDest(ship, dest3, cmd))
                 return;
             ship.MoveTo(dest3);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump4(Command cmd) {
@@ -536,7 +438,7 @@ namespace Celemp
             if (!CheckDest(ship, dest4, cmd))
                 return;
             ship.MoveTo(dest4);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump5(Command cmd) {
@@ -568,7 +470,7 @@ namespace Celemp
             if (!CheckDest(ship, dest5, cmd))
                 return;
             ship.MoveTo(dest5);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private bool JumpChecks(Ship ship, Command cmd, int jumplength)
@@ -618,130 +520,6 @@ namespace Celemp
                 return true;
             results.Add("Engaged by a tractor beam");
             return false;
-        }
-
-        private void Cmd_LoadAll(Command cmd) {
-            // Load all available ore (Except type 0) onto ship
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
-                return;
-
-            results.Add("Loaded");
-            for (int oretype=1;oretype<numOreTypes;oretype++)
-            {
-                int amount = planet.ore[oretype];
-                if (ship.CargoLeft() < amount)
-                    amount = ship.CargoLeft();
-                planet.ore[oretype] -= amount;
-                ship.LoadShip($"{oretype}", amount);
-                if(amount != 0) 
-                    results.Add($"{amount} x R{oretype}");
-            }
-            results.Add("OK");
-        }
-
-        private void Cmd_LoadOre(Command cmd)
-        {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-            int amount = cmd.numbers["amount"];
-            int oretype = cmd.numbers["oretype"];
-
-            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
-                return;
-            if (planet.ore[oretype] < amount)
-                amount = planet.ore[oretype];
-            amount = ship.LoadShip($"{oretype}", amount);
-            planet.ore[oretype] -= amount;
-            results.Add($"Loaded {amount} R{oretype}");
-        }
-
-        private void Cmd_LoadIndustry(Command cmd) {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
-                return;
-            // TODO
-        }
-
-        private void Cmd_LoadMine(Command cmd) {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-
-            if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
-                return;
-            // TODO
-        }
-        private void Cmd_LoadSpacemine(Command cmd) {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet, cmd))
-                return;
-            // TODO
-        }
-
-        public void Cmd_LoadPDU(Command cmd) {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-            int amount = cmd.numbers["amount"];
-
-            if (!CheckShipOwnership(ship,cmd) || !CheckPlanetOwnership(planet,cmd))
-                return;
-            if (planet.pdu < amount)
-                amount = planet.pdu;
-            amount = ship.LoadShip("PDU", amount);
-            planet.pdu -= amount;
-            results.Add($"Loaded {amount} PDU");
-        }
-
-        public void Cmd_UnloadAll(Command cmd)
-        {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-            Planet planet = galaxy!.planets[ship.planet];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            int amount;
-            results.Add($"Unloaded");
-
-            for (int oreType = 1; oreType < numOreTypes; oreType++) {
-                amount = ship.carrying[$"{oreType}"];
-                if (amount == 0)
-                    continue;
-                amount = ship.UnloadShip($"{oreType}", amount);
-                planet.ore[oreType] += amount;
-                results.Add($"{amount} x R{oreType}");
-            }
-        }
-
-        public void Cmd_UnloadPDU(Command cmd)
-        {
-            int shipNum = cmd.numbers["ship"];
-            Ship ship = galaxy!.ships[shipNum];
-
-            Planet planet = galaxy!.planets[ship.planet];
-            int amount = cmd.numbers["amount"];
-
-            if (!CheckShipOwnership(ship, cmd))
-                return;
-            if (ship.carrying["PDU"] < amount)
-                amount = ship.carrying["PDU"];
-            amount = ship.UnloadShip("PDU", amount);
-            planet.pdu += amount;
-            results.Add($"Unloaded {amount} PDU");
         }
 
         private void Cmd_NameShip(Command cmd)

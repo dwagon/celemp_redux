@@ -232,6 +232,57 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.ATTACK_ORE, cmd.priority);
         Assert.AreEqual(20, cmd.numbers["amount"]);
         Assert.AreEqual(3, cmd.numbers["oretype"]);
+    }
 
+    [TestMethod]
+    public void Test_UnloadMine()
+    {
+        Command cmd = new("S123UM3", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_MINE, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(3, cmd.numbers["oretype"]);
+
+        cmd = new("S123U20M4", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_MINE, cmd.priority);
+        Assert.AreEqual(20, cmd.numbers["amount"]);
+        Assert.AreEqual(4, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_UnloadIndustry()
+    {
+        Command cmd = new("S123UI", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_IND, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+
+        cmd = new("S123U3I", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_IND, cmd.priority);
+        Assert.AreEqual(3, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_UnloadOre()
+    {
+        Command cmd = new("S123UR5", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_ORE, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(5, cmd.numbers["oretype"]);
+
+        cmd = new("S123U3R6", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_ORE, cmd.priority);
+        Assert.AreEqual(3, cmd.numbers["amount"]);
+        Assert.AreEqual(6, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_UnloadSpacemine()
+    {
+        Command cmd = new("S123US", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_SPCM, cmd.priority);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+
+        cmd = new("S123U3S", 1);
+        Assert.AreEqual(CommandOrder.UNLOAD_SPCM, cmd.priority);
+        Assert.AreEqual(3, cmd.numbers["amount"]);
     }
 }

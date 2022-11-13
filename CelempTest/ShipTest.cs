@@ -64,6 +64,8 @@ public class ShipTest
         Assert.AreEqual(10, s.CargoLeft());
         s.carrying["3"] = 3;
         Assert.AreEqual(7, s.CargoLeft());
+        s.carrying["Mine"] =1;
+        Assert.AreEqual(-13, s.CargoLeft());
     }
 
     [TestMethod]
@@ -132,17 +134,49 @@ public class ShipTest
         Ship s = new();
         Galaxy g = new();
         Player p1 = new();
+        Planet plan = new();
         p1.InitPlayer(g, 1);
         g.players[1] = p1;
+        g.planets[0] = plan;
 
         s.owner = 1;
+        s.planet = 0;
         s.fighter = 10;
         s.tractor = 10;
         s.cargo = 10;
         s.SetGalaxy(g);
         s.SufferShots(15);
-        s.SufferDamage();
+        s.ResolveDamage();
         Assert.AreEqual(0, s.fighter);
         Assert.AreEqual(5, s.tractor);
+    }
+
+    [TestMethod]
+    public void Test_RemoveDestroyedCargo()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Ship s = new(g, 1);
+        g.planets[0] = plan;
+        plan.setGalaxy(g);
+
+        s.planet = 0;
+        s.cargo = 1;
+        s.carrying["Mine"] = 2;
+        s.carrying["Industry"] = 1;
+        s.carrying["9"] = 5;
+        s.carrying["0"] = 2;
+
+        Console.WriteLine($"Cargo down to {s.CargoLeft()}");
+        s.RemoveDestroyedCargo();
+
+        Assert.AreEqual(0, s.carrying["Mine"]);
+        Assert.AreEqual(0, s.carrying["Industry"]);
+        Assert.AreEqual(1, plan.industry);
+        Assert.AreEqual(0, s.carrying["9"]);
+        Assert.AreEqual(5, plan.ore[9]);
+        Assert.AreEqual(1, s.carrying["0"]);
+        Assert.AreEqual(1, plan.ore[0]);
+        Console.WriteLine($"Cargo now down to {s.CargoLeft()}");
     }
 }

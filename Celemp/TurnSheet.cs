@@ -189,9 +189,9 @@ namespace Celemp
                 outfh.Write("Ind: {" + s.carrying["Industry"] + ";");
                 hasCargo = true;
             }
-            if (s.carrying["Mines"] != 0)
+            if (s.carrying["Mine"] != 0)
             {
-                outfh.Write("Mine: " + s.carrying["Mines"] + ";");
+                outfh.Write("Mine: " + s.carrying["Mine"] + ";");
                 hasCargo = true;
             }
             if (s.carrying["PDU"] != 0)
@@ -199,9 +199,9 @@ namespace Celemp
                 outfh.Write("PDU: " + s.carrying["PDU"] + ";");
                 hasCargo = true;
             }
-            if (s.carrying["Spacemines"] != 0)
+            if (s.carrying["Spacemine"] != 0)
             {
-                outfh.Write("SpcMines: " + s.carrying["Spacemines"] + ";");
+                outfh.Write("SpcMines: " + s.carrying["Spacemine"] + ";");
                 hasCargo = true;
             }
             for (int oreType = 0; oreType < numOreTypes; oreType++)
