@@ -95,7 +95,6 @@ namespace Celemp
         }
 
         public void ProcessCommand(Command cmd) {
-            Console.WriteLine($"Processing command {cmd.cmdstr}");
             results = new();
             results.Add(cmd.cmdstr.ToUpper());
             switch (cmd.priority)
@@ -138,6 +137,9 @@ namespace Celemp
                     break;
                 case CommandOrder.UNLOAD_IND:
                     Cmd_UnloadIndustry(cmd);
+                    break;
+                case CommandOrder.UNLOAD_MINE:
+                    Cmd_UnloadMine(cmd);
                     break;
                 case CommandOrder.JUMP1:
                     Cmd_Jump1(cmd);
@@ -384,7 +386,7 @@ namespace Celemp
             if (!CheckDest(ship, dest2, cmd))
                 return;
             ship.MoveTo(dest2);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump3(Command cmd) {
@@ -408,7 +410,7 @@ namespace Celemp
             if (!CheckDest(ship, dest3, cmd))
                 return;
             ship.MoveTo(dest3);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump4(Command cmd) {
@@ -436,7 +438,7 @@ namespace Celemp
             if (!CheckDest(ship, dest4, cmd))
                 return;
             ship.MoveTo(dest4);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump5(Command cmd) {
@@ -468,7 +470,7 @@ namespace Celemp
             if (!CheckDest(ship, dest5, cmd))
                 return;
             ship.MoveTo(dest5);
-            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private bool JumpChecks(Ship ship, Command cmd, int jumplength)

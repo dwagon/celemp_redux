@@ -31,7 +31,7 @@ namespace Celemp
             research = false;
             spacemines = 0;
             deployed = 0;
-            for (int player=1;player<numPlayers;player++)
+            for (int player = 1; player < numPlayers; player++)
             {
                 scanned[player] = false;
                 visited[player] = false;
@@ -85,7 +85,8 @@ namespace Celemp
 
         }
 
-        public int SpacemineAttack(int shipnum) {
+        public int SpacemineAttack(int shipnum)
+        {
             // Have the spacemines attack the ship
             // Return the number of hits
             // TODO
@@ -104,7 +105,7 @@ namespace Celemp
         // All end of turn processing
         {
             for (int oreType = 0; oreType < numOreTypes; oreType++)
-                if (owner!=0 || IsEarth())
+                if (owner != 0 || IsEarth())
                     ore[oreType] += mine[oreType];
 
             // Ownership check
@@ -151,14 +152,15 @@ namespace Celemp
         // Return list of ships orbitting planet
         {
             List<Ship> orbitting = new();
-            foreach (KeyValuePair<int, Ship> shp in galaxy!.ships) {
+            foreach (KeyValuePair<int, Ship> shp in galaxy!.ships)
+            {
                 if (shp.Value.planet == number)
                     orbitting.Add(shp.Value);
-                    }
+            }
             return orbitting;
         }
 
-        public String DisplayNumber(int num=-1)
+        public String DisplayNumber(int num = -1)
         {
             if (num < 0) { num = number; }
             return (num + 100).ToString();
@@ -177,7 +179,7 @@ namespace Celemp
                 return true;
             if (scanned[plrNum])
                 return true;
-            foreach(KeyValuePair<int, Ship> ship in galaxy!.ships)
+            foreach (KeyValuePair<int, Ship> ship in galaxy!.ships)
             {
                 if (ship.Value.owner == plrNum && ship.Value.planet == number)
                     return true;
@@ -194,7 +196,7 @@ namespace Celemp
         public bool HasBeenScanned()
         {
             bool result = false;
-            for (int plrNum=0;plrNum<numPlayers;plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
             {
                 if (scanned[plrNum])
                     result = true;
@@ -245,7 +247,8 @@ namespace Celemp
             }
         }
 
-        private int Normal() {
+        private int Normal()
+        {
             var rnd = new Random();
 
             int val = rnd.Next(100);
