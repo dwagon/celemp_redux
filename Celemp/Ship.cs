@@ -1,4 +1,6 @@
-﻿using System.Security.AccessControl;
+﻿using System;
+using System.Reflection.Metadata;
+using System.Security.AccessControl;
 using static Celemp.Constants;
 
 namespace Celemp
@@ -38,15 +40,15 @@ namespace Celemp
             engaged = false;
             engaging = -1;
             carrying = new Dictionary<string, int>();
-            for (int oreType = 0;oreType<numOreTypes; oreType++)
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
             {
                 carrying.Add($"{oreType}", 0);
             }
             carrying.Add("Industry", 0);
-            carrying.Add("Mines", 0);
+            carrying.Add("Mine", 0);
             carrying.Add("PDU", 0);
-            carrying.Add("Spacemines", 0);
-    
+            carrying.Add("Spacemine", 0);
+
             efficiency = 0;
             planet = -1;
             shotsleft = fighter;
@@ -54,22 +56,23 @@ namespace Celemp
             hits = 0;
         }
 
-        public Ship(Galaxy g, int n): this()
+        public Ship(Galaxy g, int n) : this()
         {
             galaxy = g;
             number = n;
             g.ships[n] = this;
         }
 
-        public int CargoLeft() {
+        public int CargoLeft()
+        {
             // Return how much cargo capacity is left
             int cargoleft = cargo;
             for (int oreType = 0; oreType < numOreTypes; oreType++)
                 cargoleft -= carrying[$"{oreType}"] * CargoScale($"{oreType}");
             cargoleft -= carrying["Industry"] * CargoScale("Industry");
-            cargoleft -= carrying["Mines"] * CargoScale("Mines");
+            cargoleft -= carrying["Mine"] * CargoScale("Mine");
             cargoleft -= carrying["PDU"] * CargoScale("PDU");
-            cargoleft -= carrying["Spacemines"] * CargoScale("Spacemines");
+            cargoleft -= carrying["Spacemine"] * CargoScale("Spacemine");
             return cargoleft;
         }
 
@@ -85,9 +88,9 @@ namespace Celemp
 
         public void EndTurn()
         {
-            if (hits>0)
-                SufferDamage();
-            if(IsEmpty())
+            if (hits > 0)
+                ResolveDamage();
+            if (IsEmpty())
             {
                 if (galaxy!.planets[planet].owner != owner)
                 {
@@ -100,7 +103,8 @@ namespace Celemp
             }
         }
 
-        public void SufferDamage() {
+        public void ResolveDamage()
+        {
             hits -= ShieldPower();
             if (hits < 0)
             {
@@ -114,7 +118,7 @@ namespace Celemp
 
             int shield_destroyed = Math.Min(shield, hits);
             shield -= shield_destroyed;
-            if(shield_destroyed > 0)
+            if (shield_destroyed > 0)
                 galaxy!.players[owner].messages.Add($"{DisplayNumber()} {shield_destroyed} Shields units destroyed");
             hits -= shield_destroyed;
             if (hits < 0)
@@ -122,7 +126,7 @@ namespace Celemp
 
             int fight_destroyed = Math.Min(fighter, hits);
             fighter -= fight_destroyed;
-            if (fight_destroyed>0)
+            if (fight_destroyed > 0)
                 galaxy!.players[owner].messages.Add($"{DisplayNumber()} {fight_destroyed} Fighter units destroyed");
             hits -= fight_destroyed;
             if (hits < 0)
@@ -130,7 +134,7 @@ namespace Celemp
 
             int tractor_destroyed = Math.Min(tractor, hits);
             tractor -= tractor_destroyed;
-            if (tractor_destroyed>0)
+            if (tractor_destroyed > 0)
                 galaxy!.players[owner].messages.Add($"{DisplayNumber()} {tractor_destroyed} Tractor units destroyed");
             hits -= tractor_destroyed;
             if (hits < 0)
@@ -138,14 +142,52 @@ namespace Celemp
 
             int cargo_destroyed = Math.Min(cargo, hits);
             cargo -= cargo_destroyed;
-            if (cargo_destroyed>0)
+            if (cargo_destroyed > 0)
                 galaxy!.players[owner].messages.Add($"{DisplayNumber()} {cargo_destroyed} Cargo units destroyed");
-            RemoveCargo(cargo_destroyed);
+
+            galaxy!.players[owner].messages.Add($"{DisplayNumber()} is now {CalcType()}");
+            RemoveDestroyedCargo();
         }
 
-        public void RemoveCargo(int dmg)
+        public void RemoveDestroyedCargo()
         {
-            // TODO 
+            Planet orbitting = galaxy!.planets[planet];
+
+            Console.WriteLine($"DBG Init {CargoLeft()}");
+
+            if (CargoLeft() >= 0)
+            {
+                return;
+            }
+            int mine_to_dump = Math.Min(carrying["Mine"], Math.Abs(CargoLeft() / CargoScale("Mine")));
+            carrying["Mine"] -= mine_to_dump;
+            DumpDamagedMine(mine_to_dump);
+
+            int ind_to_dump = Math.Min(carrying["Industry"], Math.Abs(CargoLeft() / CargoScale("Industry")));
+            carrying["Industry"] -= ind_to_dump;
+            orbitting.industry += ind_to_dump;
+
+            int pdu_to_dump = Math.Min(carrying["PDU"], Math.Abs(CargoLeft() / CargoScale("PDU")));
+            carrying["PDU"] -= pdu_to_dump;
+            orbitting.pdu += pdu_to_dump;
+
+            int spcm_to_dump = Math.Min(carrying["Spacemine"], Math.Abs(CargoLeft() / CargoScale("Spacemine")));
+            carrying["Spacemine"] -= spcm_to_dump;
+            orbitting.deployed += spcm_to_dump;
+
+            for (int oreType = numOreTypes - 1; oreType >= 0; oreType--)
+            {
+                int ore_to_dump = Math.Min(carrying[$"{oreType}"], Math.Abs(CargoLeft() / CargoScale($"{oreType}")));
+                carrying[$"{oreType}"] -= ore_to_dump;
+                orbitting.ore[oreType] += ore_to_dump;
+            }
+        }
+
+        public void DumpDamagedMine(int num)
+        {
+            // TODO
+            // These mines will be randomly distributed amongst the mines that exist on the planet below.If there are no mines on that planet, then these mines will be destroyed
+            Console.WriteLine($"Dumping {num} mines");
         }
 
         public void InitialiseTurn()
@@ -161,14 +203,16 @@ namespace Celemp
             return shotsleft;
         }
 
-        public void FireShots(int funits) {
+        public void FireShots(int funits)
+        {
             if (funits < 0)
                 funits = fighter;
             shotsleft -= funits;
             moved = true;
         }
 
-        public void SufferShots(int shots) {
+        public void SufferShots(int shots)
+        {
             // Someone has attacked our ship
             // Store how many hits we have taken and process at end of turn
             hits += shots;
@@ -182,7 +226,8 @@ namespace Celemp
         public bool IsEmpty()
         // Is this an empty ship - or a hull
         {
-            if (cargo == 0 && fighter == 0 && tractor == 0 && shield == 0) {
+            if (cargo == 0 && fighter == 0 && tractor == 0 && shield == 0)
+            {
                 return true;
             }
             return false;
@@ -190,13 +235,13 @@ namespace Celemp
 
         public int FuelRequired(int distance)
         {
-            return driveEfficiency[distance-1,EffectiveEfficiency()+1];
+            return driveEfficiency[distance - 1, EffectiveEfficiency() + 1];
         }
 
         public String DisplayNumber(int num = -1)
         {
             if (num < 0) { num = number; }
-            return "S"+(num + 100).ToString();
+            return "S" + (num + 100).ToString();
         }
 
         public int LoadShip(string cargotype, int amount)
@@ -215,7 +260,7 @@ namespace Celemp
         {
             // Unload cargo from the ship - doesn't add it to the destination
             int scale = CargoScale(cargotype);
-      
+
             if (carrying[cargotype] < amount)
                 amount = carrying[cargotype];
             carrying[cargotype] -= amount;
@@ -261,7 +306,7 @@ namespace Celemp
             return true;
         }
 
-        public bool MoveTo(int dest, bool ongoing=false)
+        public bool MoveTo(int dest, bool ongoing = false)
         // Move a ship to a planet
         {
             Planet plan = galaxy!.planets[dest];
@@ -278,7 +323,7 @@ namespace Celemp
             plan.ShipArriving(number);
             if (engaging >= 0)
                 plan.ShipArriving(engaging);
-          
+
             return false;
         }
 
@@ -290,7 +335,7 @@ namespace Celemp
             return Math.Min(4, efficiency - (int)(total / 200.0D));
         }
 
-        public int Shots(int shts=-1)
+        public int Shots(int shts = -1)
         // How many shots does this ship have?
         {
             int weight = CalcWeight();
@@ -301,7 +346,7 @@ namespace Celemp
             //    return 0; // Zero shots due to Earth amnesty
             if (shts < 0)
                 shts = fighter;
-            ratio = (float) fighter / (float) weight;
+            ratio = (float)fighter / (float)weight;
             if (ratio >= 10)  // Class three ratio - unavailable in reality
                 tmpshots = 3.0F * shts;
             else if (ratio < 1) // Class one ratio
@@ -320,7 +365,7 @@ namespace Celemp
             weight += tractor / 2.0F;
             weight += fighter / 10.0F;
             weight += shield / 2.0F;
-            return (int) weight;
+            return (int)weight;
         }
 
         public int ShieldPower()
@@ -330,7 +375,7 @@ namespace Celemp
             float ratio, shldrat;
 
             totunits = cargo + fighter + tractor + shield;
-            if (totunits == 0 || shield == 0) 
+            if (totunits == 0 || shield == 0)
             {
                 return 0;
             }
@@ -415,8 +460,8 @@ namespace Celemp
                 return ShipType.MediumShip;
             return ShipType.SmallShip;
         }
-        
-        private ShipType CalcCargoType()        
+
+        private ShipType CalcCargoType()
         {
             if (cargo > 250)
                 return ShipType.UltraCargo;
@@ -429,22 +474,6 @@ namespace Celemp
             if (cargo > 10)
                 return ShipType.MediumCargo;
             return ShipType.SmallCargo;
-        }
-
-        private bool ShipOwnerCheck(Player player)
-        {
-            if (owner != player.number)
-            {
-                Console.WriteLine($"loadSpacemines: Player {player.name} does not own ship {number}");
-                return false;
-            }
-            return true;
-        }
-
-        private bool LoadSpacemines(int amount, Player player)
-        {
-            if (!ShipOwnerCheck(player)) { return false; }
-            return true;
         }
     }
 }
