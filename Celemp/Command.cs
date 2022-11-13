@@ -105,7 +105,7 @@ namespace Celemp
                     ShipAttack(cmd, ship);
                     break;
                 case 'b':
-                    ShipBuild(cmd, ship);
+                    ShipBuild(cmd);
                     break;
                 case 'd':
                     ShipDeploy(cmd, ship);
@@ -132,7 +132,7 @@ namespace Celemp
                     ShipTend(cmd, ship);
                     break;
                 case 'u':
-                    ShipUnload(cmd, ship);
+                    ShipUnload(cmd);
                     break;
                 case 'x':
                     ShipSellOre(cmd, ship);
@@ -217,49 +217,47 @@ namespace Celemp
             priority = CommandOrder.ATTACK_SPCM;
         }
 
-        private void ShipBuild(string cmd, int ship) {
+        private void ShipBuild(string cmd) {
             // S123B10C
             (int amount, int offset) = ExtractAmount(cmd, 5);
             char cmdchar = Char.ToLower(cmd[5 + offset]);
+            numbers.Add("amount", amount);
             switch (cmdchar)
             {
                 case 'c':
-                    ShipBuildCargo(cmd, ship, amount);
+                    ShipBuildCargo(cmd);
                     break;
                 case 'f':
-                    ShipBuildFighter(cmd, ship, amount);
+                    ShipBuildFighter(cmd);
                     break;
                 case 't':
-                    ShipBuildTractor(cmd, ship, amount);
+                    ShipBuildTractor(cmd);
                     break;
                 case 's':
-                    ShipBuildShield(cmd, ship, amount);
+                    ShipBuildShield(cmd);
                     break;
                 default: throw new CommandParseException($"Ship build command not understood {cmd}");
             }
         }
 
-        private void ShipBuildCargo(string cmd, int ship, int amount) {
+        private void ShipBuildCargo(string cmd) {
             priority = CommandOrder.BUILD_CARGO;
-            numbers.Add("amount", amount);
         }
 
-        private void ShipBuildFighter(string cmd, int ship, int amount) {
+        private void ShipBuildFighter(string cmd) {
             priority = CommandOrder.BUILD_FIGHTER;
-            numbers.Add("amount", amount);
         }
 
-        private void ShipBuildTractor(string cmd, int ship, int amount) {
+        private void ShipBuildTractor(string cmd) {
             priority = CommandOrder.BUILD_TRACTOR;
-            numbers.Add("amount", amount);
         }
 
-        private void ShipBuildShield(string cmd, int ship, int amount) {
+        private void ShipBuildShield(string cmd) {
             priority = CommandOrder.BUILD_SHIELD;
-            numbers.Add("amount", amount);
         }
 
         private void ShipDeploy(string cmd, int ship) { }
+
         private void ShipEngageTractor(string cmd, int ship) { }
 
         private void ShipGift(string cmd, int ship) {
@@ -368,60 +366,67 @@ namespace Celemp
         private void ShipPurchaseOre(string cmd, int ship) { }
         private void ShipRetrieve(string cmd, int ship) { }
         private void ShipTend(string cmd, int ship) { }
-        private void ShipUnload(string cmd, int ship) {
+        private void ShipUnload(string cmd) {
             // S123U
             if (cmd.Length==5) {
                 priority = CommandOrder.UNLOAD_ALL;
                 return;
             }
             (int amount, int offset) = ExtractAmount(cmd, 5);
+            numbers.Add("amount", amount);
 
             char cmdchar = Char.ToLower(cmd[5 + offset]);
             switch (cmdchar)
             {
                 case 'm':
-                    ShipUnloadMine(cmd, ship, amount);
+                    ShipUnloadMine(cmd);
                     break;
                 case 'd':
-                    ShipUnloadPDU(cmd, ship, amount);
+                    ShipUnloadPDU(cmd);
                     break;
                 case 'i':
-                    ShipUnloadIndustry(cmd, ship, amount);
+                    ShipUnloadIndustry(cmd);
                     break;
                 case 'r':
-                    ShipUnloadOre(cmd, ship, amount);
+                    ShipUnloadOre(cmd);
                     break;
                 case 's':
-                    ShipUnloadSpacemines(cmd, ship, amount);
+                    ShipUnloadSpacemines(cmd);
                     break;
                 default:
                     throw new CommandParseException($"Ship unload command not understood {cmd}");
             }
         }
 
-        private void ShipUnloadMine(string cmd, int ship, int amount) {
+        private void ShipUnloadMine(string cmd) {
             // S123U23M2 - Unload 23 Mines of type 2
-            int type = Convert.ToInt16(cmd[cmd.Length-1]);
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
             priority = CommandOrder.UNLOAD_MINE;
-            numbers.Add("amount", amount);
-            strings.Add("cargo", "mine");
             numbers.Add("oretype", type);
         }
 
-        private void ShipUnloadPDU(string cmd, int ship, int amount) {
+        private void ShipUnloadPDU(string cmd) {
             // S322U23D
             priority = CommandOrder.UNLOAD_PDU;
-            numbers.Add("amount", amount);
         }
 
-        private void ShipUnloadIndustry(string cmd, int ship, int amount) { }
-        private void ShipUnloadOre(string cmd, int ship, int amount) { }
-        private void ShipUnloadSpacemines(string cmd, int ship, int amount) { }
+        private void ShipUnloadIndustry(string cmd) {
+            priority = CommandOrder.UNLOAD_IND;
+        }
+
+        private void ShipUnloadOre(string cmd) {
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            numbers.Add("oretype", type);
+            priority = CommandOrder.UNLOAD_ORE;
+        }
+        private void ShipUnloadSpacemines(string cmd) {
+            priority = CommandOrder.UNLOAD_SPCM;
+        }
 
         private void ShipLoadMine(string cmd, int ship, int amount)
         {
             // S123L23M2 - Load 23 Mines of type 2
-            int type = Convert.ToInt16(cmd[cmd.Length - 1]);
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
             priority = CommandOrder.LOAD_MINE;
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
