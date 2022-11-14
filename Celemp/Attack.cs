@@ -1,8 +1,8 @@
 ﻿using System;
 namespace Celemp
 {
-	public partial class Player
-	{
+    public partial class Player
+    {
         public void Cmd_Ship_Attack_Ship(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
@@ -114,6 +114,32 @@ namespace Celemp
             results.Add($"Fired {shots} at Ore R{oreType} destroying {destroyed} of them");
 
             plan.ore[oreType] -= destroyed;
+        }
+
+        public void Cmd_Planet_Attack_Ship(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            Ship ship = galaxy.ships[cmd.numbers["victim"]];
+            int amount = cmd.numbers["amount"];
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            if (ship.planet != plan.number)
+            {
+                results.Add($"{ship.DisplayNumber()} not orbitting {plan.DisplayNumber()}");
+                return;
+            }
+            if (amount > 0)
+            {
+                amount = Math.Min(plan.PduLeft(), amount);
+                results.Add("Limited PDU left");
+            }
+            else
+                amount = plan.PduLeft();
+            int received = plan.PDUAttack(ship.number, amount);
+            ship.SufferShots(received);
+
+            results.Add($"Fired {amount} at {ship.DisplayNumber()}");
+            galaxy.players[ship.owner].messages.Add($"{plan.DisplayNumber()} fired on your ship {ship.DisplayNumber()} with {amount} PDUs inflicting {received} damage  ");
         }
     }
 }

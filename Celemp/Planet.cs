@@ -13,14 +13,16 @@ namespace Celemp
         public int[] ore { get; set; } = new int[numOreTypes];
         public int[] mine { get; set; } = new int[numOreTypes];
         public int industry { get; set; }
-        public int indleft { get; set; }
+        public int ind_left { get; set; }
         public int pdu { get; set; }
         public int[] link { get; set; } = new int[4];
         public bool[] visited { get; set; } = new bool[numPlayers];  // Knows links
         public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
         public String stndord { get; set; }
+
         private Galaxy? galaxy;
+        private int pdu_left;
 
         public Planet()
         {
@@ -37,6 +39,7 @@ namespace Celemp
                 visited[player] = false;
             }
             stndord = "";
+            pdu_left = pdu;
         }
 
         public void setGalaxy(Galaxy? aGalaxy)
@@ -67,7 +70,8 @@ namespace Celemp
         {
             for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 scanned[plrNum] = false;
-            indleft = industry;
+            ind_left = industry;
+            pdu_left = pdu;
         }
 
         public void ShipArriving(int shipnum)
@@ -93,10 +97,10 @@ namespace Celemp
             return 0;
         }
 
-        public int PDUAttack(int shipnum)
+        public int PDUAttack(int shipnum, int amount = -1)
         {
             // TODO - check for alliance, etc.
-            int hits = PduValue();
+            int hits = Fire_Pdu(amount);
             galaxy!.ships[shipnum].SufferShots(hits);
             return hits;
         }
@@ -204,8 +208,10 @@ namespace Celemp
             return result;
         }
 
-        public int PduValue()
+        public int PduValue(int amount = -1)
         {
+            if (amount > 0)
+                pdu = Math.Min(pdu, amount);
             if (pdu > 500)
                 return pdu * 4;
             if (pdu > 100)
@@ -271,7 +277,7 @@ namespace Celemp
             {
                 industry = 0;
             }
-            indleft = industry;
+            ind_left = industry;
         }
 
         private void SetPDU(int pct_has_pdu)
@@ -282,6 +288,20 @@ namespace Celemp
             {
                 pdu = Normal() * 2;
             }
+        }
+
+        public int PduLeft()
+        {
+            return pdu_left;
+        }
+
+        public int Fire_Pdu(int amount)
+        {
+            if (amount > 0)
+                amount = Math.Min(amount, PduLeft());
+            int hits = PduValue(amount);
+            pdu_left -= amount;
+            return hits;
         }
 
         private int NumMines(int pct_no_mines, int pct_extra_mines)
