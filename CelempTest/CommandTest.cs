@@ -301,4 +301,33 @@ public class CommandTest
         Assert.AreEqual(23, cmd.numbers["planet"]);
         Assert.AreEqual(134, cmd.numbers["victim"]);
     }
+
+    [TestMethod]
+    public void Test_Planet_BuildIndustry()
+    {
+        Command cmd = new("123B10I", 1);
+        Assert.AreEqual(CommandOrder.BUILD_IND, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Planet_BuildPDU()
+    {
+        Command cmd = new("123B10D", 1);
+        Assert.AreEqual(CommandOrder.BUILD_PDU, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+
+    [TestMethod]
+    public void Test_Planet_BuildSpacemine()
+    {
+        Command cmd = new("123B10S3", 1);
+        Assert.AreEqual(CommandOrder.BUILD_SPACEMINE, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+        Assert.AreEqual(3, cmd.numbers["oretype"]);
+    }
 }

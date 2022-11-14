@@ -15,7 +15,11 @@ namespace Celemp
         {
             cmdstr = rawcmd;
             plrNum = aPlrNum;
+            if (rawcmd.Trim() == "")
+                return;
+
             char firstchar = rawcmd[0];
+
             switch (Char.ToLower(firstchar))
             {
                 case ' ':
@@ -582,7 +586,7 @@ namespace Celemp
                     PlanetBuildIndustry(cmd);
                     break;
                 case 's':
-                    PlanetBuildShip(cmd);
+                    PlanetBuildSpacemine(cmd);
                     break;
                 case 'h':
                     PlanetBuildHyperdrive(cmd);
@@ -594,7 +598,8 @@ namespace Celemp
 
         private void PlanetBuildPDU(string cmd)
         {
-            // TODO
+            // 123B23D
+            priority = CommandOrder.BUILD_PDU;
         }
 
         private void PlanetBuildMine(string cmd)
@@ -605,8 +610,18 @@ namespace Celemp
             numbers.Add("oretype", type);
         }
 
-        private void PlanetBuildIndustry(string cmd) { }
-        private void PlanetBuildShip(string cmd) { }
+        private void PlanetBuildIndustry(string cmd)
+        {
+            priority = CommandOrder.BUILD_IND;
+        }
+
+        private void PlanetBuildSpacemine(string cmd)
+        {
+            priority = CommandOrder.BUILD_SPACEMINE;
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            numbers.Add("oretype", type);
+        }
+
         private void PlanetBuildHyperdrive(string cmd) { }
 
         private void PlanetTrans(string cmd) { }
