@@ -30,17 +30,17 @@ namespace Celemp
             using (StreamWriter sw = File.CreateText(output_filename))
             {
                 TitlePage(sw);
-                TurnSheetHeadings(sw, plr);
+                Header(sw, plr);
                 Winning_Conditions(sw, plr);
                 Earth_Details(sw);
                 Earth_Bids(sw);
                 Ship_Type_Summary(sw);
-                TurnOwnerSummary(sw);
-                TurnPlanetSummary(sw);
-                TurnShipSummary(sw);
-                TurnPlanetDetails(sw, plr);
-                TurnCommandHistory(sw, plr);
-                TurnFooter(sw);
+                Owner_Summary(sw);
+                Planet_Summary(sw, plr);
+                Ship_Summary(sw, plr);
+                Planet_Details(sw, plr);
+                Command_History(sw, plr);
+                Footer(sw);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Celemp
             outfh.WriteLine("");
         }
 
-        private void TurnPlanetDetails(StreamWriter outfh, Player plr)
+        private void Planet_Details(StreamWriter outfh, Player plr)
         {
             for (int planNum = 0; planNum < numPlanets; planNum++)
             {
@@ -91,13 +91,16 @@ namespace Celemp
                     foreach (KeyValuePair<int, Ship> ship in galaxy.ships)
                     {
                         if (ship.Value.planet == planNum)
-                            Friend_Ship(outfh, ship.Value);
+                            if (plr.number == ship.Value.owner || plr.number == 0)
+                                Friend_Ship(outfh, ship.Value);
+                            else
+                                Enemy_Ship(outfh, ship.Value);
                     }
                 }
             }
         }
 
-        private void TurnCommandHistory(StreamWriter outfh, Player plr)
+        private void Command_History(StreamWriter outfh, Player plr)
         {
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
@@ -108,7 +111,7 @@ namespace Celemp
             outfh.WriteLine("\\end{itemize}\n");
         }
 
-        private void TurnOwnerSummary(StreamWriter outfh)
+        private void Owner_Summary(StreamWriter outfh)
         {
             // outfh.WriteLine("Owner Summary");   // TODO - Complete
         }
@@ -129,7 +132,8 @@ namespace Celemp
             outfh.WriteLine("\\section*{Summary of ship types}");
             outfh.WriteLine("\\begin{tabular}{lr|lr}");
             int count = 0;
-            foreach(KeyValuePair<ShipType, int> styp in stypes) {
+            foreach (KeyValuePair<ShipType, int> styp in stypes)
+            {
                 outfh.Write($"{styp.Key} & {styp.Value}");
                 if (count % 2 == 0)
                     outfh.Write(" & ");
@@ -142,19 +146,103 @@ namespace Celemp
             outfh.WriteLine("\\end{tabular}\n");
         }
 
-        private void TurnShipSummary(StreamWriter outfh)
+        private void Ship_Summary(StreamWriter outfh, Player plr)
         {
-            // outfh.WriteLine("Ship Summary");    // TODO - Complete
+            outfh.WriteLine("\\section*{Summary of ships}");
+            outfh.WriteLine("\\begin{longtable}{rllllllll}");
+            outfh.WriteLine("Ship & Type & F & C & T & S & Planet & Cargo & Name\\\\ \\hline");
+            foreach (KeyValuePair<int, Ship> shp in galaxy.ships)
+            {
+                Ship s = shp.Value;
+                if (s.owner == plr.number)
+                {
+                    outfh.Write(s.DisplayNumber());
+                    outfh.Write("& ");
+                    outfh.Write(s.CalcType());
+                    outfh.Write($" & {s.fighter} & {s.cargo} & {s.tractor} & {s.shield}");
+                    outfh.Write($"& {galaxy!.planets[s.planet].DisplayNumber()} &");
+                    if (s.carrying["Mine"] > 0)
+                        outfh.Write($"M: {s.carrying["Mine"]}");
+                    if (s.carrying["Industry"] > 0)
+                        outfh.Write($" I: {s.carrying["Industry"]}");
+                    if (s.carrying["PDU"] > 0)
+                        outfh.Write($" D: {s.carrying["PDU"]}");
+                    if (s.carrying["Spacemine"] > 0)
+                        outfh.Write($" SM: {s.carrying["Spacemine"]}");
+                    for (int oreType = 0; oreType < numOreTypes; oreType++)
+                    {
+                        if (s.carrying[$"{oreType}"] > 0)
+                            outfh.Write($" R{oreType}:{s.carrying[$"{oreType}"]}");
+                    }
+
+                    outfh.WriteLine($"& {s.name}");
+                    outfh.WriteLine("\\\\");
+                }
+            }
+            outfh.WriteLine("\\end{longtable}");
+            outfh.WriteLine("");
+
         }
 
-        private void TurnPlanetSummary(StreamWriter outfh)
+        private void Planet_Summary(StreamWriter outfh, Player plr)
         {
-            // outfh.WriteLine("Planet Summary");  // TODO - Complete
+            int owned = 0;
+            outfh.WriteLine("\\section*{Summary of planets}");
+            outfh.WriteLine("\\begin{longtable}{rc@{/}cc@{/}cc@{/}cc@{/}cc@{/}cc@{/}cc@{/}cc@{/}cc@{/}cc@{/}ccc}");
+            outfh.Write("Planet &");
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+            {
+                outfh.Write("\\multicolumn{2}{c}{");
+                outfh.Write(oreType);
+                outfh.Write("} & ");
+            }
+            outfh.WriteLine("PDU & Ind \\\\ \\hline");
+            for (int planNum = 0; planNum < numPlanets; planNum++)
+            {
+                Planet p = galaxy.planets[planNum];
+                if (p.owner != plr.number && plr.number != 0)
+                    continue;
+                owned++;
+                outfh.Write(p.DisplayNumber());
+                outfh.Write(" & ");
+                for (int oreType = 0; oreType < numOreTypes; oreType++)
+                {
+                    if (p.mine[oreType] > 0)
+                        outfh.Write(p.mine[oreType]);
+                    else
+                        outfh.Write("");
+                    outfh.Write("&");
+                    if (p.ore[oreType] > 0)
+                        outfh.Write(p.ore[oreType]);
+                    else
+                        outfh.Write("");
+                    outfh.Write("&");
+                }
+                outfh.Write(p.pdu);
+                outfh.Write("&");
+                outfh.Write(p.industry);
+                outfh.WriteLine("\\\\");
+            }
+            outfh.WriteLine("\\end{longtable}");
+            outfh.WriteLine($"Total number of planets owned = {owned}");
+            outfh.WriteLine("");
         }
 
-        private void TurnFooter(StreamWriter outfh)
+        private void Footer(StreamWriter outfh)
         {
             outfh.Write("\\end{document}\n");
+        }
+
+        public void Enemy_Ship(StreamWriter outfh, Ship s)
+        {
+            outfh.WriteLine("\\frame{\\");
+            outfh.WriteLine("\\begin{tabular}{rlll}");
+            outfh.Write($"{s.DisplayNumber()} & ");
+            outfh.Write(galaxy!.players[s.owner].name);
+            outfh.Write($"& {s.name} & {s.CalcType()}");
+            outfh.WriteLine("\\\\");
+            outfh.WriteLine("\\end{tabular}");
+            outfh.WriteLine("}\n");
         }
 
         public void Friend_Ship(StreamWriter outfh, Ship s)
@@ -181,6 +269,7 @@ namespace Celemp
                 outfh.Write($"{s.DisplayNumber()}{s.stndord}");
             };
             outfh.WriteLine("}\\\\");
+            outfh.WriteLine("");
 
             /* Print out cargo details */
             outfh.Write("Cargo & \\multicolumn{3}{l}{");
@@ -219,7 +308,6 @@ namespace Celemp
             outfh.WriteLine("}");
         }
 
-
         private void TitlePage(StreamWriter outfh)
         {
             outfh.Write("\\documentclass{article}\n");
@@ -230,7 +318,7 @@ namespace Celemp
             outfh.Write("\\maketitle\n");
         }
 
-        private void TurnSheetHeadings(StreamWriter outfh, Player plr)
+        private void Header(StreamWriter outfh, Player plr)
         {
             outfh.WriteLine("\\section*{" + plr.name + "}");
             /* Print out score and gm and turn numbers */
