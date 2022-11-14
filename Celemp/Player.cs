@@ -63,13 +63,12 @@ namespace Celemp
                 {
                     cmd = new(command, number);
                 }
-                catch
+                catch (CommandParseException exc)
                 {
-                    messages.Add($"{command} - Command not understood error");
+                    messages.Add($"{command} - Command not understood error: {exc.Message}");
                     continue;
                 }
                 yield return cmd;
-
             }
         }
 
@@ -199,11 +198,68 @@ namespace Celemp
                 case CommandOrder.PLANET_ATTACK_SHIP:
                     Cmd_Planet_Attack_Ship(cmd);
                     break;
+                case CommandOrder.BUILD_SPACEMINE:
+                    Cmd_BuildSpacemine(cmd);
+                    break;
+                case CommandOrder.BUILD_IND:
+                    Cmd_BuildIndustry(cmd);
+                    break;
+                case CommandOrder.BUILD_PDU:
+                    Cmd_BuildPDU(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
+        }
+
+        public void Cmd_BuildIndustry(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 10);
+            amount = CheckOre(amount, plan, 5, 8);
+            amount = CheckOre(amount, plan, 5, 9);
+
+            plan.ind_left -= amount * 10;
+            plan.ore[8] -= amount * 5;
+            plan.ore[9] -= amount * 5;
+            plan.industry += amount;
+            results.Add($"Built {amount} industry");
+        }
+
+        public void Cmd_BuildSpacemine(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            int oretype = cmd.numbers["oretype"];
+            amount = CheckIndustry(amount, plan, 1);
+            amount = CheckOre(amount, plan, 1, oretype);
+
+            plan.ind_left -= amount;
+            plan.ore[oretype] -= amount;
+            plan.spacemines += amount;
+            results.Add($"Built {amount} spacemines");
+        }
+
+        public void Cmd_BuildPDU(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 1);
+            amount = CheckOre(amount, plan, 1, 4);
+
+            plan.ind_left -= amount;
+            plan.ore[4] -= amount;
+            plan.pdu += amount;
+            results.Add($"Built {amount} PDU");
         }
 
         public void Cmd_BuildCargo(Command cmd)
@@ -494,7 +550,7 @@ namespace Celemp
                 return false;
             if (!CheckFuel(ship, jumplength))
                 return false;
-            if (!CheckShipEngaged(ship, cmd))
+            if (CheckShipEngaged(ship, cmd))
                 return false;
             return true;
         }

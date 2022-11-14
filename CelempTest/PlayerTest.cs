@@ -630,4 +630,89 @@ public class PlayerTest
 
         Assert.AreEqual(100 - 23, plan.PduLeft());
     }
+
+    [TestMethod]
+    public void Cmd_Planet_Build_Industry()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+
+        g.players[1] = plr;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        plan.number = 100;
+        plan.owner = 1;
+        plan.industry = 50;
+        plan.ore[8] = 30;
+        plan.ore[9] = 30;
+        plan.setGalaxy(g);
+        plan.InitialiseTurn();
+
+        Command cmd = new("200B10I", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(50 + 5, plan.industry);
+        Assert.AreEqual(0, plan.ind_left);
+        Assert.AreEqual(30 - (5 * 5), plan.ore[8]);
+        Assert.AreEqual(30 - (5 * 5), plan.ore[9]);
+    }
+
+    [TestMethod]
+    public void Cmd_Planet_Build_PDU()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+
+        g.players[1] = plr;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        plan.number = 100;
+        plan.owner = 1;
+        plan.industry = 50;
+        plan.ore[4] = 30;
+        plan.pdu = 0;
+        plan.setGalaxy(g);
+        plan.InitialiseTurn();
+
+        Command cmd = new("200B10D", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(50 - 10, plan.ind_left);
+        Assert.AreEqual(30 - (10 * 1), plan.ore[4]);
+        Assert.AreEqual(10, plan.pdu);
+    }
+
+    [TestMethod]
+    public void Cmd_Planet_Build_Spacemines()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+
+        g.players[1] = plr;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        plan.number = 100;
+        plan.owner = 1;
+        plan.industry = 50;
+        plan.ore[2] = 30;
+        plan.pdu = 0;
+        plan.setGalaxy(g);
+        plan.InitialiseTurn();
+
+        Command cmd = new("200B10S2", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(50 - 10, plan.ind_left);
+        Assert.AreEqual(30 - (10 * 1), plan.ore[2]);
+        Assert.AreEqual(10, plan.spacemines);
+    }
 }
