@@ -36,7 +36,7 @@ namespace Celemp
         DEPLPLN,
         DEPLSHP,
         UNDEPL,
-        PLANATT,
+        PLANET_ATTACK_SHIP,
         PLANSPM,
         ATTACK_SHIP,
         ATTACK_PDU,

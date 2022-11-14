@@ -83,7 +83,7 @@ public class PlayerTest
 
         Command cmd = new("S133L6D", 2);
         pr.Cmd_LoadPDU(cmd);
-      
+
         // Should be constrained by available cargo
         Assert.AreEqual(4, pt.pdu);
         Assert.AreEqual(5, s.carrying["PDU"]);
@@ -100,7 +100,7 @@ public class PlayerTest
         pt.owner = 2;
         pr.InitPlayer(g, 2);
         pt.industry = 50;
-        pt.indleft = 50;
+        pt.ind_left = 50;
         pt.ore[8] = 40;
         pt.ore[9] = 20;
         pt.mine[8] = 0;
@@ -112,7 +112,7 @@ public class PlayerTest
         Assert.IsTrue(pr.messages[0].Contains("Insufficient Ore 9"));
 
         // Should be constrained to building 4
-        Assert.AreEqual(50 - 4 *10, pt.indleft);
+        Assert.AreEqual(50 - 4 * 10, pt.ind_left);
         Assert.AreEqual(40 - 4 * 5, pt.ore[8]);
         Assert.AreEqual(20 - 4 * 5, pt.ore[9]);
         Assert.AreEqual(4, pt.mine[8]);
@@ -136,7 +136,7 @@ public class PlayerTest
         s.owner = 1;
         s.planet = 100;
         s.SetGalaxy(g);
-        
+
         Command cmd = new("S100U10D", 1);
         plr.ProcessCommand(cmd);
         plr.OutputLog();
@@ -160,7 +160,7 @@ public class PlayerTest
 
         plan.owner = 1;
         plan.industry = 20;
-        plan.indleft = 20;
+        plan.ind_left = 20;
         plan.ore[1] = 20;
         s.owner = 1;
         s.planet = 1;
@@ -172,7 +172,7 @@ public class PlayerTest
 
         Assert.AreEqual(10, s.cargo);
         Assert.AreEqual(10, s.CargoLeft());
-        Assert.AreEqual(20 - 10, plan.indleft);
+        Assert.AreEqual(20 - 10, plan.ind_left);
         Assert.AreEqual(20 - 10, plan.ore[1]);
     }
 
@@ -190,7 +190,7 @@ public class PlayerTest
 
         plan.owner = 1;
         plan.industry = 20;
-        plan.indleft = 20;
+        plan.ind_left = 20;
         plan.ore[2] = 10;
         plan.ore[3] = 8;
         s.owner = 1;
@@ -203,7 +203,7 @@ public class PlayerTest
 
         Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 3"));
         Assert.AreEqual(8, s.fighter);
-        Assert.AreEqual(20 - (8*2), plan.indleft);
+        Assert.AreEqual(20 - (8 * 2), plan.ind_left);
         Assert.AreEqual(10 - 8, plan.ore[2]);
         Assert.AreEqual(8 - 8, plan.ore[3]);
     }
@@ -222,7 +222,7 @@ public class PlayerTest
 
         plan.owner = 1;
         plan.industry = 20;
-        plan.indleft = 20;
+        plan.ind_left = 20;
         plan.ore[7] = 15;
         s.owner = 1;
         s.planet = 1;
@@ -235,8 +235,8 @@ public class PlayerTest
         Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 7"));
 
         Assert.AreEqual(7, s.tractor);
-        Assert.AreEqual(20 - (7*2), plan.indleft);
-        Assert.AreEqual(15 - (7*2), plan.ore[7]);
+        Assert.AreEqual(20 - (7 * 2), plan.ind_left);
+        Assert.AreEqual(15 - (7 * 2), plan.ore[7]);
     }
 
     [TestMethod]
@@ -253,7 +253,7 @@ public class PlayerTest
 
         plan.owner = 1;
         plan.industry = 20;
-        plan.indleft = 12;
+        plan.ind_left = 12;
         plan.ore[5] = 20;
         plan.ore[6] = 20;
 
@@ -268,7 +268,7 @@ public class PlayerTest
         Assert.IsTrue(plr.messages[0].Contains("Insufficient Industry"));
 
         Assert.AreEqual(6, s.shield);
-        Assert.AreEqual(12 - (6*2), plan.indleft);
+        Assert.AreEqual(12 - (6 * 2), plan.ind_left);
         Assert.AreEqual(20 - 6, plan.ore[5]);
         Assert.AreEqual(20 - 6, plan.ore[6]);
     }
@@ -331,7 +331,7 @@ public class PlayerTest
         plr.OutputLog();
 
         Assert.AreEqual(5 - 4, s.carrying["PDU"]);
-        Assert.AreEqual(20 - (1*2), s.CargoLeft());
+        Assert.AreEqual(20 - (1 * 2), s.CargoLeft());
         Assert.AreEqual(4, pln.pdu);
     }
 
@@ -419,7 +419,7 @@ public class PlayerTest
         plr.OutputLog();
 
         Assert.AreEqual(10, s.ShotsLeft());
-        Assert.AreEqual(20-7, plan.pdu);
+        Assert.AreEqual(20 - 7, plan.pdu);
     }
 
 
@@ -540,7 +540,7 @@ public class PlayerTest
         g.planets[100] = p1;
 
         plr.InitPlayer(g, 1);
-        vic.InitPlayer(g, 2);      
+        vic.InitPlayer(g, 2);
 
         s_atk.fighter = 20;
         s_atk.planet = 100;
@@ -596,5 +596,38 @@ public class PlayerTest
 
         Assert.AreEqual(0, s.ShotsLeft());
         Assert.AreEqual(100 - 45, plan.deployed);
+    }
+
+    [TestMethod]
+    public void Cmd_Planet_Attack_Ship()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s = new(g, 23);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+        plan.pdu = 100;
+        plan.number = 100;
+        plan.owner = 1;
+        plan.setGalaxy(g);
+
+        s.fighter = 20;
+        s.planet = 100;
+        s.owner = 1;
+        s.InitialiseTurn();
+        plan.InitialiseTurn();
+
+        Command cmd = new("200A23S123", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(100 - 23, plan.PduLeft());
     }
 }

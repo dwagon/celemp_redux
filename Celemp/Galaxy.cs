@@ -328,7 +328,7 @@ namespace Celemp
             }
             home.pdu = config.homePDU;
             home.industry = config.homeIndustry;
-            home.indleft = home.industry;
+            home.ind_left = home.industry;
             // Ensure no A-ring planets are defended or industrial to make things more even
             for (int link=0;link<4; link++)
             {

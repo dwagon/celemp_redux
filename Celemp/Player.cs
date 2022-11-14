@@ -31,13 +31,13 @@ namespace Celemp
             results = new();
         }
 
-        public Player(String name): this()
+        public Player(String name) : this()
         {
             this.name = name;
         }
 
         public int NumScans()
-            // Number of scans available to player
+        // Number of scans available to player
         {
             return scans;
         }
@@ -81,9 +81,9 @@ namespace Celemp
         public int Income()
         {
             int inc = 0;
-            for (int planNum=0; planNum < numPlanets; planNum++)
+            for (int planNum = 0; planNum < numPlanets; planNum++)
             {
-                if (galaxy!.planets[planNum].owner == number) 
+                if (galaxy!.planets[planNum].owner == number)
                     inc += galaxy!.planets[planNum].Income();
             }
             int numrp = galaxy!.NumberResearchPlanetsOwned(number);
@@ -94,7 +94,8 @@ namespace Celemp
             return inc;
         }
 
-        public void ProcessCommand(Command cmd) {
+        public void ProcessCommand(Command cmd)
+        {
             results = new();
             results.Add(cmd.cmdstr.ToUpper());
             switch (cmd.priority)
@@ -195,6 +196,9 @@ namespace Celemp
                 case CommandOrder.ATTACK_ORE:
                     Cmd_Ship_Attack_Ore(cmd);
                     break;
+                case CommandOrder.PLANET_ATTACK_SHIP:
+                    Cmd_Planet_Attack_Ship(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
@@ -202,7 +206,8 @@ namespace Celemp
             messages.Add(String.Join(": ", results));
         }
 
-        public void Cmd_BuildCargo(Command cmd) {
+        public void Cmd_BuildCargo(Command cmd)
+        {
             // Build Cargo units on a ship
             // A cargo takes 1 industry and one ore type 1
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
@@ -215,15 +220,15 @@ namespace Celemp
             amount = CheckIndustry(amount, plan, 1);
             amount = CheckOre(amount, plan, 1, 1);
 
-            plan.indleft -= amount;
+            plan.ind_left -= amount;
             plan.ore[1] -= amount;
             ship.cargo += amount;
             results.Add($"Built {amount} cargo");
         }
 
         public void Cmd_BuildFighter(Command cmd)
-            // Build Fighter units on a ship
-            // A fighter takes 2 industry and one each of ore 2 and 3
+        // Build Fighter units on a ship
+        // A fighter takes 2 industry and one each of ore 2 and 3
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             Planet plan = galaxy.planets[ship.planet];
@@ -236,14 +241,15 @@ namespace Celemp
             amount = CheckOre(amount, plan, 1, 2);
             amount = CheckOre(amount, plan, 1, 3);
 
-            plan.indleft -= amount * 2;
+            plan.ind_left -= amount * 2;
             plan.ore[2] -= amount;
             plan.ore[3] -= amount;
             ship.fighter += amount;
             results.Add($"Built {amount} fighter");
         }
 
-        public void Cmd_BuildTractor(Command cmd) {
+        public void Cmd_BuildTractor(Command cmd)
+        {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             Planet plan = galaxy.planets[ship.planet];
             if (!CheckShipOwnership(ship, cmd))
@@ -254,13 +260,14 @@ namespace Celemp
             amount = CheckIndustry(amount, plan, 2);
             amount = CheckOre(amount, plan, 2, 7);
 
-            plan.indleft -= amount * 2;
+            plan.ind_left -= amount * 2;
             plan.ore[7] -= amount * 2;
             ship.tractor += amount;
             results.Add($"Built {amount} tractor");
         }
 
-        public void Cmd_BuildShield(Command cmd) {
+        public void Cmd_BuildShield(Command cmd)
+        {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             Planet plan = galaxy.planets[ship.planet];
             if (!CheckShipOwnership(ship, cmd))
@@ -272,7 +279,7 @@ namespace Celemp
             amount = CheckOre(amount, plan, 1, 5);
             amount = CheckOre(amount, plan, 1, 6);
 
-            plan.indleft -= amount * 2;
+            plan.ind_left -= amount * 2;
             plan.ore[5] -= amount;
             plan.ore[6] -= amount;
 
@@ -282,9 +289,9 @@ namespace Celemp
 
         public int CheckIndustry(int amount, Planet plan, int scale)
         {
-            if (plan.indleft < amount * scale)
+            if (plan.ind_left < amount * scale)
             {
-                amount = plan.indleft / scale;
+                amount = plan.ind_left / scale;
                 results.Add("Insufficient Industry");
             }
             return amount;
@@ -310,8 +317,8 @@ namespace Celemp
             amount = CheckIndustry(amount, plan, 10);
             amount = CheckOre(amount, plan, 5, 8);
             amount = CheckOre(amount, plan, 5, 9);
-    
-            plan.indleft -= amount * 10;
+
+            plan.ind_left -= amount * 10;
             plan.ore[8] -= amount * 5;
             plan.ore[9] -= amount * 5;
             plan.mine[oretype] += amount;
@@ -325,7 +332,7 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            int new_owner =galaxy.GuessPlayerName(recip);
+            int new_owner = galaxy.GuessPlayerName(recip);
             if (new_owner < 0)
             {
                 results.Add($"Unknown player {recip}");
@@ -336,7 +343,7 @@ namespace Celemp
         }
 
         public void Cmd_GiftPlan(Command cmd)
-            // Gift a planet
+        // Gift a planet
         {
             Planet plan = galaxy!.planets[cmd.numbers["planet"]];
             String recip = cmd.strings["recipient"];
@@ -353,7 +360,8 @@ namespace Celemp
             results.Add("OK");
         }
 
-        private void Cmd_Jump1(Command cmd) {
+        private void Cmd_Jump1(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int dest1 = cmd.numbers["jump1"];
@@ -369,7 +377,8 @@ namespace Celemp
             results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
-        private void Cmd_Jump2(Command cmd) {
+        private void Cmd_Jump2(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int distance = 2;
@@ -389,7 +398,8 @@ namespace Celemp
             results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
-        private void Cmd_Jump3(Command cmd) {
+        private void Cmd_Jump3(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int distance = 3;
@@ -413,7 +423,8 @@ namespace Celemp
             results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
-        private void Cmd_Jump4(Command cmd) {
+        private void Cmd_Jump4(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int distance = 4;
@@ -441,7 +452,8 @@ namespace Celemp
             results.Add($"Used {ship.FuelRequired(distance)} Fuel");
         }
 
-        private void Cmd_Jump5(Command cmd) {
+        private void Cmd_Jump5(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
             int distance = 5;
@@ -482,10 +494,13 @@ namespace Celemp
                 return false;
             if (!CheckFuel(ship, jumplength))
                 return false;
+            if (!CheckShipEngaged(ship, cmd))
+                return false;
             return true;
         }
 
-        private bool CheckFuel(Ship aShip, int distance) {
+        private bool CheckFuel(Ship aShip, int distance)
+        {
             int required = aShip.FuelRequired(distance);
             if (aShip.carrying["0"] < required)
             {
@@ -517,8 +532,10 @@ namespace Celemp
         private bool CheckShipEngaged(Ship aShip, Command cmd)
         {
             if (aShip.IsEngaged())
+            {
+                results.Add("Engaged by a tractor beam");
                 return true;
-            results.Add("Engaged by a tractor beam");
+            }
             return false;
         }
 
@@ -548,13 +565,6 @@ namespace Celemp
             }
         }
 
-        private bool CheckShipOwnership(Ship aShip)
-        {
-            if (aShip.owner == number) 
-                return true;
-            return false;
-        }
-
         private bool CheckShipOwnership(Ship aShip, Command cmd)
         {
             if (aShip.owner == number)
@@ -565,19 +575,12 @@ namespace Celemp
 
         private int CheckShotsLeft(Ship aShip, int amount)
         {
-            if (amount>aShip.ShotsLeft())
+            if (amount > aShip.ShotsLeft())
             {
                 results.Add("Insufficient fighter units");
                 amount = aShip.ShotsLeft();
             }
             return amount;
-        }
-
-        private bool CheckPlanetOwnership(Planet aPlanet)
-        {
-            if (aPlanet.owner == number)
-                return true;
-            return false;
         }
 
         private bool CheckPlanetOwnership(Planet aPlanet, Command cmd)
@@ -600,7 +603,7 @@ namespace Celemp
         }
 
         public void OutputLog()
-            // Dump executed output for debugging purposes
+        // Dump executed output for debugging purposes
         {
             foreach (string str in messages)
             {

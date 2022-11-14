@@ -285,4 +285,20 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.UNLOAD_SPCM, cmd.priority);
         Assert.AreEqual(3, cmd.numbers["amount"]);
     }
+
+    [TestMethod]
+    public void Test_Planet_Attack_Ship()
+    {
+        Command cmd = new("123AS234", 1);
+        Assert.AreEqual(CommandOrder.PLANET_ATTACK_SHIP, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+        Assert.AreEqual(134, cmd.numbers["victim"]);
+
+        cmd = new("123A23S234", 1);
+        Assert.AreEqual(CommandOrder.PLANET_ATTACK_SHIP, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+        Assert.AreEqual(23, cmd.numbers["planet"]);
+        Assert.AreEqual(134, cmd.numbers["victim"]);
+    }
 }
