@@ -11,12 +11,27 @@ namespace Celemp
         public string cmdstr = new("");
         public int plrNum = 0;
 
-        public Command(string rawcmd, int aPlrNum)
+        public Command(string rawcmd, int aPlrNum, bool special = false)
         {
             cmdstr = rawcmd;
             plrNum = aPlrNum;
             if (rawcmd.Trim() == "")
+            {
+                priority = CommandOrder.NOOPERAT;
                 return;
+            }
+            if (special)    // Internal instruction
+            {
+                switch (cmdstr)
+                {
+                    case "RESOLVEATTACK":
+                        priority = CommandOrder.RESOLVE_ATTACK;
+                        break;
+                    default:
+                        throw new CommandParseException($"Unknown special command {rawcmd}");
+                }
+                return;
+            }
 
             char firstchar = rawcmd[0];
 
@@ -75,40 +90,40 @@ namespace Celemp
 
         private void ChangeAlliance(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
-
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void Broadcast(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void PersonalMessage(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void AllMessage(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void SetStandingOrder(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void ClearStandingOrder(string cmd)
         {
-            Console.WriteLine($"Unimplemented order {cmd}");
+            throw new CommandParseException($"Unimplemented order {cmd}");
         }
 
         private void Ship_Order(string cmd)
         {
             int ship = ParseShip(cmd.Substring(0, 4));
             numbers.Add("ship", ship);
-
+            if (cmd.Length <= 4)
+                throw new CommandParseException($"Ship command not understood {cmd}");
             char cmdchar = Char.ToLower(cmd[4]);
             switch (cmdchar)
             {
@@ -134,7 +149,7 @@ namespace Celemp
                     ShipLoad(cmd, ship);
                     break;
                 case 'p':
-                    ShipPurchaseOre(cmd, ship);
+                    ShipPurchaseOre(cmd);
                     break;
                 case 'r':
                     ShipRetrieve(cmd, ship);
@@ -146,7 +161,7 @@ namespace Celemp
                     ShipUnload(cmd);
                     break;
                 case 'x':
-                    ShipSellOre(cmd, ship);
+                    ShipSellOre(cmd);
                     break;
                 case 'z':
                     ShipUnbuild(cmd, ship);
@@ -389,7 +404,16 @@ namespace Celemp
             return (amount, amountstr.Length);
         }
 
-        private void ShipPurchaseOre(string cmd, int ship) { }
+        private void ShipPurchaseOre(string cmd)
+        {
+            // S123P5R3
+            priority = CommandOrder.BUY_ORE;
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            numbers.Add("amount", amount);
+            numbers.Add("oretype", type);
+        }
+
         private void ShipRetrieve(string cmd, int ship) { }
         private void ShipTend(string cmd, int ship) { }
         private void ShipUnload(string cmd)
@@ -491,7 +515,23 @@ namespace Celemp
             priority = CommandOrder.LOAD_SPCM;
         }
 
-        private void ShipSellOre(string cmd, int ship) { }
+        private void ShipSellOre(string cmd)
+        {
+            // S123X10R9
+            // S123X
+            if (cmd.Length == 5)
+            {
+                priority = CommandOrder.SELL_ALL;
+                return;
+            }
+
+            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            priority = CommandOrder.SELL_ORE;
+            numbers.Add("oretype", oreType);
+            numbers.Add("amount", amount);
+        }
+
         private void ShipUnbuild(string cmd, int ship) { }
 
         private void ShipName(string cmd, int ship)

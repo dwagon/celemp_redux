@@ -88,8 +88,6 @@ namespace Celemp
 
         public void EndTurn()
         {
-            if (hits > 0)
-                ResolveDamage();
             if (IsEmpty())
             {
                 if (galaxy!.planets[planet].owner != owner)
@@ -105,6 +103,8 @@ namespace Celemp
 
         public void ResolveDamage()
         {
+            if (hits == 0)
+                return;
             hits -= ShieldPower();
             if (hits < 0)
             {
@@ -152,8 +152,6 @@ namespace Celemp
         public void RemoveDestroyedCargo()
         {
             Planet orbitting = galaxy!.planets[planet];
-
-            Console.WriteLine($"DBG Init {CargoLeft()}");
 
             if (CargoLeft() >= 0)
             {

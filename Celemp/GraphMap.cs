@@ -25,7 +25,7 @@ namespace Celemp
             using (StreamWriter sw = File.CreateText(dotfile))
             {
                 Header(sw);
-                for(int plan=0;plan<numPlanets;plan++)
+                for (int plan = 0; plan < numPlanets; plan++)
                 {
                     Planet planet = galaxy.planets[plan];
                     if (planet.HasVisited(plr.number) || planet.Knows(plr.number))
@@ -35,15 +35,18 @@ namespace Celemp
             }
 
         }
-        private void Header(StreamWriter outfh) {
+        private void Header(StreamWriter outfh)
+        {
             outfh.WriteLine("strict graph G {");
         }
 
-        private void Footer(StreamWriter outfh) {
+        private void Footer(StreamWriter outfh)
+        {
             outfh.WriteLine("}");
         }
 
-        private void Planet(StreamWriter outfh, Planet plan, Player plr) {
+        private void Planet(StreamWriter outfh, Planet plan, Player plr)
+        {
             string label = $"{plan.DisplayNumber()} {plan.name}";
             string shape = "rectangle";
             string colour = "black";
@@ -67,7 +70,8 @@ namespace Celemp
             outfh.Write($"color=\"{colour}\"; ");
 
             outfh.WriteLine("];");
-            for(int linkNum =0; linkNum <4; linkNum++) {
+            for (int linkNum = 0; linkNum < 4; linkNum++)
+            {
                 if (plan.link[linkNum] >= 0)
                     outfh.WriteLine($"{plan.DisplayNumber()} -- {plan.DisplayNumber(plan.link[linkNum])}");
             }

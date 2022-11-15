@@ -235,6 +235,7 @@ namespace Celemp
 
         public void Enemy_Ship(StreamWriter outfh, Ship s)
         {
+            outfh.WriteLine("\n");
             outfh.WriteLine("\\frame{\\");
             outfh.WriteLine("\\begin{tabular}{rlll}");
             outfh.Write($"{s.DisplayNumber()} & ");
@@ -306,6 +307,7 @@ namespace Celemp
             outfh.WriteLine("}\\\\");
             outfh.WriteLine("\\end{tabular}");
             outfh.WriteLine("}");
+            outfh.WriteLine("");
         }
 
         private void TitlePage(StreamWriter outfh)

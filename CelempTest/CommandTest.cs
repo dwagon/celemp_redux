@@ -320,7 +320,6 @@ public class CommandTest
         Assert.AreEqual(10, cmd.numbers["amount"]);
     }
 
-
     [TestMethod]
     public void Test_Planet_BuildSpacemine()
     {
@@ -329,5 +328,33 @@ public class CommandTest
         Assert.AreEqual(23, cmd.numbers["planet"]);
         Assert.AreEqual(10, cmd.numbers["amount"]);
         Assert.AreEqual(3, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_Sell_All()
+    {
+        Command cmd = new("S123X", 1);
+        Assert.AreEqual(CommandOrder.SELL_ALL, cmd.priority);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+    }
+
+    [TestMethod]
+    public void Test_Sell_Ore()
+    {
+        Command cmd = new("S234X5R9", 1);
+        Assert.AreEqual(CommandOrder.SELL_ORE, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["ship"]);
+        Assert.AreEqual(5, cmd.numbers["amount"]);
+        Assert.AreEqual(9, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_Purchase_Ore()
+    {
+        Command cmd = new("S234P5R9", 1);
+        Assert.AreEqual(CommandOrder.BUY_ORE, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["ship"]);
+        Assert.AreEqual(5, cmd.numbers["amount"]);
+        Assert.AreEqual(9, cmd.numbers["oretype"]);
     }
 }
