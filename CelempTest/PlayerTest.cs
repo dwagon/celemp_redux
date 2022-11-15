@@ -531,6 +531,7 @@ public class PlayerTest
         Galaxy g = new();
         Planet p1 = new();
         Player plr = new("Max");
+        Player neut = new("Neutral");
         Player vic = new("Min");
         Ship s_atk = new(g, 23);
         Ship s_vic = new(g, 24);
@@ -539,6 +540,7 @@ public class PlayerTest
         g.players[2] = vic;
         g.planets[100] = p1;
 
+        neut.InitPlayer(g, 0);
         plr.InitPlayer(g, 1);
         vic.InitPlayer(g, 2);
 
@@ -555,7 +557,9 @@ public class PlayerTest
 
         Command cmd = new("S123AS124", 1);
         plr.ProcessCommand(cmd);
-        s_vic.EndTurn();
+
+        Command resolv = new("RESOLVE_ATTACK", 0, true);
+        neut.ProcessCommand(resolv);
 
         plr.OutputLog();
         vic.OutputLog();
@@ -714,5 +718,64 @@ public class PlayerTest
         Assert.AreEqual(50 - 10, plan.ind_left);
         Assert.AreEqual(30 - (10 * 1), plan.ore[2]);
         Assert.AreEqual(10, plan.spacemines);
+    }
+
+    [TestMethod]
+    public void Cmd_SellOre()
+    {
+        Galaxy g = new();
+        Player plr = new("Betty");
+        Ship s = new(g, 1);
+        Planet plan = new();
+        g.players[1] = plr;
+        g.earth_price[1] = 10;
+        g.planets[99] = plan;
+        s.carrying["1"] = 20;
+        plr.InitPlayer(g, 1);
+        plr.earthCredit = 0;
+
+        s.owner = 1;
+        s.planet = 99;
+        plan.earth = true;
+        plan.setGalaxy(g);
+        plan.ore[1] = 0;
+
+        Command cmd = new("S101X10R1", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(10 * 10 * 2 / 3, plr.earthCredit);
+        Assert.AreEqual(10, s.carrying["1"]);
+        Assert.AreEqual(10, plan.ore[1]);
+    }
+
+    [TestMethod]
+    public void Cmd_BuyOre()
+    {
+        Galaxy g = new();
+        Player plr = new("Betty");
+        Ship s = new(g, 1);
+        Planet plan = new();
+        g.players[1] = plr;
+        g.earth_price[1] = 10;
+        g.planets[99] = plan;
+        s.carrying["1"] = 0;
+        plr.InitPlayer(g, 1);
+        plr.earthCredit = 100;
+
+        s.owner = 1;
+        s.planet = 99;
+        s.cargo = 20;
+        plan.earth = true;
+        plan.setGalaxy(g);
+        plan.ore[1] = 10;
+
+        Command cmd = new("S101P10R1", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(100 - 10 * 10, plr.earthCredit);
+        Assert.AreEqual(10, s.carrying["1"]);
+        Assert.AreEqual(0, plan.ore[1]);
     }
 }

@@ -68,6 +68,11 @@ namespace Celemp
                     messages.Add($"{command} - Command not understood error: {exc.Message}");
                     continue;
                 }
+                catch
+                {
+                    Console.WriteLine($"Exception parsing {command} for player {number}");
+                    throw;
+                }
                 yield return cmd;
             }
         }
@@ -99,6 +104,8 @@ namespace Celemp
             results.Add(cmd.cmdstr.ToUpper());
             switch (cmd.priority)
             {
+                case CommandOrder.NOOPERAT:
+                    break;
                 case CommandOrder.SCAN:
                     Cmd_Scan(cmd);
                     break;
@@ -207,11 +214,104 @@ namespace Celemp
                 case CommandOrder.BUILD_PDU:
                     Cmd_BuildPDU(cmd);
                     break;
+                case CommandOrder.SELL_ORE:
+                    Cmd_SellOre(cmd);
+                    break;
+                case CommandOrder.SELL_ALL:
+                    Cmd_SellAll(cmd);
+                    break;
+                case CommandOrder.BUY_ORE:
+                    Cmd_BuyOre(cmd);
+                    break;
+                case CommandOrder.RESOLVE_ATTACK:
+                    System_ResolveAttacks(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
+        }
+
+        public void System_ResolveAttacks(Command cmd)
+        // Resolve all the hits to ships
+        {
+            foreach (KeyValuePair<int, Ship> kvp in galaxy!.ships)
+                kvp.Value.ResolveDamage();
+        }
+
+        public void Cmd_BuyOre(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            int amount = cmd.numbers["amount"];
+            int oretype = cmd.numbers["oretype"];
+            BuyOre(ship, oretype, amount);
+        }
+
+        public void BuyOre(Ship ship, int oretype, int amount)
+        {
+            int price = galaxy!.earth_price[oretype];
+            if (amount * price > earthCredit)
+            {
+                results.Add("Insufficient credit");
+                amount = (int)earthCredit / price;
+            }
+            if (amount > galaxy.planets[ship.planet].ore[oretype])
+            {
+                amount = galaxy.planets[ship.planet].ore[oretype];
+                results.Add("Insufficient Ore");
+            }
+            if (amount > ship.CargoLeft())
+            {
+                results.Add("Insufficient Cargo");
+                amount = ship.CargoLeft();
+            }
+            int value = amount * price;
+            results.Add($"Spent {value} Earth Credits for {amount} x R{oretype}");
+            earthCredit -= value;
+            ship.LoadShip($"{oretype}", amount);
+            galaxy.planets[ship.planet].ore[oretype] -= amount;
+        }
+
+        public void Cmd_SellOre(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            int amount = cmd.numbers["amount"];
+            int oretype = cmd.numbers["oretype"];
+            if (amount > ship.carrying[$"{oretype}"])
+            {
+                amount = ship.carrying[$"{oretype}"];
+                results.Add($"Insufficient R{oretype}");
+            }
+            SellOre(ship, oretype, amount);
+        }
+
+        public void Cmd_SellAll(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            for (int oreType = 1; oreType < numOreTypes; oreType++)
+                SellOre(ship, oreType, ship.carrying[$"{oreType}"]);
+        }
+
+        public void SellOre(Ship ship, int oretype, int amount)
+        {
+            int value = (int)(0.666F * amount * galaxy!.earth_price[oretype]);
+            results.Add($"Gained {value} Earth Credits for {amount} x R{oretype}");
+            earthCredit += value;
+            ship.UnloadShip($"{oretype}", amount);
+            galaxy.planets[ship.planet].ore[oretype] += amount;
         }
 
         public void Cmd_BuildIndustry(Command cmd)
@@ -645,6 +745,16 @@ namespace Celemp
                 return true;
             results.Add($"You do not own planet {aPlanet.DisplayNumber()}");
             return false;
+        }
+
+        private bool CheckEarth(Planet aPlanet)
+        {
+            if (!aPlanet.IsEarth())
+            {
+                results.Add("You are not orbitting Earth");
+                return false;
+            }
+            return true;
         }
 
         public void InitPlayer(Galaxy aGalaxy, int aPlrNum)

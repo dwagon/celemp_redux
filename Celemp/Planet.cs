@@ -19,6 +19,7 @@ namespace Celemp
         public bool[] visited { get; set; } = new bool[numPlayers];  // Knows links
         public bool[] scanned { get; set; } = new bool[numPlayers];
         public bool research { get; set; }
+        public bool earth { get; set; }
         public String stndord { get; set; }
 
         private Galaxy? galaxy;
@@ -31,6 +32,7 @@ namespace Celemp
             name = "TODO";
             owner = 0;
             research = false;
+            earth = false;
             spacemines = 0;
             deployed = 0;
             for (int player = 1; player < numPlayers; player++)
@@ -223,8 +225,7 @@ namespace Celemp
 
         public bool IsEarth()
         {
-            // TODO - Sometimes this should be true
-            return false;
+            return earth;
         }
 
         private void SetOre(int pct_extra_ore)

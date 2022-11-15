@@ -4,20 +4,20 @@ using static Celemp.Constants;
 namespace Celemp
 {
     class Program
-    {        
+    {
         static void Main(string[] args)
         {
             int game_number;
 
-            if (args.Length != 2) {
+            if (args.Length != 2)
+            {
                 PrintUsage();
-                System.Environment.Exit(1);
+                Environment.Exit(1);
             }
 
             Program pc = new Program();
             game_number = Int16.Parse(args[1]);
             string game_path = MakePath(game_number);
-           
 
             switch (args[0])
             {
@@ -65,7 +65,8 @@ namespace Celemp
             Console.WriteLine("celemp sheet <gamenum>");
         }
 
-        void NewGame(string celemp_path) {
+        void NewGame(string celemp_path)
+        {
             string save_file = Path.Join(celemp_path, "celemp.json");
             Config config = new(Path.Join(celemp_path, "protofile"));
             Galaxy galaxy = new();
@@ -75,7 +76,8 @@ namespace Celemp
             galaxy.SaveGame(save_file);
         }
 
-        void GenerateTurnSheets(int game_number, string celemp_path) {
+        void GenerateTurnSheets(int game_number, string celemp_path)
+        {
             string save_file = Path.Join(celemp_path, "celemp.json");
 
             Galaxy galaxy = LoadGame(save_file);
@@ -86,10 +88,10 @@ namespace Celemp
             gm.GenerateTurnSheets(celemp_path);
         }
 
-        void ProcessTurns(string celemp_path) {
+        void ProcessTurns(string celemp_path)
+        {
             string save_file = Path.Join(celemp_path, "celemp.json");
             Galaxy galaxy = LoadGame(save_file);
-            System.IO.File.Move(save_file, $"{save_file}.{galaxy.turn}");
             galaxy.InitialiseTurn();
 
             List<string>[] cmdstrings = LoadCommandStrings(celemp_path, galaxy);
@@ -97,6 +99,14 @@ namespace Celemp
             commands.Sort();
             galaxy.ProcessCommands(commands);
             galaxy.EndTurn();
+            string cmd_fname;
+            // Now that the turn has succeeded back up the cmd files
+            for (int plrNum = 1; plrNum < numPlayers; plrNum++)
+            {
+                cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
+                File.Move(cmd_fname, $"{cmd_fname}.{galaxy.turn}");
+            }
+            File.Move(save_file, $"{save_file}.{galaxy.turn}");
             galaxy.SaveGame(save_file);
         }
 
@@ -110,14 +120,16 @@ namespace Celemp
             {
                 commands[plrNum] = new List<string>();
                 cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
-                try {
+                Console.WriteLine($"Loading commands from {cmd_fname}");
+                try
+                {
                     foreach (string line in File.ReadLines(cmd_fname))
                     {
                         commands[plrNum].Add(line.Trim());
                     }
-                    System.IO.File.Move(cmd_fname, $"{cmd_fname}.{galaxy.turn}");
                 }
-                catch (Exception exc) {
+                catch (Exception exc)
+                {
                     Console.WriteLine($"Couldn't read commands from {cmd_fname}: {exc.Message}");
                 }
             }
@@ -141,7 +153,7 @@ namespace Celemp
             if (galaxy is null)
             {
                 Console.WriteLine($"Failed to load from {save_file}");
-                System.Environment.Exit(1);
+                Environment.Exit(1);
             }
             for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 galaxy.players[plrNum].InitPlayer(galaxy);

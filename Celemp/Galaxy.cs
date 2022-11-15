@@ -51,6 +51,9 @@ namespace Celemp
                 foreach (Command cmd in players[plrNum].ParseCommandStrings(cmdstrings[plrNum]))
                     commands.Add(cmd);
             }
+            // Add special internal commands
+            Command resolve_attacks = new Command("RESOLVEATTACK", 0, true);
+            commands.Add(resolve_attacks);
             return commands;
         }
 
@@ -63,7 +66,7 @@ namespace Celemp
         public void InitialiseTurn()
         {
             turn++;
-            for (int plrNum=0; plrNum<numPlayers; plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
                 players[plrNum].InitialiseTurn();
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 planets[planNum].InitialiseTurn();
@@ -119,10 +122,11 @@ namespace Celemp
             }
         }
 
-        private void InitShip1(Player owner, Config config) {
+        private void InitShip1(Player owner, Config config)
+        {
             Ship newship;
 
-            for (int num=0; num < config.ship1_num; num++)
+            for (int num = 0; num < config.ship1_num; num++)
             {
                 newship = InitShip(config.ship1_fight, config.ship1_cargo, config.ship1_shield, config.ship1_tractor, config.ship1_eff);
                 newship.owner = owner.number;
@@ -130,7 +134,8 @@ namespace Celemp
             }
         }
 
-        private void InitShip2(Player owner, Config config) {
+        private void InitShip2(Player owner, Config config)
+        {
             Ship newship;
 
             for (int num = 0; num < config.ship2_num; num++)
@@ -155,17 +160,19 @@ namespace Celemp
             return newship;
         }
 
-        private void InitPlanets(Config config) {
+        private void InitPlanets(Config config)
+        {
             int[] trans = GeneratePlanetShuffle();
             Dictionary<string, List<int>>? linkmap;
-        
+
             linkmap = LoadGalaxyLinks();
             if (linkmap is null)
             {
                 Console.WriteLine($"Couldn't load linkmap properly");
                 System.Environment.Exit(1);
             }
-            for (int plan_num = 0; plan_num< numPlanets; plan_num++) {
+            for (int plan_num = 0; plan_num < numPlanets; plan_num++)
+            {
                 int linknum = 0;
 
                 planets[trans[plan_num]] = new Planet();
@@ -197,7 +204,7 @@ namespace Celemp
         public int GuessPlayerName(string name)
         // Return the player number from the name
         {
-            for(int plrNum=0;plrNum< numPlayers;plrNum++)
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
             {
                 if (players[plrNum] is null)
                 {   // So we don't need to define everyone for testing
@@ -210,7 +217,7 @@ namespace Celemp
             return -1;
         }
 
-        private static int[] GeneratePlanetShuffle() 
+        private static int[] GeneratePlanetShuffle()
         // Shuffle planet numbers around so they aren't always the same
         {
             int[] trans = new int[numPlanets];
@@ -219,7 +226,7 @@ namespace Celemp
             Random rnd = new Random();
 
             // Generate mapping
-            for (int plan_num=0; plan_num < numPlanets; plan_num++)
+            for (int plan_num = 0; plan_num < numPlanets; plan_num++)
             {
                 num = -1;
                 while (num < 0 || used.Contains(num))
@@ -236,7 +243,7 @@ namespace Celemp
         // Return the dictionary of links for planets
         {
             Dictionary<string, List<int>>? linkdict = new();
-            using (StreamReader r = new ("/Users/dwagon/Projects/Celemp/Celemp/GalaxyLinks.json"))
+            using (StreamReader r = new("/Users/dwagon/Projects/Celemp/Celemp/GalaxyLinks.json"))
             {
                 string jsonString = r.ReadToEnd();
                 linkdict = JsonSerializer.Deserialize<Dictionary<string, List<int>>>(jsonString);
@@ -247,19 +254,21 @@ namespace Celemp
         void NamePlanets()
         // Give the planets names
         {
-            Random rnd = new ();
+            Random rnd = new();
 
             string[] planetNames = LoadPlanetNames();
-            for (int plan_num=0; plan_num < numPlanets; plan_num++) {
+            for (int plan_num = 0; plan_num < numPlanets; plan_num++)
+            {
                 int idx = rnd.Next(planetNames.Length);
                 planets[plan_num].name = planetNames[idx];
             }
         }
 
-        static string[] LoadPlanetNames() {
+        static string[] LoadPlanetNames()
+        {
             string[]? planetnames;
             string fname = "/Users/dwagon/Projects/Celemp/Celemp/PlanetNames.json";
-            using (StreamReader r = new (fname))
+            using (StreamReader r = new(fname))
             {
                 string jsonString = r.ReadToEnd();
                 planetnames = JsonSerializer.Deserialize<String[]>(jsonString);
@@ -287,6 +296,7 @@ namespace Celemp
             earth_planet = plannum;
             earth.name = "**** EARTH ****";
             earth.industry = config.earthInd;
+            earth.earth = true;
             earth.pdu = config.earthPDU;
             for (int ore_type = 0; ore_type < numOreTypes; ore_type++)
             {
@@ -330,13 +340,13 @@ namespace Celemp
             home.industry = config.homeIndustry;
             home.ind_left = home.industry;
             // Ensure no A-ring planets are defended or industrial to make things more even
-            for (int link=0;link<4; link++)
+            for (int link = 0; link < 4; link++)
             {
                 Planet neighbour = planets[home.link[link]];
                 neighbour.industry = 0;
                 neighbour.pdu = 0;
             }
-          
+
         }
     }
 }
