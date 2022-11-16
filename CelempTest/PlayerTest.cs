@@ -796,4 +796,58 @@ public class PlayerTest
 
         Assert.AreEqual("S101P10R1", s.stndord);
     }
+
+    [TestMethod]
+    public void Cmd_EngageShip()
+    {
+        Galaxy g = new();
+        Planet p1 = new();
+        Planet p2 = new();
+        Player plr = new("Max");
+        Player vic = new("Min");
+        Ship s_atk = new(g, 23);
+        Ship s_vic = new(g, 24);
+
+        g.players[1] = plr;
+        g.players[2] = vic;
+        g.planets[0] = p1;
+        g.planets[1] = p2;
+
+        p1.link[0] = 1;
+        p1.setGalaxy(g);
+        p2.setGalaxy(g);
+
+        plr.InitPlayer(g, 1);
+        vic.InitPlayer(g, 2);
+
+        s_atk.tractor = 20;
+        s_atk.cargo = 5;
+        s_atk.planet = 0;
+        s_atk.owner = 1;
+        s_atk.carrying["0"] = 5;
+        s_atk.InitialiseTurn();
+
+        s_vic.cargo = 5;
+        s_vic.owner = 2;
+        s_vic.planet = 0;
+        s_vic.InitialiseTurn();
+
+        Command cmd = new("S123ES124", 1);
+        plr.ProcessCommand(cmd);
+
+        plr.OutputLog();
+        vic.OutputLog();
+
+        Assert.AreEqual(true, s_vic.IsEngaged());
+        Assert.AreEqual(true, s_atk.IsEngaging());
+
+        cmd = new("S123J101", 1);
+        plr.ProcessCommand(cmd);
+
+        plr.OutputLog();
+        vic.OutputLog();
+
+        Assert.AreEqual(1, s_vic.planet);
+        Assert.AreEqual(1, s_atk.planet);
+    }
 }

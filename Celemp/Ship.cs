@@ -86,6 +86,17 @@ namespace Celemp
             return engaged;
         }
 
+        public bool IsEngaging()
+        {
+            return engaging >= 0;
+        }
+
+        public void EngageShip(Ship target)
+        {
+            engaging = target.number;
+            target.engaged = true;
+        }
+
         public void EndTurn()
         {
             if (IsEmpty())

@@ -45,7 +45,7 @@ namespace Celemp
         ATTACK_ORE,
         ATTACK_SPCM,
         RESOLVE_ATTACK,
-        ENGTRAC,
+        ENGAGE_TRACTOR,
         TENDIND,
         TENDSPM,
         TENDDEF,

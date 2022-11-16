@@ -385,4 +385,13 @@ public class CommandTest
         Assert.AreEqual(134, cmd.numbers["planet"]);
         Assert.AreEqual("clearplanet", cmd.strings["order"]);
     }
+
+    [TestMethod]
+    public void Test_EngageTractor()
+    {
+        Command cmd = new("S123ES234", 1);
+        Assert.AreEqual(CommandOrder.ENGAGE_TRACTOR, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["victim"]);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+    }
 }
