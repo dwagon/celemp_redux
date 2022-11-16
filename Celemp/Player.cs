@@ -273,6 +273,12 @@ namespace Celemp
             int value = amount * price;
             results.Add($"Spent {value} Earth Credits for {amount} x R{oretype}");
             earthCredit -= value;
+            if (earthCredit < 0)
+            {
+                int debt = Math.Abs(earthCredit);
+                score -= debt * galaxy.earthMult;
+                earthCredit += debt;
+            }
             ship.LoadShip($"{oretype}", amount);
             galaxy.planets[ship.planet].ore[oretype] -= amount;
         }
