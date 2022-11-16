@@ -145,7 +145,8 @@ namespace Celemp
                 return owner;
             foreach (Ship shp in orbitting)
             {
-                owners.Add(shp.owner);
+                if (!shp.IsEmpty())
+                    owners.Add(shp.owner);
             }
             if (owners.Count == 1)
                 foreach (int own in owners)

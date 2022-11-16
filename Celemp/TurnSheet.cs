@@ -154,7 +154,7 @@ namespace Celemp
             foreach (KeyValuePair<int, Ship> shp in galaxy.ships)
             {
                 Ship s = shp.Value;
-                if (s.owner == plr.number)
+                if (s.owner == plr.number || plr.number == 0)
                 {
                     outfh.Write(s.DisplayNumber());
                     outfh.Write("& ");
@@ -267,7 +267,7 @@ namespace Celemp
             }
             else
             {
-                outfh.Write($"{s.DisplayNumber()}{s.stndord}");
+                outfh.Write(s.stndord);
             };
             outfh.WriteLine("}\\\\");
             outfh.WriteLine("");
@@ -402,7 +402,7 @@ namespace Celemp
             if (p.stndord.Length == 0)
                 outfh.Write("\\multicolumn{4}{l}{None}\\\\\n");
             else
-                outfh.Write("\\multicolumn{4}{l}{" + (p.number + 100) + p.stndord + "}\\\\\n");
+                outfh.Write("\\multicolumn{4}{l}{" + p.stndord + "}\\\\\n");
             outfh.Write("\\end{tabular}\n\n");
 
             outfh.Write("\\begin{tabular}{r|cccccccccc}\n");

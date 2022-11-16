@@ -226,11 +226,50 @@ namespace Celemp
                 case CommandOrder.RESOLVE_ATTACK:
                     System_ResolveAttacks(cmd);
                     break;
+                case CommandOrder.STANDING_ORDER:
+                    Standing_Order(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
+        }
+
+        public void Standing_Order(Command cmd)
+        {
+            Ship ship; Planet plan;
+            switch (cmd.strings["order"])
+            {
+                case "setship":
+                    ship = galaxy!.ships[cmd.numbers["ship"]];
+                    if (!CheckShipOwnership(ship, cmd))
+                        return;
+                    ship.stndord = cmd.strings["command"];
+                    break;
+                case "setplanet":
+                    plan = galaxy!.planets[cmd.numbers["planet"]];
+                    if (!CheckPlanetOwnership(plan, cmd))
+                        return;
+                    plan.stndord = cmd.strings["command"];
+                    break;
+                case "clearship":
+                    ship = galaxy!.ships[cmd.numbers["ship"]];
+                    if (!CheckShipOwnership(ship, cmd))
+                        return;
+                    ship.stndord = "";
+                    break;
+                case "clearplanet":
+                    plan = galaxy!.planets[cmd.numbers["planet"]];
+                    if (!CheckPlanetOwnership(plan, cmd))
+                        return;
+                    plan.stndord = "";
+                    break;
+                default:
+                    Console.WriteLine($"Unhandled stadning order direction {cmd.strings["direction"]}");
+                    break;
+            }
+            results.Add("OK");
         }
 
         public void System_ResolveAttacks(Command cmd)
@@ -255,11 +294,7 @@ namespace Celemp
         public void BuyOre(Ship ship, int oretype, int amount)
         {
             int price = galaxy!.earth_price[oretype];
-            if (amount * price > earthCredit)
-            {
-                results.Add("Insufficient credit");
-                amount = (int)earthCredit / price;
-            }
+
             if (amount > galaxy.planets[ship.planet].ore[oretype])
             {
                 amount = galaxy.planets[ship.planet].ore[oretype];
@@ -273,6 +308,12 @@ namespace Celemp
             int value = amount * price;
             results.Add($"Spent {value} Earth Credits for {amount} x R{oretype}");
             earthCredit -= value;
+            if (earthCredit < 0)
+            {
+                int debt = Math.Abs(earthCredit);
+                score -= debt * galaxy.earthMult;
+                earthCredit += debt;
+            }
             ship.LoadShip($"{oretype}", amount);
             galaxy.planets[ship.planet].ore[oretype] -= amount;
         }
@@ -551,7 +592,7 @@ namespace Celemp
             if (!CheckDest(ship, dest2, cmd))
                 return;
             ship.MoveTo(dest2);
-            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump3(Command cmd)
@@ -576,7 +617,7 @@ namespace Celemp
             if (!CheckDest(ship, dest3, cmd))
                 return;
             ship.MoveTo(dest3);
-            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump4(Command cmd)
@@ -605,7 +646,7 @@ namespace Celemp
             if (!CheckDest(ship, dest4, cmd))
                 return;
             ship.MoveTo(dest4);
-            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private void Cmd_Jump5(Command cmd)
@@ -638,7 +679,7 @@ namespace Celemp
             if (!CheckDest(ship, dest5, cmd))
                 return;
             ship.MoveTo(dest5);
-            results.Add($"Used {ship.FuelRequired(distance)} Fuel");
+            results.Add($"OK - Used {ship.FuelRequired(distance)} Fuel");
         }
 
         private bool JumpChecks(Ship ship, Command cmd, int jumplength)

@@ -558,7 +558,7 @@ public class PlayerTest
         Command cmd = new("S123AS124", 1);
         plr.ProcessCommand(cmd);
 
-        Command resolv = new("RESOLVE_ATTACK", 0, true);
+        Command resolv = new("RESOLVEATTACK", 0, true);
         neut.ProcessCommand(resolv);
 
         plr.OutputLog();
@@ -777,5 +777,23 @@ public class PlayerTest
         Assert.AreEqual(100 - 10 * 10, plr.earthCredit);
         Assert.AreEqual(10, s.carrying["1"]);
         Assert.AreEqual(0, plan.ore[1]);
+    }
+
+    [TestMethod]
+    public void Cmd_SetStandingOrder()
+    {
+        Galaxy g = new();
+        Player plr = new("Betty");
+        Ship s = new(g, 1);
+        g.players[1] = plr;
+        plr.InitPlayer(g, 1);
+
+        s.owner = 1;
+
+        Command cmd = new("OS101P10R1", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual("S101P10R1", s.stndord);
     }
 }

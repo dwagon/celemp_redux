@@ -109,13 +109,38 @@ namespace Celemp
         }
 
         private void SetStandingOrder(string cmd)
+        //OS123J123
         {
-            throw new CommandParseException($"Unimplemented order {cmd}");
+            priority = CommandOrder.STANDING_ORDER;
+            strings.Add("command", cmd.Substring(1));
+            if (Char.ToLower(cmd[1]) == 's')
+            {
+                numbers.Add("ship", ParseShip(cmd.Substring(1, 4)));
+                strings.Add("order", "setship");
+            }
+            else
+            {
+                numbers.Add("planet", ParsePlanet(cmd.Substring(1, 3)));
+                strings.Add("order", "setplanet");
+            }
         }
 
         private void ClearStandingOrder(string cmd)
+        //XS123
         {
-            throw new CommandParseException($"Unimplemented order {cmd}");
+            priority = CommandOrder.STANDING_ORDER;
+            if (cmd.Length == 5)
+            {
+                int ship = ParseShip(cmd.Substring(1, 4));
+                numbers.Add("ship", ship);
+                strings.Add("order", "clearship");
+            }
+            else
+            {
+                int planet = ParsePlanet(cmd.Substring(1, 3));
+                numbers.Add("planet", planet);
+                strings.Add("order", "clearplanet");
+            }
         }
 
         private void Ship_Order(string cmd)
@@ -225,7 +250,7 @@ namespace Celemp
 
         private void ShipAttackMines(string cmd)
         {
-            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int oreType = ParseOretype(cmd[cmd.Length - 1]);
 
             priority = CommandOrder.ATTACK_MINE;
             numbers.Add("oretype", oreType);
@@ -238,7 +263,7 @@ namespace Celemp
 
         private void ShipAttackOre(string cmd)
         {
-            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int oreType = ParseOretype(cmd[cmd.Length - 1]);
 
             priority = CommandOrder.ATTACK_ORE;
             numbers.Add("oretype", oreType);
@@ -409,7 +434,7 @@ namespace Celemp
             // S123P5R3
             priority = CommandOrder.BUY_ORE;
             (int amount, int offset) = ExtractAmount(cmd, 5);
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             numbers.Add("amount", amount);
             numbers.Add("oretype", type);
         }
@@ -453,7 +478,7 @@ namespace Celemp
         private void ShipUnloadMine(string cmd)
         {
             // S123U23M2 - Unload 23 Mines of type 2
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             priority = CommandOrder.UNLOAD_MINE;
             numbers.Add("oretype", type);
         }
@@ -471,7 +496,7 @@ namespace Celemp
 
         private void ShipUnloadOre(string cmd)
         {
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             numbers.Add("oretype", type);
             priority = CommandOrder.UNLOAD_ORE;
         }
@@ -483,7 +508,7 @@ namespace Celemp
         private void ShipLoadMine(string cmd)
         {
             // S123L23M2 - Load 23 Mines of type 2
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             priority = CommandOrder.LOAD_MINE;
             numbers.Add("oretype", type);
         }
@@ -503,7 +528,7 @@ namespace Celemp
         private void ShipLoadOre(string cmd)
         {
             // S123L120R2
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
 
             priority = CommandOrder.LOAD_ORE;
             numbers.Add("oretype", type);
@@ -525,7 +550,7 @@ namespace Celemp
                 return;
             }
 
-            int oreType = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int oreType = ParseOretype(cmd[cmd.Length - 1]);
             (int amount, int offset) = ExtractAmount(cmd, 5);
             priority = CommandOrder.SELL_ORE;
             numbers.Add("oretype", oreType);
@@ -580,7 +605,6 @@ namespace Celemp
                     break;
                 default:
                     throw new CommandParseException($"Planet command not understood {cmd}");
-
             }
         }
 
@@ -646,7 +670,7 @@ namespace Celemp
         {
             // 235B5M8 - Build 5 mines of ore type 8 on planet 235
             priority = CommandOrder.BUILD_MINE;
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             numbers.Add("oretype", type);
         }
 
@@ -658,7 +682,7 @@ namespace Celemp
         private void PlanetBuildSpacemine(string cmd)
         {
             priority = CommandOrder.BUILD_SPACEMINE;
-            int type = (int)Char.GetNumericValue(cmd[cmd.Length - 1]);
+            int type = ParseOretype(cmd[cmd.Length - 1]);
             numbers.Add("oretype", type);
         }
 
@@ -688,6 +712,14 @@ namespace Celemp
                 throw new CommandParseException($"Ship {shp} not a good ship number");
             }
             return num - 100;
+        }
+
+        private int ParseOretype(char ot)
+        {
+            int type = (int)Char.GetNumericValue(ot);
+            if (type < 0)
+                throw new CommandParseException($"Oretype {ot} not understandable");
+            return type;
         }
 
         private int ParsePlanet(string plan)

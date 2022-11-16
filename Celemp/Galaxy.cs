@@ -51,6 +51,22 @@ namespace Celemp
                 foreach (Command cmd in players[plrNum].ParseCommandStrings(cmdstrings[plrNum]))
                     commands.Add(cmd);
             }
+            // Add standing orders
+            for (int planNum = 0; planNum < numPlanets; planNum++)
+                if (planets[planNum].stndord.Length > 0)
+                {
+                    Command std = new Command(planets[planNum].stndord, planets[planNum].owner);
+                    commands.Add(std);
+                }
+            foreach (var kvp in ships)
+            {
+                if (kvp.Value.stndord.Length > 0)
+                {
+                    Command std = new Command(kvp.Value.stndord, kvp.Value.owner);
+                    commands.Add(std);
+                }
+            }
+
             // Add special internal commands
             Command resolve_attacks = new Command("RESOLVEATTACK", 0, true);
             commands.Add(resolve_attacks);
