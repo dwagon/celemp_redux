@@ -229,11 +229,41 @@ namespace Celemp
                 case CommandOrder.STANDING_ORDER:
                     Standing_Order(cmd);
                     break;
+                case CommandOrder.ENGAGE_TRACTOR:
+                    Cmd_EngageTractor(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
+        }
+
+        public void Cmd_EngageTractor(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Ship victim = galaxy!.ships[cmd.numbers["victim"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (ship.planet != victim.planet)
+            {
+                results.Add($"Not over same planet as {victim.DisplayNumber()}");
+                return;
+            }
+            if (victim.CalcWeight() > ship.tractor)
+            {
+                results.Add("Target ship is too heavy");
+                return;
+            }
+            if (CheckShipEngaged(ship, cmd))
+                return;
+            if (ship.IsEngaging())
+            {
+                results.Add("Ship is already engaging another");
+                return;
+            }
+            ship.EngageShip(victim);
+            results.Add("OK");
         }
 
         public void Standing_Order(Command cmd)

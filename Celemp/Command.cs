@@ -162,7 +162,7 @@ namespace Celemp
                     ShipDeploy(cmd, ship);
                     break;
                 case 'e':
-                    ShipEngageTractor(cmd, ship);
+                    ShipEngageTractor(cmd);
                     break;
                 case 'g':
                     ShipGift(cmd, ship);
@@ -320,7 +320,13 @@ namespace Celemp
 
         private void ShipDeploy(string cmd, int ship) { }
 
-        private void ShipEngageTractor(string cmd, int ship) { }
+        private void ShipEngageTractor(string cmd)
+        {
+            // S123ES234
+            int victim = ParseShip(cmd.Substring(cmd.Length - 4, 4));
+            priority = CommandOrder.ENGAGE_TRACTOR;
+            numbers.Add("victim", victim);
+        }
 
         private void ShipGift(string cmd, int ship)
         {
