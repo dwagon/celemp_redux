@@ -99,6 +99,16 @@ public class CommandTest
     }
 
     [TestMethod]
+    [ExpectedException(typeof(CommandParseException))]
+    public void Test_BuildMine_Fail()
+    {
+        Command cmd = new("235B5M", 1);
+        Assert.AreEqual(135, cmd.numbers["planet"]);
+        Assert.AreEqual(5, cmd.numbers["amount"]);
+        Assert.AreEqual(CommandOrder.BUILD_MINE, cmd.priority);
+    }
+
+    [TestMethod]
     public void Test_BuildCargo()
     {
         Command cmd = new("S340B10C", 1);
@@ -356,5 +366,23 @@ public class CommandTest
         Assert.AreEqual(134, cmd.numbers["ship"]);
         Assert.AreEqual(5, cmd.numbers["amount"]);
         Assert.AreEqual(9, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_SetStandingOrder()
+    {
+        Command cmd = new("OS234P5R9", 1);
+        Assert.AreEqual(CommandOrder.STANDING_ORDER, cmd.priority);
+        Assert.AreEqual("S234P5R9", cmd.strings["command"]);
+        Assert.AreEqual("setship", cmd.strings["order"]);
+    }
+
+    [TestMethod]
+    public void Test_ClearStandingOrder()
+    {
+        Command cmd = new("X234", 1);
+        Assert.AreEqual(CommandOrder.STANDING_ORDER, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["planet"]);
+        Assert.AreEqual("clearplanet", cmd.strings["order"]);
     }
 }

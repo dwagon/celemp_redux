@@ -73,7 +73,7 @@ namespace Celemp
         JUMP4,
         JUMP5,
         SCAN,
-        STORD
+        STANDING_ORDER
     }
 }
 
