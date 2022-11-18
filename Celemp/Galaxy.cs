@@ -93,15 +93,29 @@ namespace Celemp
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 if (planets[planNum].stndord.Length > 0)
                 {
-                    Command std = new Command(planets[planNum].stndord, planets[planNum].owner);
-                    commands.Add(std);
+                    try
+                    {
+                        Command std = new Command(planets[planNum].stndord, planets[planNum].owner);
+                        commands.Add(std);
+                    }
+                    catch (CommandParseException exc)
+                    {
+                        players[planets[planNum].owner].messages.Add($"{planets[planNum].stndord}: {exc.Message}");
+                    }
                 }
             foreach (var kvp in ships)
             {
                 if (kvp.Value.stndord.Length > 0)
                 {
-                    Command std = new Command(kvp.Value.stndord, kvp.Value.owner);
-                    commands.Add(std);
+                    try
+                    {
+                        Command std = new Command(kvp.Value.stndord, kvp.Value.owner);
+                        commands.Add(std);
+                    }
+                    catch (CommandParseException exc)
+                    {
+                        players[kvp.Value.owner].messages.Add($"{kvp.Value.stndord}: {exc.Message}");
+                    }
                 }
             }
 
