@@ -1,5 +1,7 @@
 ﻿namespace CelempTest;
 using Celemp;
+using static Celemp.Constants;
+
 
 [TestClass]
 public class PlayerTest
@@ -69,7 +71,7 @@ public class PlayerTest
     {
         Galaxy g = new();
         Planet pt = new();
-        Player pr = new("Max");
+        Player plr = new("Max");
         Ship s = new();
         s.SetGalaxy(g);
         s.planet = 123;
@@ -80,10 +82,11 @@ public class PlayerTest
         g.planets[123] = pt;
         pt.pdu = 9;
         pt.owner = 2;
-        pr.InitPlayer(g, 2);
+        plr.InitPlayer(g, 2);
 
         Command cmd = new("S133L6D", 2);
-        pr.Cmd_LoadPDU(cmd);
+        plr.Cmd_LoadPDU(cmd);
+        plr.OutputLog();
 
         // Should be constrained by available cargo
         Assert.AreEqual(4, pt.pdu);
@@ -850,5 +853,44 @@ public class PlayerTest
 
         Assert.AreEqual(1, s_vic.planet);
         Assert.AreEqual(1, s_atk.planet);
+    }
+
+    [TestMethod]
+    public void Cmd_ContractCargo()
+    {
+        Galaxy g = new();
+        Planet earth = new();
+        Player plr = new();
+        Player neut = new("Neutral");
+
+        Ship s = new();
+
+        g.planets[1] = earth;
+        g.ships[0] = s;
+        plr.InitPlayer(g, 1);
+        plr.earthCredit = 100;
+        neut.InitPlayer(g, 0);
+
+        earth.owner = 0;
+        earth.industry = 20;
+        earth.ind_left = 20;
+        earth.earth = true;
+        s.owner = 1;
+        s.cargo = 10;
+        s.carrying["1"] = 10;
+        s.planet = 1;
+        s.SetGalaxy(g);
+
+        Command cmd = new("S100B10C3", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Command resolv = new("ENDCONTRACTING", 0, true);
+        neut.ProcessCommand(resolv);
+
+        Assert.AreEqual(10 + 10, s.cargo);
+        Assert.AreEqual(0, s.carrying["1"]);
+        Assert.AreEqual(20 - 10, earth.ind_left);
+        Assert.AreEqual(100 - (10 * 3), plr.earthCredit);
     }
 }

@@ -100,7 +100,8 @@ public class ShipTest
     }
 
     [TestMethod]
-    public void Test_Shots() {
+    public void Test_Shots()
+    {
         Ship s = new();
         s.cargo = 20;
         s.carrying["0"] = 5;
@@ -126,7 +127,7 @@ public class ShipTest
         s.shield = 20;
         int weight = s.CalcWeight();
         Assert.AreEqual(51, weight);
-            
+
     }
 
     [TestMethod]

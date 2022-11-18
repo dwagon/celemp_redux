@@ -20,6 +20,11 @@ namespace Celemp
 
         private Dictionary<int, Planet> home_planets;
         private int ship_num;
+        private List<(int bid, Command cmd)> cargo_bids = new();
+        private List<(int bid, Command cmd)> fighter_bids = new();
+        private List<(int bid, Command cmd)> shield_bids = new();
+        private List<(int bid, Command cmd)> tractor_bids = new();
+
 
         public Galaxy()
         {
@@ -41,6 +46,39 @@ namespace Celemp
             earth_price = new int[numOreTypes];
 
             home_planets = new Dictionary<int, Planet>();
+        }
+
+        public void AddBid(string type, Command acmd)
+        {
+            (int bid, Command cmd) = (acmd.numbers["bid"], acmd);
+            if (type == "cargo") cargo_bids.Add((bid, cmd));
+            if (type == "fighter") fighter_bids.Add((bid, cmd));
+            if (type == "shield") shield_bids.Add((bid, cmd));
+            if (type == "tractor") tractor_bids.Add((bid, cmd));
+        }
+
+        public void ResolveContracts(string type)
+        {
+            cargo_bids.Reverse();
+            fighter_bids.Reverse();
+            shield_bids.Reverse();
+            tractor_bids.Reverse();
+            foreach ((_, Command cmd) in cargo_bids)
+            {
+                players[cmd.plrNum].Earth_Build_Cargo(cmd);
+            }
+            foreach ((_, Command cmd) in fighter_bids)
+            {
+                players[cmd.plrNum].Earth_Build_Fighter(cmd);
+            }
+            foreach ((_, Command cmd) in shield_bids)
+            {
+                players[cmd.plrNum].Earth_Build_Shield(cmd);
+            }
+            foreach ((_, Command cmd) in tractor_bids)
+            {
+                players[cmd.plrNum].Earth_Build_Tractor(cmd);
+            }
         }
 
         public List<Command> ParseCommandStrings(List<string>[] cmdstrings)
@@ -68,8 +106,8 @@ namespace Celemp
             }
 
             // Add special internal commands
-            Command resolve_attacks = new Command("RESOLVEATTACK", 0, true);
-            commands.Add(resolve_attacks);
+            commands.Add(new Command(resolve_attack, 0, true));
+            commands.Add(new Command(end_contracting, 0, true));
             return commands;
         }
 

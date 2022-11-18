@@ -104,7 +104,14 @@ namespace Celemp
             for (int plrNum = 1; plrNum < numPlayers; plrNum++)
             {
                 cmd_fname = Path.Join(celemp_path, $"cmd{plrNum}");
-                File.Move(cmd_fname, $"{cmd_fname}.{galaxy.turn}");
+                try
+                {
+                    File.Move(cmd_fname, $"{cmd_fname}.{galaxy.turn}");
+                }
+                catch (FileNotFoundException exc)
+                {
+                    Console.WriteLine($"Could not back up {cmd_fname} - {exc.Message}");
+                }
             }
             File.Move(save_file, $"{save_file}.{galaxy.turn}");
             galaxy.SaveGame(save_file);
