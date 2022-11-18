@@ -75,6 +75,7 @@ public class PlayerTest
         s.planet = 123;
         s.cargo = 10;
         s.owner = 2;
+        s.carrying[cargo_pdu] = 0;
         g.ships[33] = s;
         g.planets[123] = pt;
         pt.pdu = 9;
@@ -86,7 +87,7 @@ public class PlayerTest
 
         // Should be constrained by available cargo
         Assert.AreEqual(4, pt.pdu);
-        Assert.AreEqual(5, s.carrying["PDU"]);
+        Assert.AreEqual(5, s.carrying[cargo_pdu]);
         Assert.AreEqual(0, s.CargoLeft());
     }
 
@@ -132,7 +133,7 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 20;
-        s.carrying["PDU"] = 10;
+        s.carrying[cargo_pdu] = 10;
         s.owner = 1;
         s.planet = 100;
         s.SetGalaxy(g);
@@ -142,7 +143,7 @@ public class PlayerTest
         plr.OutputLog();
 
         Assert.AreEqual(pln.pdu, 10);
-        Assert.AreEqual(0, s.carrying["PDU"]);
+        Assert.AreEqual(0, s.carrying[cargo_pdu]);
         Assert.AreEqual(20, s.CargoLeft());
     }
 
@@ -321,7 +322,7 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 20;
-        s.carrying["PDU"] = 5;
+        s.carrying[cargo_pdu] = 5;
 
         s.owner = 1;
         s.planet = 100;
@@ -330,7 +331,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.AreEqual(5 - 4, s.carrying["PDU"]);
+        Assert.AreEqual(5 - 4, s.carrying[cargo_pdu]);
         Assert.AreEqual(20 - (1 * 2), s.CargoLeft());
         Assert.AreEqual(4, pln.pdu);
     }
@@ -348,7 +349,7 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 80;
-        s.carrying["Mine"] = 3;
+        s.carrying[cargo_mine] = 3;
 
         s.owner = 1;
         s.planet = 100;
@@ -357,7 +358,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.AreEqual(3 - 2, s.carrying["Mine"]);
+        Assert.AreEqual(3 - 2, s.carrying[cargo_mine]);
         Assert.AreEqual(80 - (1 * 20), s.CargoLeft());
         Assert.AreEqual(2, pln.mine[1]);
     }
@@ -375,7 +376,7 @@ public class PlayerTest
         plr.InitPlayer(g, 1);
 
         s.cargo = 20;
-        s.carrying["Industry"] = 2;
+        s.carrying[cargo_industry] = 2;
 
         s.owner = 1;
         s.planet = 100;
@@ -384,7 +385,7 @@ public class PlayerTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.AreEqual(2 - 1, s.carrying["Industry"]);
+        Assert.AreEqual(2 - 1, s.carrying[cargo_industry]);
         Assert.AreEqual(20 - (1 * 10), s.CargoLeft());
         Assert.AreEqual(1, pln.industry);
     }

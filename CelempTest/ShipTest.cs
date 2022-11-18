@@ -1,5 +1,6 @@
 ﻿namespace CelempTest;
 using Celemp;
+using static Celemp.Constants;
 
 [TestClass]
 public class ShipTest
@@ -41,7 +42,7 @@ public class ShipTest
     public void Test_CargoScale()
     {
         Assert.AreEqual(1, Ship.CargoScale("1"));
-        Assert.AreEqual(2, Ship.CargoScale("PDU"));
+        Assert.AreEqual(2, Ship.CargoScale(cargo_pdu));
     }
 
     [TestMethod]
@@ -49,9 +50,9 @@ public class ShipTest
     {
         Ship s = new();
         s.cargo = 20;
-        s.carrying["PDU"] = 10;
+        s.carrying[cargo_pdu] = 10;
 
-        Assert.AreEqual(10, s.UnloadShip("PDU", 20));
+        Assert.AreEqual(10, s.UnloadShip(cargo_pdu, 20));
     }
 
     [TestMethod]
@@ -60,11 +61,11 @@ public class ShipTest
         Ship s = new();
         s.cargo = 20;
         Assert.AreEqual(20, s.CargoLeft());
-        s.carrying["Industry"] = 1;
+        s.carrying[cargo_industry] = 1;
         Assert.AreEqual(10, s.CargoLeft());
         s.carrying["3"] = 3;
         Assert.AreEqual(7, s.CargoLeft());
-        s.carrying["Mine"] =1;
+        s.carrying[cargo_mine] = 1;
         Assert.AreEqual(-13, s.CargoLeft());
     }
 
@@ -162,16 +163,16 @@ public class ShipTest
 
         s.planet = 0;
         s.cargo = 1;
-        s.carrying["Mine"] = 2;
-        s.carrying["Industry"] = 1;
+        s.carrying[cargo_mine] = 2;
+        s.carrying[cargo_industry] = 1;
         s.carrying["9"] = 5;
         s.carrying["0"] = 2;
 
         Console.WriteLine($"Cargo down to {s.CargoLeft()}");
         s.RemoveDestroyedCargo();
 
-        Assert.AreEqual(0, s.carrying["Mine"]);
-        Assert.AreEqual(0, s.carrying["Industry"]);
+        Assert.AreEqual(0, s.carrying[cargo_mine]);
+        Assert.AreEqual(0, s.carrying[cargo_industry]);
         Assert.AreEqual(1, plan.industry);
         Assert.AreEqual(0, s.carrying["9"]);
         Assert.AreEqual(5, plan.ore[9]);

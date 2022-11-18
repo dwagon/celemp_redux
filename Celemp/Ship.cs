@@ -44,10 +44,10 @@ namespace Celemp
             {
                 carrying.Add($"{oreType}", 0);
             }
-            carrying.Add("Industry", 0);
-            carrying.Add("Mine", 0);
-            carrying.Add("PDU", 0);
-            carrying.Add("Spacemine", 0);
+            carrying.Add(cargo_industry, 0);
+            carrying.Add(cargo_mine, 0);
+            carrying.Add(cargo_pdu, 0);
+            carrying.Add(cargo_spacemine, 0);
 
             efficiency = 0;
             planet = -1;
@@ -69,10 +69,10 @@ namespace Celemp
             int cargoleft = cargo;
             for (int oreType = 0; oreType < numOreTypes; oreType++)
                 cargoleft -= carrying[$"{oreType}"] * CargoScale($"{oreType}");
-            cargoleft -= carrying["Industry"] * CargoScale("Industry");
-            cargoleft -= carrying["Mine"] * CargoScale("Mine");
-            cargoleft -= carrying["PDU"] * CargoScale("PDU");
-            cargoleft -= carrying["Spacemine"] * CargoScale("Spacemine");
+            cargoleft -= carrying[cargo_industry] * CargoScale(cargo_industry);
+            cargoleft -= carrying[cargo_mine] * CargoScale(cargo_mine);
+            cargoleft -= carrying[cargo_pdu] * CargoScale(cargo_pdu);
+            cargoleft -= carrying[cargo_spacemine] * CargoScale(cargo_spacemine);
             return cargoleft;
         }
 
@@ -168,20 +168,20 @@ namespace Celemp
             {
                 return;
             }
-            int mine_to_dump = Math.Min(carrying["Mine"], Math.Abs(CargoLeft() / CargoScale("Mine")));
-            carrying["Mine"] -= mine_to_dump;
+            int mine_to_dump = Math.Min(carrying[cargo_mine], Math.Abs(CargoLeft() / CargoScale(cargo_mine)));
+            carrying[cargo_mine] -= mine_to_dump;
             DumpDamagedMine(mine_to_dump);
 
-            int ind_to_dump = Math.Min(carrying["Industry"], Math.Abs(CargoLeft() / CargoScale("Industry")));
-            carrying["Industry"] -= ind_to_dump;
+            int ind_to_dump = Math.Min(carrying[cargo_industry], Math.Abs(CargoLeft() / CargoScale(cargo_industry)));
+            carrying[cargo_industry] -= ind_to_dump;
             orbitting.industry += ind_to_dump;
 
-            int pdu_to_dump = Math.Min(carrying["PDU"], Math.Abs(CargoLeft() / CargoScale("PDU")));
-            carrying["PDU"] -= pdu_to_dump;
+            int pdu_to_dump = Math.Min(carrying[cargo_pdu], Math.Abs(CargoLeft() / CargoScale(cargo_pdu)));
+            carrying[cargo_pdu] -= pdu_to_dump;
             orbitting.pdu += pdu_to_dump;
 
-            int spcm_to_dump = Math.Min(carrying["Spacemine"], Math.Abs(CargoLeft() / CargoScale("Spacemine")));
-            carrying["Spacemine"] -= spcm_to_dump;
+            int spcm_to_dump = Math.Min(carrying[cargo_spacemine], Math.Abs(CargoLeft() / CargoScale(cargo_spacemine)));
+            carrying[cargo_spacemine] -= spcm_to_dump;
             orbitting.deployed += spcm_to_dump;
 
             for (int oreType = numOreTypes - 1; oreType >= 0; oreType--)
@@ -253,16 +253,10 @@ namespace Celemp
             return "S" + (num + 100).ToString();
         }
 
-        public int LoadShip(string cargotype, int amount)
+        public void LoadShip(string cargotype, int amount)
         {
             // Load cargo onto the ship - doesn't remove it from source
-            // Return the amount actually loaded based on cargo left.
-            int scale = CargoScale(cargotype);
-
-            if (CargoLeft() < amount * scale)
-                amount = CargoLeft() / scale;
             carrying[cargotype] += amount;
-            return amount;
         }
 
         public int UnloadShip(string cargotype, int amount)
@@ -279,13 +273,13 @@ namespace Celemp
         public static int CargoScale(string cargotype)
         {
             int scale = 1;
-            if (String.Equals(cargotype, "Spacemine"))
+            if (String.Equals(cargotype, cargo_spacemine))
                 scale = 1;
-            if (String.Equals(cargotype, "PDU"))
+            if (String.Equals(cargotype, cargo_pdu))
                 scale = 2;
-            if (String.Equals(cargotype, "Industry"))
+            if (String.Equals(cargotype, cargo_industry))
                 scale = 10;
-            if (String.Equals(cargotype, "Mine"))
+            if (String.Equals(cargotype, cargo_mine))
                 scale = 20;
             return scale;
         }
