@@ -161,14 +161,14 @@ namespace Celemp
                     outfh.Write(s.CalcType());
                     outfh.Write($" & {s.fighter} & {s.cargo} & {s.tractor} & {s.shield}");
                     outfh.Write($"& {galaxy!.planets[s.planet].DisplayNumber()} &");
-                    if (s.carrying["Mine"] > 0)
-                        outfh.Write($"M: {s.carrying["Mine"]}");
-                    if (s.carrying["Industry"] > 0)
-                        outfh.Write($" I: {s.carrying["Industry"]}");
-                    if (s.carrying["PDU"] > 0)
-                        outfh.Write($" D: {s.carrying["PDU"]}");
-                    if (s.carrying["Spacemine"] > 0)
-                        outfh.Write($" SM: {s.carrying["Spacemine"]}");
+                    if (s.carrying[cargo_mine] > 0)
+                        outfh.Write($"M: {s.carrying[cargo_mine]}");
+                    if (s.carrying[cargo_industry] > 0)
+                        outfh.Write($" I: {s.carrying[cargo_industry]}");
+                    if (s.carrying[cargo_pdu] > 0)
+                        outfh.Write($" D: {s.carrying[cargo_pdu]}");
+                    if (s.carrying[cargo_spacemine] > 0)
+                        outfh.Write($" SM: {s.carrying[cargo_spacemine]}");
                     for (int oreType = 0; oreType < numOreTypes; oreType++)
                     {
                         if (s.carrying[$"{oreType}"] > 0)
@@ -274,24 +274,24 @@ namespace Celemp
 
             /* Print out cargo details */
             outfh.Write("Cargo & \\multicolumn{3}{l}{");
-            if (s.carrying["Industry"] != 0)
+            if (s.carrying[cargo_industry] != 0)
             {
-                outfh.Write("Ind: {" + s.carrying["Industry"] + ";");
+                outfh.Write("Ind: {" + s.carrying[cargo_industry] + ";");
                 hasCargo = true;
             }
-            if (s.carrying["Mine"] != 0)
+            if (s.carrying[cargo_mine] != 0)
             {
-                outfh.Write("Mine: " + s.carrying["Mine"] + ";");
+                outfh.Write("Mine: " + s.carrying[cargo_mine] + ";");
                 hasCargo = true;
             }
-            if (s.carrying["PDU"] != 0)
+            if (s.carrying[cargo_pdu] != 0)
             {
-                outfh.Write("PDU: " + s.carrying["PDU"] + ";");
+                outfh.Write("PDU: " + s.carrying[cargo_pdu] + ";");
                 hasCargo = true;
             }
-            if (s.carrying["Spacemine"] != 0)
+            if (s.carrying[cargo_spacemine] != 0)
             {
-                outfh.Write("SpcMines: " + s.carrying["Spacemine"] + ";");
+                outfh.Write("SpcMines: " + s.carrying[cargo_spacemine] + ";");
                 hasCargo = true;
             }
             for (int oreType = 0; oreType < numOreTypes; oreType++)

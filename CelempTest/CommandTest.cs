@@ -89,6 +89,14 @@ public class CommandTest
     }
 
     [TestMethod]
+
+    [ExpectedException(typeof(CommandParseException))]
+    public void Test_Load_Fail()
+    {
+        Command cmd = new("S323L270", 1);
+    }
+
+    [TestMethod]
     public void Test_BuildMine()
     {
         Command cmd = new("235B5M8", 1);
@@ -393,5 +401,46 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.ENGAGE_TRACTOR, cmd.priority);
         Assert.AreEqual(134, cmd.numbers["victim"]);
         Assert.AreEqual(23, cmd.numbers["ship"]);
+    }
+
+    [TestMethod]
+
+    public void Test_Contract_Cargo()
+    {
+        Command cmd = new("S340B10C1", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.CONTRACT_CARGO, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+        Assert.AreEqual(1, cmd.numbers["bid"]);
+    }
+
+    [TestMethod]
+    public void Test_Contract_Fighter()
+    {
+        Command cmd = new("S140B1F2", 1);
+        Assert.AreEqual(40, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.CONTRACT_FIGHTER, cmd.priority);
+        Assert.AreEqual(1, cmd.numbers["amount"]);
+        Assert.AreEqual(2, cmd.numbers["bid"]);
+    }
+
+    [TestMethod]
+    public void Test_Contract_Tractor()
+    {
+        Command cmd = new("S341B100T3", 1);
+        Assert.AreEqual(241, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.CONTRACT_TRACTOR, cmd.priority);
+        Assert.AreEqual(100, cmd.numbers["amount"]);
+        Assert.AreEqual(3, cmd.numbers["bid"]);
+    }
+
+    [TestMethod]
+    public void Test_Contract_Shield()
+    {
+        Command cmd = new("S340B10S4", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.CONTRACT_SHIELD, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+        Assert.AreEqual(4, cmd.numbers["bid"]);
     }
 }

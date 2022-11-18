@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Security.AccessControl;
 using static Celemp.Constants;
 
 namespace Celemp
 {
-	public partial class Player
-	{
+    public partial class Player
+    {
 
         public void Cmd_UnloadAll(Command cmd)
         {
@@ -38,9 +39,11 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            if (ship.carrying["PDU"] < amount)
-                amount = ship.carrying["PDU"];
-            amount = ship.UnloadShip("PDU", amount);
+            if (amount < 0)
+                amount = ship.carrying[cargo_pdu];
+            if (ship.carrying[cargo_pdu] < amount)
+                amount = ship.carrying[cargo_pdu];
+            amount = ship.UnloadShip(cargo_pdu, amount);
             planet.pdu += amount;
             results.Add($"Unloaded {amount} PDU");
         }
@@ -55,9 +58,11 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            if (ship.carrying["Mine"] < amount)
-                amount = ship.carrying["Mine"];
-            amount = ship.UnloadShip("Mine", amount);
+            if (amount < 0)
+                amount = ship.carrying[cargo_mine];
+            if (ship.carrying[cargo_mine] < amount)
+                amount = ship.carrying[cargo_mine];
+            amount = ship.UnloadShip(cargo_mine, amount);
             planet.mine[oreType] += amount;
             results.Add($"Unloaded {amount} Mine R{oreType}");
         }
@@ -72,14 +77,17 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            if (ship.carrying["Industry"] < amount)
-                amount = ship.carrying["Industry"];
-            amount = ship.UnloadShip("Industry", amount);
+            if (amount < 0)
+                amount = ship.carrying[cargo_industry];
+            if (ship.carrying[cargo_industry] < amount)
+                amount = ship.carrying[cargo_industry];
+            amount = ship.UnloadShip(cargo_industry, amount);
             planet.industry += amount;
             results.Add($"Unloaded {amount} Industry");
         }
-        
-        public void Cmd_UnloadOre(Command cmd) {
+
+        public void Cmd_UnloadOre(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
 
@@ -89,6 +97,8 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
+            if (amount < 0)
+                amount = ship.carrying[$"{oreType}"];
             if (ship.carrying[$"{oreType}"] < amount)
                 amount = ship.carrying[$"{oreType}"];
             amount = ship.UnloadShip($"{oreType}", amount);
@@ -96,7 +106,8 @@ namespace Celemp
             results.Add($"Unloaded {amount} R{oreType}");
         }
 
-        public void Cmd_UnloadSpacemine(Command cmd) {
+        public void Cmd_UnloadSpacemine(Command cmd)
+        {
             int shipNum = cmd.numbers["ship"];
             Ship ship = galaxy!.ships[shipNum];
 
@@ -105,9 +116,11 @@ namespace Celemp
 
             if (!CheckShipOwnership(ship, cmd))
                 return;
-            if (ship.carrying["PDU"] < amount)
-                amount = ship.carrying["Spacemine"];
-            amount = ship.UnloadShip("Spacemine", amount);
+            if (amount < 0)
+                amount = ship.carrying[cargo_spacemine];
+            if (ship.carrying[cargo_pdu] < amount)
+                amount = ship.carrying[cargo_spacemine];
+            amount = ship.UnloadShip(cargo_spacemine, amount);
             planet.pdu += amount;
             results.Add($"Unloaded {amount} Spacemines");
         }
@@ -126,8 +139,7 @@ namespace Celemp
             for (int oretype = 1; oretype < numOreTypes; oretype++)
             {
                 int amount = planet.ore[oretype];
-                if (ship.CargoLeft() < amount)
-                    amount = ship.CargoLeft();
+                amount = CheckCargoLeft(ship, amount, $"{oretype}", notify: false);
                 planet.ore[oretype] -= amount;
                 ship.LoadShip($"{oretype}", amount);
                 if (amount != 0)
@@ -148,7 +160,8 @@ namespace Celemp
                 return;
             if (planet.ore[oretype] < amount)
                 amount = planet.ore[oretype];
-            amount = ship.LoadShip($"{oretype}", amount);
+            amount = CheckCargoLeft(ship, amount, $"{oretype}");
+            ship.LoadShip($"{oretype}", amount);
             planet.ore[oretype] -= amount;
             results.Add($"Loaded {amount} R{oretype}");
         }
@@ -156,11 +169,15 @@ namespace Celemp
         private void Cmd_LoadIndustry(Command cmd)
         {
             int shipNum = cmd.numbers["ship"];
+            int amount = cmd.numbers["amount"];
             Ship ship = galaxy!.ships[shipNum];
             Planet planet = galaxy!.planets[ship.planet];
 
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
+            amount = CheckCargoLeft(ship, amount, cargo_industry);
+            ship.LoadShip(cargo_industry, amount);
+            planet.industry -= amount;
             // TODO
         }
 
@@ -175,6 +192,7 @@ namespace Celemp
                 return;
             // TODO
         }
+
         private void Cmd_LoadSpacemine(Command cmd)
         {
             int shipNum = cmd.numbers["ship"];
@@ -196,8 +214,12 @@ namespace Celemp
             if (!CheckShipOwnership(ship, cmd) || !CheckPlanetOwnership(planet, cmd))
                 return;
             if (planet.pdu < amount)
+            {
+                results.Add("Insufficient PDU on planet");
                 amount = planet.pdu;
-            amount = ship.LoadShip("PDU", amount);
+            }
+            amount = CheckCargoLeft(ship, amount, cargo_pdu);
+            ship.LoadShip(cargo_pdu, amount);
             planet.pdu -= amount;
             results.Add($"Loaded {amount} PDU");
         }

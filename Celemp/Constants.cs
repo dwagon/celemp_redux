@@ -18,5 +18,12 @@ namespace Celemp
             { 50, 25, 20, 15, 10, 5
             }
         };
+
+        public const string resolve_attack = "RESOLVEATTACK";
+        public const string end_contracting = "ENDCONTRACTING";
+        public const string cargo_pdu = "PDU";
+        public const string cargo_mine = "Mine";
+        public const string cargo_industry = "Industry";
+        public const string cargo_spacemine = "Spacemine";
     }
 }

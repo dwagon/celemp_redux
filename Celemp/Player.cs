@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Numerics;
+using static System.Formats.Asn1.AsnWriter;
 using static Celemp.Constants;
 
 namespace Celemp
@@ -100,8 +101,10 @@ namespace Celemp
 
         public void ProcessCommand(Command cmd)
         {
-            results = new();
-            results.Add(cmd.cmdstr.ToUpper());
+            results = new()
+            {
+                cmd.cmdstr.ToUpper()
+            };
             switch (cmd.priority)
             {
                 case CommandOrder.NOOPERAT:
@@ -226,17 +229,182 @@ namespace Celemp
                 case CommandOrder.RESOLVE_ATTACK:
                     System_ResolveAttacks(cmd);
                     break;
+                case CommandOrder.RESOLVE_CONTRACTS:
+                    System_ResolveContracts(cmd);
+                    break;
                 case CommandOrder.STANDING_ORDER:
                     Standing_Order(cmd);
                     break;
                 case CommandOrder.ENGAGE_TRACTOR:
                     Cmd_EngageTractor(cmd);
                     break;
+                case CommandOrder.CONTRACT_CARGO:
+                    Cmd_Contract_Cargo(cmd);
+                    break;
+                case CommandOrder.CONTRACT_FIGHTER:
+                    Cmd_Contract_Fighter(cmd);
+                    break;
+                case CommandOrder.CONTRACT_SHIELD:
+                    Cmd_Contract_Shield(cmd);
+                    break;
+                case CommandOrder.CONTRACT_TRACTOR:
+                    Cmd_Contract_Tractor(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
+        }
+
+        public void Earth_Build_Cargo(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            int amount = cmd.numbers["amount"];
+            results = new()
+            {
+                cmd.cmdstr.ToUpper()
+            };
+
+            amount = CheckShipOre(amount, ship, 1, 1);
+            amount = CheckIndustry(amount, plan, 1);
+
+            plan.ind_left -= amount;
+            ship.carrying["1"] -= amount;
+            ship.cargo += amount;
+            int cost = amount * cmd.numbers["bid"];
+            SpendEarthCredit(cost);
+            results.Add($"Built {amount} cargo units at {cmd.numbers["bid"]} for {cost}");
+            messages.Add(String.Join(": ", results));
+        }
+
+        public void Earth_Build_Fighter(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            results = new()
+            {
+                cmd.cmdstr.ToUpper()
+            };
+
+            int amount = cmd.numbers["amount"];
+            amount = CheckShipOre(amount, ship, 1, 2);
+            amount = CheckShipOre(amount, ship, 1, 3);
+            amount = CheckIndustry(amount, plan, 2);
+
+            plan.ind_left -= amount * 2;
+            ship.carrying["2"] -= amount;
+            ship.carrying["3"] -= amount;
+            ship.fighter += amount;
+            int cost = amount * cmd.numbers["bid"];
+            SpendEarthCredit(cost);
+            results.Add($"Built {amount} fighter units at {cmd.numbers["bid"]} for {cost}");
+            messages.Add(String.Join(": ", results));
+        }
+
+        public void SpendEarthCredit(int cost)
+        {
+            earthCredit -= cost;
+            if (earthCredit < 0)
+            {
+                int debt = Math.Abs(earthCredit);
+                score -= debt * galaxy!.earthMult;
+                earthCredit += debt;
+            }
+        }
+
+        public void Earth_Build_Shield(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            results = new()
+            {
+                cmd.cmdstr.ToUpper()
+            };
+
+            int amount = cmd.numbers["amount"];
+            amount = CheckShipOre(amount, ship, 1, 5);
+            amount = CheckShipOre(amount, ship, 1, 6);
+            amount = CheckIndustry(amount, plan, 2);
+
+            plan.ind_left -= amount * 2;
+            ship.carrying["5"] -= amount;
+            ship.carrying["6"] -= amount;
+
+            ship.shield += amount;
+            int cost = amount * cmd.numbers["bid"];
+            SpendEarthCredit(cost);
+            results.Add($"Built {amount} shield units at {cmd.numbers["bid"]} for {cost}");
+            messages.Add(String.Join(": ", results));
+        }
+
+        public void Earth_Build_Tractor(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            results = new()
+            {
+                cmd.cmdstr.ToUpper()
+            };
+
+            int amount = cmd.numbers["amount"];
+            amount = CheckShipOre(amount, ship, 2, 7);
+            amount = CheckIndustry(amount, plan, 2);
+
+            plan.ind_left -= amount * 2;
+            ship.carrying["7"] -= amount;
+            ship.tractor += amount;
+            int cost = amount * cmd.numbers["bid"];
+            SpendEarthCredit(cost);
+            results.Add($"Built {amount} tractor units at {cmd.numbers["bid"]} for {cost}");
+            messages.Add(String.Join(": ", results));
+        }
+
+        // Contracts are weird as they get resolved in contractor order
+        // So we lodge them first, then resolve them later
+        public void Cmd_Contract_Cargo(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            galaxy!.AddBid("cargo", cmd);
+            results.Add("Bid accepted");
+        }
+
+        public void Cmd_Contract_Fighter(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            galaxy!.AddBid("fighter", cmd);
+            results.Add("Bid accepted");
+        }
+
+        public void Cmd_Contract_Shield(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            galaxy!.AddBid("shield", cmd);
+            results.Add("Bid accepted");
+        }
+
+        public void Cmd_Contract_Tractor(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckEarth(galaxy!.planets[ship.planet]))
+                return;
+            galaxy!.AddBid("tractor", cmd);
+            results.Add("Bid accepted");
         }
 
         public void Cmd_EngageTractor(Command cmd)
@@ -296,10 +464,18 @@ namespace Celemp
                     plan.stndord = "";
                     break;
                 default:
-                    Console.WriteLine($"Unhandled stadning order direction {cmd.strings["direction"]}");
+                    Console.WriteLine($"Unhandled standing order direction {cmd.strings["direction"]}");
                     break;
             }
             results.Add("OK");
+        }
+
+        public void System_ResolveContracts(Command cmd)
+        {
+            galaxy!.ResolveContracts("cargo");
+            galaxy!.ResolveContracts("fighter");
+            galaxy!.ResolveContracts("shield");
+            galaxy!.ResolveContracts("tractor");
         }
 
         public void System_ResolveAttacks(Command cmd)
@@ -330,20 +506,10 @@ namespace Celemp
                 amount = galaxy.planets[ship.planet].ore[oretype];
                 results.Add("Insufficient Ore");
             }
-            if (amount > ship.CargoLeft())
-            {
-                results.Add("Insufficient Cargo");
-                amount = ship.CargoLeft();
-            }
+            amount = CheckCargoLeft(ship, amount, $"{oretype}");
             int value = amount * price;
             results.Add($"Spent {value} Earth Credits for {amount} x R{oretype}");
-            earthCredit -= value;
-            if (earthCredit < 0)
-            {
-                int debt = Math.Abs(earthCredit);
-                score -= debt * galaxy.earthMult;
-                earthCredit += debt;
-            }
+            SpendEarthCredit(value);
             ship.LoadShip($"{oretype}", amount);
             galaxy.planets[ship.planet].ore[oretype] -= amount;
         }
@@ -534,6 +700,17 @@ namespace Celemp
             return amount;
         }
 
+        public int CheckShipOre(int amount, Ship ship, int scale, int oretype)
+        // Check amount of ore on the ship (for Earth contractor)
+        {
+            if (ship.carrying[$"{oretype}"] < amount * scale)
+            {
+                amount = ship.carrying[$"{oretype}"] / scale;
+                results.Add($"Insufficient Ore {oretype}");
+            }
+            return amount;
+        }
+
         public void Cmd_BuildMine(Command cmd)
         {
             Planet plan = galaxy!.planets[cmd.numbers["planet"]];
@@ -565,7 +742,9 @@ namespace Celemp
                 results.Add($"Unknown player {recip}");
                 return;
             }
+            galaxy.players[new_owner].messages.Add($"{galaxy.players[ship.owner].name} gave you {ship.DisplayNumber()}");
             ship.owner = new_owner;
+            ship.stndord = "";
             results.Add("OK");
         }
 
@@ -583,7 +762,9 @@ namespace Celemp
                 results.Add($"Unknown player {recip}");
                 return;
             }
+            galaxy.players[new_owner].messages.Add($"{galaxy.players[plan.owner].name} gave you {plan.DisplayNumber()}");
             plan.owner = new_owner;
+            plan.stndord = "";
             results.Add("OK");
         }
 
@@ -810,6 +991,17 @@ namespace Celemp
             return amount;
         }
 
+        private int CheckCargoLeft(Ship aShip, int amount, string cargo_type, bool notify = true)
+        {
+            if (aShip.CargoLeft() < amount * Ship.CargoScale(cargo_type))
+            {
+                if (notify)
+                    results.Add("Insufficient free cargo units");
+                amount = aShip.CargoLeft() / Ship.CargoScale(cargo_type);
+            }
+            return amount;
+        }
+
         private bool CheckPlanetOwnership(Planet aPlanet, Command cmd)
         {
             if (aPlanet.owner == number)
@@ -832,6 +1024,7 @@ namespace Celemp
         {
             galaxy = aGalaxy;
             number = aPlrNum;
+            galaxy.players[aPlrNum] = this;
         }
 
         public void InitPlayer(Galaxy aGalaxy)

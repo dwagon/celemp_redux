@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using static Celemp.Constants;
 
 namespace Celemp
 {
@@ -24,8 +25,11 @@ namespace Celemp
             {
                 switch (cmdstr)
                 {
-                    case "RESOLVEATTACK":
+                    case resolve_attack:
                         priority = CommandOrder.RESOLVE_ATTACK;
+                        break;
+                    case end_contracting:
+                        priority = CommandOrder.RESOLVE_CONTRACTS;
                         break;
                     default:
                         throw new CommandParseException($"Unknown special command {rawcmd}");
@@ -156,7 +160,7 @@ namespace Celemp
                     ShipAttack(cmd, ship);
                     break;
                 case 'b':
-                    ShipBuild(cmd);
+                    ShipBuildContract(cmd);
                     break;
                 case 'd':
                     ShipDeploy(cmd, ship);
@@ -274,48 +278,52 @@ namespace Celemp
             priority = CommandOrder.ATTACK_SPCM;
         }
 
-        private void ShipBuild(string cmd)
+        private void ShipBuildContract(string cmd)
         {
-            // S123B10C
+            // S123B10C for build or S123B10C5 for contracting
             (int amount, int offset) = ExtractAmount(cmd, 5);
             char cmdchar = Char.ToLower(cmd[5 + offset]);
+            (int bid, int offset2) = ExtractAmount(cmd, 6 + offset);
             numbers.Add("amount", amount);
+
+            if (bid > 0)
+            {
+                numbers.Add("bid", bid);
+                switch (cmdchar)
+                {
+                    case 'c':
+                        priority = CommandOrder.CONTRACT_CARGO;
+                        break;
+                    case 'f':
+                        priority = CommandOrder.CONTRACT_FIGHTER;
+                        break;
+                    case 't':
+                        priority = CommandOrder.CONTRACT_TRACTOR;
+                        break;
+                    case 's':
+                        priority = CommandOrder.CONTRACT_SHIELD;
+                        break;
+                    default: throw new CommandParseException($"Ship contract command not understood {cmd}");
+                }
+                return;
+            }
+
             switch (cmdchar)
             {
                 case 'c':
-                    ShipBuildCargo(cmd);
+                    priority = CommandOrder.BUILD_CARGO;
                     break;
                 case 'f':
-                    ShipBuildFighter(cmd);
+                    priority = CommandOrder.BUILD_FIGHTER;
                     break;
                 case 't':
-                    ShipBuildTractor(cmd);
+                    priority = CommandOrder.BUILD_TRACTOR;
                     break;
                 case 's':
-                    ShipBuildShield(cmd);
+                    priority = CommandOrder.BUILD_SHIELD;
                     break;
                 default: throw new CommandParseException($"Ship build command not understood {cmd}");
             }
-        }
-
-        private void ShipBuildCargo(string cmd)
-        {
-            priority = CommandOrder.BUILD_CARGO;
-        }
-
-        private void ShipBuildFighter(string cmd)
-        {
-            priority = CommandOrder.BUILD_FIGHTER;
-        }
-
-        private void ShipBuildTractor(string cmd)
-        {
-            priority = CommandOrder.BUILD_TRACTOR;
-        }
-
-        private void ShipBuildShield(string cmd)
-        {
-            priority = CommandOrder.BUILD_SHIELD;
         }
 
         private void ShipDeploy(string cmd, int ship) { }
@@ -378,15 +386,23 @@ namespace Celemp
         private void ShipLoad(string cmd, int ship)
         {
             // S123L = Load all
+            char cmdchar;
             if (cmd.Length == 5)
             {
                 priority = CommandOrder.LOAD_ALL;
                 return;
             }
-            (int amount, int offset) = ExtractAmount(cmd, 5);
-            numbers.Add("amount", amount);
+            try
+            {
+                (int amount, int offset) = ExtractAmount(cmd, 5);
+                numbers.Add("amount", amount);
 
-            char cmdchar = Char.ToLower(cmd[5 + offset]);
+                cmdchar = Char.ToLower(cmd[5 + offset]);
+            }
+            catch (System.IndexOutOfRangeException)
+            {
+                throw new CommandParseException($"Ship load command not understood {cmd}");
+            }
             switch (cmdchar)
             {
                 case 'm':
@@ -407,7 +423,6 @@ namespace Celemp
                 default:
                     throw new CommandParseException($"Ship load command not understood {cmd}");
             }
-
         }
 
         public static (int, int) ExtractAmount(string str, int startidx)
