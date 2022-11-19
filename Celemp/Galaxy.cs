@@ -19,7 +19,6 @@ namespace Celemp
         public int[] earth_price { get; set; }
 
         private Dictionary<int, Planet> home_planets;
-        private int ship_num;
         private List<(int bid, Command cmd)> cargo_bids = new();
         private List<(int bid, Command cmd)> fighter_bids = new();
         private List<(int bid, Command cmd)> shield_bids = new();
@@ -33,7 +32,6 @@ namespace Celemp
             ships = new Dictionary<int, Ship>();
             winning_terms = new();
             turn = 0;
-            ship_num = 0;
             earthBids = new();
             earthMult = -1;
             earthAmnesty = -1;
@@ -57,8 +55,9 @@ namespace Celemp
             if (type == "tractor") tractor_bids.Add((bid, cmd));
         }
 
-        public void ResolveContracts(string type)
+        public void ResolveContracts()
         {
+
             cargo_bids.Reverse();
             fighter_bids.Reverse();
             shield_bids.Reverse();
@@ -93,15 +92,29 @@ namespace Celemp
             for (int planNum = 0; planNum < numPlanets; planNum++)
                 if (planets[planNum].stndord.Length > 0)
                 {
-                    Command std = new Command(planets[planNum].stndord, planets[planNum].owner);
-                    commands.Add(std);
+                    try
+                    {
+                        Command std = new Command(planets[planNum].stndord, planets[planNum].owner);
+                        commands.Add(std);
+                    }
+                    catch (CommandParseException exc)
+                    {
+                        players[planets[planNum].owner].messages.Add($"{planets[planNum].stndord}: {exc.Message}");
+                    }
                 }
             foreach (var kvp in ships)
             {
                 if (kvp.Value.stndord.Length > 0)
                 {
-                    Command std = new Command(kvp.Value.stndord, kvp.Value.owner);
-                    commands.Add(std);
+                    try
+                    {
+                        Command std = new Command(kvp.Value.stndord, kvp.Value.owner);
+                        commands.Add(std);
+                    }
+                    catch (CommandParseException exc)
+                    {
+                        players[kvp.Value.owner].messages.Add($"{kvp.Value.stndord}: {exc.Message}");
+                    }
                 }
             }
 
@@ -200,7 +213,7 @@ namespace Celemp
             }
         }
 
-        private Ship InitShip(int fight, int cargo, int shield, int tractor, int eff)
+        public Ship InitShip(int fight = 0, int cargo = 0, int shield = 0, int tractor = 0, int eff = 0)
         {
             Ship newship = new Ship();
             newship.SetGalaxy(this);
@@ -209,8 +222,8 @@ namespace Celemp
             newship.shield = shield;
             newship.tractor = tractor;
             newship.efficiency = eff;
-            newship.number = ship_num;
-            ships[ship_num++] = newship;
+            newship.number = ships.Count();
+            ships[newship.number] = newship;
             return newship;
         }
 

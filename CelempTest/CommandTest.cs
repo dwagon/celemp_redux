@@ -443,4 +443,18 @@ public class CommandTest
         Assert.AreEqual(10, cmd.numbers["amount"]);
         Assert.AreEqual(4, cmd.numbers["bid"]);
     }
+
+
+    [TestMethod]
+    public void Test_Build_Hyperdrive()
+    {
+        Command cmd = new("327B1H2/5/0/7", 1);
+        Assert.AreEqual(227, cmd.numbers["planet"]);
+        Assert.AreEqual(CommandOrder.BUILD_HYPER, cmd.priority);
+        Assert.AreEqual(1, cmd.numbers["amount"]);
+        Assert.AreEqual(2, cmd.numbers["fighter"]);
+        Assert.AreEqual(5, cmd.numbers["cargo"]);
+        Assert.AreEqual(0, cmd.numbers["tractor"]);
+        Assert.AreEqual(7, cmd.numbers["shield"]);
+    }
 }

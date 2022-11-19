@@ -62,7 +62,7 @@ namespace Celemp
         BUILD_PDU,
         EARTHDEF,
         BUILD_MINE,
-        BUILDHYP,
+        BUILD_HYPER,
         BUILD_CARGO,
         BUILD_FIGHTER,
         BUILD_TRACTOR,

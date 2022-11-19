@@ -707,7 +707,24 @@ namespace Celemp
             numbers.Add("oretype", type);
         }
 
-        private void PlanetBuildHyperdrive(string cmd) { }
+        private void PlanetBuildHyperdrive(string cmd)
+        {
+            // xxxByyHff/cc/tt/ss
+            priority = CommandOrder.BUILD_HYPER;
+            try
+            {
+                int idx = cmd.ToLower().IndexOf('h');
+                string[] bits = cmd.Substring(idx + 1).Split('/');
+                numbers.Add("fighter", Int16.Parse(bits[0]));
+                numbers.Add("cargo", Int16.Parse(bits[1]));
+                numbers.Add("tractor", Int16.Parse(bits[2]));
+                numbers.Add("shield", Int16.Parse(bits[3]));
+            }
+            catch (Exception exc)
+            {
+                throw new CommandParseException($"Hyperdrive build command not understood {cmd}: {exc}");
+            }
+        }
 
         private void PlanetTrans(string cmd) { }
         private void PlanetDeploy(string cmd) { }
