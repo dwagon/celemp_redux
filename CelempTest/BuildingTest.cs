@@ -212,7 +212,6 @@ public class BuildingTest
         Assert.AreEqual(10, plan.pdu);
     }
 
-
     [TestMethod]
     public void Cmd_Planet_Build_Spacemines()
     {
@@ -294,7 +293,34 @@ public class BuildingTest
             Assert.AreEqual(shield, ship.shield);
             Assert.AreEqual(1, ship.number);
         }
+    }
 
+    [TestMethod]
+    public void Cmd_Unbuild_Cargo()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new();
+        Ship s = g.InitShip();
+
+        g.planets[1] = plan;
+        plr.InitPlayer(g, 1);
+
+        plan.owner = 1;
+        plan.industry = 20;
+        plan.ind_left = 20;
+        plan.ore[1] = 20;
+        s.owner = 1;
+        s.planet = 1;
+        s.cargo = 20;
+
+        Command cmd = new("S100Z10C", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual(20 - 10, s.cargo);
+        Assert.AreEqual(20 - 10, plan.ind_left);
+        Assert.AreEqual(20 + 10 / 2, plan.ore[1]);
     }
 }
 

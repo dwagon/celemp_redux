@@ -253,14 +253,24 @@ namespace Celemp
                 case CommandOrder.BUILD_HYPER:
                     Cmd_Build_Hyperdrive(cmd);
                     break;
+                case CommandOrder.UNBUILD_CARGO:
+                    Cmd_Unbuild_Cargo(cmd);
+                    break;
+                case CommandOrder.UNBUILD_FIGHTER:
+                    Cmd_Unbuild_Fighter(cmd);
+                    break;
+                case CommandOrder.UNBUILD_SHIELD:
+                    Cmd_Unbuild_Shield(cmd);
+                    break;
+                case CommandOrder.UNBUILD_TRACTOR:
+                    Cmd_Unbuild_Tractor(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
             messages.Add(String.Join(": ", results));
         }
-
-
 
         public void SpendEarthCredit(int cost)
         {
