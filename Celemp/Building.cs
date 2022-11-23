@@ -282,6 +282,76 @@ namespace Celemp
             plan.mine[oretype] += amount;
             results.Add($"Built {amount} mine type {oretype}");
         }
+
+        public void Cmd_Unbuild_Cargo(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 1);
+            plan.ind_left -= amount;
+            int recovered = (int)amount / 2;
+            plan.ore[1] += recovered;
+            ship.cargo -= amount;
+            ship.RemoveDestroyedCargo();
+            results.Add($"Recovered {recovered} x R1");
+        }
+
+        public void Cmd_Unbuild_Fighter(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            plan.ind_left -= amount;
+            int recovered = (int)amount / 2;
+            plan.ore[2] += recovered;
+            plan.ore[3] += recovered;
+            ship.fighter -= amount;
+            results.Add($"Recovered {recovered} x R2 + R3");
+        }
+
+        public void Cmd_Unbuild_Shield(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            plan.ind_left -= amount;
+            int recovered = (int)amount / 2;
+            plan.ore[5] += recovered;
+            plan.ore[6] += recovered;
+            ship.shield -= amount;
+            results.Add($"Recovered {recovered} x R5 + R6");
+        }
+
+        public void Cmd_Unbuild_Tractor(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            Planet plan = galaxy.planets[ship.planet];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            int amount = cmd.numbers["amount"];
+            amount = CheckIndustry(amount, plan, 2);
+            plan.ind_left -= amount;
+            plan.ore[7] += amount;
+            ship.tractor -= amount;
+            results.Add($"Recovered {amount} x R7");
+        }
     }
 }
 

@@ -193,7 +193,7 @@ namespace Celemp
                     ShipSellOre(cmd);
                     break;
                 case 'z':
-                    ShipUnbuild(cmd, ship);
+                    ShipUnbuild(cmd);
                     break;
                 case '=':
                     ShipName(cmd, ship);
@@ -578,7 +578,30 @@ namespace Celemp
             numbers.Add("amount", amount);
         }
 
-        private void ShipUnbuild(string cmd, int ship) { }
+        private void ShipUnbuild(string cmd)
+        {
+            // S123Z30C
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            numbers.Add("amount", amount);
+            char cmdchar = Char.ToLower(cmd[5 + offset]);
+
+            switch (cmdchar)
+            {
+                case 'c':
+                    priority = CommandOrder.UNBUILD_CARGO;
+                    break;
+                case 'f':
+                    priority = CommandOrder.UNBUILD_FIGHTER;
+                    break;
+                case 't':
+                    priority = CommandOrder.UNBUILD_TRACTOR;
+                    break;
+                case 's':
+                    priority = CommandOrder.UNBUILD_SHIELD;
+                    break;
+                default: throw new CommandParseException($"Ship unbuild command not understood {cmd}");
+            }
+        }
 
         private void ShipName(string cmd, int ship)
         {

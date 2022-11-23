@@ -457,4 +457,40 @@ public class CommandTest
         Assert.AreEqual(0, cmd.numbers["tractor"]);
         Assert.AreEqual(7, cmd.numbers["shield"]);
     }
+
+    [TestMethod]
+    public void Test_Unbuild_Cargo()
+    {
+        Command cmd = new("S340Z10C", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.UNBUILD_CARGO, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Unbuild_Fighter()
+    {
+        Command cmd = new("S340Z110F", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.UNBUILD_FIGHTER, cmd.priority);
+        Assert.AreEqual(110, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Unbuild_Shield()
+    {
+        Command cmd = new("S340Z2S", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.UNBUILD_SHIELD, cmd.priority);
+        Assert.AreEqual(2, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Unbuild_Tractor()
+    {
+        Command cmd = new("S340Z10T", 1);
+        Assert.AreEqual(240, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.UNBUILD_TRACTOR, cmd.priority);
+        Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
 }
