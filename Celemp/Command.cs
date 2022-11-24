@@ -662,7 +662,7 @@ namespace Celemp
         private void PlanetName(string cmd)
         {
             // 123=Arakis
-            priority = CommandOrder.NAMEPLAN;
+            priority = CommandOrder.NAME_PLANET;
             strings.Add("name", cmd.Substring(4));
         }
 

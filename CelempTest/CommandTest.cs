@@ -49,7 +49,7 @@ public class CommandTest
         Command cmd = new("259=Arakis", 5);
         Assert.AreEqual(159, cmd.numbers["planet"]);
         Assert.AreEqual("Arakis", cmd.strings["name"]);
-        Assert.AreEqual(CommandOrder.NAMEPLAN, cmd.priority);
+        Assert.AreEqual(CommandOrder.NAME_PLANET, cmd.priority);
     }
 
     [TestMethod]
@@ -492,5 +492,14 @@ public class CommandTest
         Assert.AreEqual(240, cmd.numbers["ship"]);
         Assert.AreEqual(CommandOrder.UNBUILD_TRACTOR, cmd.priority);
         Assert.AreEqual(10, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Planet_Name()
+    {
+        Command cmd = new("100=Foobar", 1);
+        Assert.AreEqual(0, cmd.numbers["planet"]);
+        Assert.AreEqual(CommandOrder.NAME_PLANET, cmd.priority);
+        Assert.AreEqual("Foobar", cmd.strings["name"]);
     }
 }

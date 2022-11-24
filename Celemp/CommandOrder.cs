@@ -6,7 +6,7 @@ namespace Celemp
         NOOPERAT,
         GAMELEN,
         NAME_SHIP,
-        NAMEPLAN,
+        NAME_PLANET,
         GIFTSHIP,
         GIFTPLAN,
         ALLNCUP,
