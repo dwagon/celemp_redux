@@ -33,8 +33,16 @@ namespace Celemp
                 }
                 Footer(sw);
             }
-
         }
+        private bool Is_A_Ring(Player plr, Planet plan)
+        {
+            // Return if planet is A-Ring planets for this player
+            for (int linkNum = 0; linkNum < 4; linkNum++)
+                if (plan.link[linkNum] == plr.home_planet)
+                    return true;
+            return false;
+        }
+
         private void Header(StreamWriter outfh)
         {
             outfh.WriteLine("strict graph G {");
@@ -73,7 +81,13 @@ namespace Celemp
             for (int linkNum = 0; linkNum < 4; linkNum++)
             {
                 if (plan.link[linkNum] >= 0)
-                    outfh.WriteLine($"{plan.DisplayNumber()} -- {plan.DisplayNumber(plan.link[linkNum])}");
+                {
+                    outfh.Write($"{plan.DisplayNumber()} -- {plan.DisplayNumber(plan.link[linkNum])}");
+                    if (plr.home_planet == plan.number)
+                        outfh.WriteLine("[penwidth=3; weight=3];");
+                    else
+                        outfh.WriteLine(";");
+                }
             }
 
             if (plan.Knows(plr.number))
@@ -88,7 +102,7 @@ namespace Celemp
                     else
                         outfh.Write("color=\"green\";");
                     outfh.WriteLine("];");
-                    outfh.WriteLine($"{shp.DisplayNumber()} -- {plan.DisplayNumber()};");
+                    outfh.WriteLine($"{shp.DisplayNumber()} -- {plan.DisplayNumber()} [weight=3];");
                 }
             }
         }
