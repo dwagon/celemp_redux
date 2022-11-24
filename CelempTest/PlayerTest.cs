@@ -656,4 +656,28 @@ public class PlayerTest
         Assert.AreEqual(20 - 10, earth.ind_left);
         Assert.AreEqual(100 - (10 * 3), plr.earthCredit);
     }
+
+    [TestMethod]
+    public void Cmd_Planet_Name()
+    {
+        Galaxy g = new();
+        Planet plan = new();
+        Player plr = new("Max");
+
+        g.players[1] = plr;
+        g.planets[100] = plan;
+
+        plr.InitPlayer(g, 1);
+        plan.number = 100;
+        plan.owner = 1;
+        plan.setGalaxy(g);
+
+        plan.InitialiseTurn();
+
+        Command cmd = new("200=Testing", 1);
+        plr.ProcessCommand(cmd);
+        plr.OutputLog();
+
+        Assert.AreEqual("Testing", plan.name);
+    }
 }

@@ -115,6 +115,9 @@ namespace Celemp
                 case CommandOrder.NAME_SHIP:
                     Cmd_NameShip(cmd);
                     break;
+                case CommandOrder.NAME_PLANET:
+                    Cmd_NamePlanet(cmd);
+                    break;
                 case CommandOrder.LOAD_ALL:
                     Cmd_LoadAll(cmd);
                     break;
@@ -727,6 +730,16 @@ namespace Celemp
             if (!CheckShipOwnership(ship, cmd))
                 return;
             ship.name = cmd.strings["name"];
+            results.Add("OK");
+        }
+
+        private void Cmd_NamePlanet(Command cmd)
+        {
+            Planet plan = galaxy!.planets[cmd.numbers["planet"]];
+
+            if (!CheckPlanetOwnership(plan, cmd))
+                return;
+            plan.name = cmd.strings["name"];
             results.Add("OK");
         }
 
