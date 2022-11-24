@@ -42,6 +42,7 @@ namespace Celemp
             }
             stndord = "";
             pdu_left = pdu;
+            visited[0] = true;
         }
 
         public void setGalaxy(Galaxy? aGalaxy)
