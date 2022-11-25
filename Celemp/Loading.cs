@@ -223,5 +223,132 @@ namespace Celemp
             planet.pdu -= amount;
             results.Add($"Loaded {amount} PDU");
         }
+
+        private void Cmd_TendAll(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            results.Add("Tended ");
+            for (int oreType = 1; oreType < numOreTypes; oreType++)
+            {
+                int amount = ship.carrying[$"{oreType}"];
+                if (target.CargoLeft() < amount)
+                    amount = target.CargoLeft();
+                ship.UnloadShip($"{oreType}", amount);
+                target.LoadShip($"{oreType}", amount);
+                results.Add($"{amount} x R{oreType}");
+            }
+            results.Add("OK");
+        }
+
+        private void Cmd_TendOre(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            int oreType = cmd.numbers["oretype"];
+            results.Add("Tended ");
+            int amount = cmd.numbers["amount"];
+            if (amount < 0)
+                amount = ship.carrying[$"{oreType}"];
+            amount = CheckCargoLeft(target, amount, $"{oreType}");
+
+            ship.UnloadShip($"{oreType}", amount);
+            target.LoadShip($"{oreType}", amount);
+            results.Add($"{amount} x R{oreType}");
+
+            results.Add("OK");
+        }
+
+        private void Cmd_TendIndustry(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            results.Add("Tended ");
+            int amount = cmd.numbers["amount"];
+            if (amount < 0)
+                amount = ship.carrying[cargo_industry];
+            amount = CheckCargoLeft(target, amount, cargo_industry);
+
+            ship.UnloadShip(cargo_industry, amount);
+            target.LoadShip(cargo_industry, amount);
+            results.Add($"{amount} x Industry");
+
+            results.Add("OK");
+        }
+
+        private void Cmd_TendMine(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            results.Add("Tended ");
+            int amount = cmd.numbers["amount"];
+            if (amount < 0)
+                amount = ship.carrying[cargo_mine];
+            amount = CheckCargoLeft(target, amount, cargo_mine);
+
+            ship.UnloadShip(cargo_mine, amount);
+            target.LoadShip(cargo_mine, amount);
+            results.Add($"{amount} x Mines");
+
+            results.Add("OK");
+        }
+
+        private void Cmd_TendPDU(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            results.Add("Tended ");
+            int amount = cmd.numbers["amount"];
+            if (amount < 0)
+                amount = ship.carrying[cargo_pdu];
+            amount = CheckCargoLeft(target, amount, cargo_pdu);
+
+            ship.UnloadShip(cargo_pdu, amount);
+            target.LoadShip(cargo_pdu, amount);
+            results.Add($"{amount} x PDU");
+
+            results.Add("OK");
+        }
+
+        private void Cmd_TendSpacemine(Command cmd)
+        {
+            Ship ship = galaxy!.ships[cmd.numbers["ship"]];
+            if (!CheckShipOwnership(ship, cmd))
+                return;
+            Ship target = galaxy!.ships[cmd.numbers["target"]];
+            if (!CheckShipOwnership(target, cmd))
+                return;
+            results.Add("Tended ");
+            int amount = cmd.numbers["amount"];
+            if (amount < 0)
+                amount = ship.carrying[cargo_spacemine];
+            amount = CheckCargoLeft(target, amount, cargo_spacemine);
+
+            ship.UnloadShip(cargo_spacemine, amount);
+            target.LoadShip(cargo_spacemine, amount);
+            results.Add($"{amount} x Spacemines");
+
+            results.Add("OK");
+        }
     }
 }

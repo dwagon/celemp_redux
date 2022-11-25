@@ -184,7 +184,7 @@ namespace Celemp
                     ShipRetrieve(cmd, ship);
                     break;
                 case 't':
-                    ShipTend(cmd, ship);
+                    ShipTend(cmd);
                     break;
                 case 'u':
                     ShipUnload(cmd);
@@ -461,7 +461,47 @@ namespace Celemp
         }
 
         private void ShipRetrieve(string cmd, int ship) { }
-        private void ShipTend(string cmd, int ship) { }
+
+        private void ShipTend(string cmd)
+        {
+            // S123TS234
+
+            if (cmd.Length == 9)
+            {
+                priority = CommandOrder.TEND_ALL;
+                numbers.Add("target", ParseShip(cmd.Substring(5)));
+                return;
+            }
+            // S123T10S345R6
+            (int amount, int offset) = ExtractAmount(cmd, 5);
+            numbers.Add("amount", amount);
+            numbers.Add("target", ParseShip(cmd.Substring(5 + offset, 4)));
+            char cmdchar = Char.ToLower(cmd[9 + offset]);
+            switch (cmdchar)
+            {
+                case 'r':
+                    priority = CommandOrder.TEND_ORE;
+                    int type = ParseOretype(cmd[cmd.Length - 1]);
+                    numbers.Add("oretype", type);
+                    break;
+                case 'i':
+                    priority = CommandOrder.TEND_INDUSTRY;
+                    break;
+                case 'm':
+                    priority = CommandOrder.TEND_MINE;
+                    break;
+                case 'd':
+                    priority = CommandOrder.TEND_PDU;
+                    break;
+                case 's':
+                    priority = CommandOrder.TEND_SPACEMINE;
+                    break;
+                default:
+                    throw new CommandParseException($"Ship tend command not understood {cmd}");
+            }
+
+        }
+
         private void ShipUnload(string cmd)
         {
             // S123U

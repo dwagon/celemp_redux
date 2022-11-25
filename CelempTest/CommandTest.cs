@@ -502,4 +502,74 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.NAME_PLANET, cmd.priority);
         Assert.AreEqual("Foobar", cmd.strings["name"]);
     }
+
+    [TestMethod]
+    public void Test_Tend_All()
+    {
+        Command cmd = new("S123TS234", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_ALL, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_Ore()
+    {
+        Command cmd = new("S123T23S234R9", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_ORE, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(23, cmd.numbers["amount"]);
+        Assert.AreEqual(9, cmd.numbers["oretype"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_Industry_No_Amount()
+    {
+        Command cmd = new("S123TS234I", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_INDUSTRY, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_Industry()
+    {
+        Command cmd = new("S123T2S234I", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_INDUSTRY, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(2, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_Mine()
+    {
+        Command cmd = new("S123TS234M", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_MINE, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_PDU()
+    {
+        Command cmd = new("S123TS234D", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_PDU, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Tend_Spacemines()
+    {
+        Command cmd = new("S123TS234S", 1);
+        Assert.AreEqual(23, cmd.numbers["ship"]);
+        Assert.AreEqual(CommandOrder.TEND_SPACEMINE, cmd.priority);
+        Assert.AreEqual(134, cmd.numbers["target"]);
+        Assert.AreEqual(-1, cmd.numbers["amount"]);
+    }
 }
