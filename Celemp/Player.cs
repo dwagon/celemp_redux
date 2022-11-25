@@ -268,6 +268,24 @@ namespace Celemp
                 case CommandOrder.UNBUILD_TRACTOR:
                     Cmd_Unbuild_Tractor(cmd);
                     break;
+                case CommandOrder.TEND_ALL:
+                    Cmd_TendAll(cmd);
+                    break;
+                case CommandOrder.TEND_INDUSTRY:
+                    Cmd_TendIndustry(cmd);
+                    break;
+                case CommandOrder.TEND_MINE:
+                    Cmd_TendMine(cmd);
+                    break;
+                case CommandOrder.TEND_ORE:
+                    Cmd_TendOre(cmd);
+                    break;
+                case CommandOrder.TEND_PDU:
+                    Cmd_TendPDU(cmd);
+                    break;
+                case CommandOrder.TEND_SPACEMINE:
+                    Cmd_TendSpacemine(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
