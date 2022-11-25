@@ -95,7 +95,7 @@ namespace Celemp
                 foreach (Ship shp in plan.ShipsOrbitting())
                 {
                     outfh.Write($"{shp.DisplayNumber()} [");
-                    outfh.Write($"label=\"{shp.DisplayNumber()}\";");
+                    outfh.Write($"label=\"{shp.DisplayNumber()}\n{shp.name}\";");
                     outfh.Write($"shape=\"hexagon\";");
                     if (shp.owner != plr.number)
                         outfh.Write("color=\"firebrick2\";");
