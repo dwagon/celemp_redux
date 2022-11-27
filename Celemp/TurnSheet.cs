@@ -11,18 +11,19 @@ namespace Celemp
         public TurnSheet(Galaxy aGalaxy)
         {
             galaxy = aGalaxy;
+
         }
 
-        public void GenerateTurnSheets(string celemp_path)
+        public void GenerateTurnSheets(string celemp_path, NeoUpdate neo)
         {
             for (int plrNum = 0; plrNum < numPlayers; plrNum++)
             {
                 Console.WriteLine($"Generate turn sheet for player {plrNum}");
-                GenerateTurnSheet(celemp_path, plrNum);
+                GenerateTurnSheet(celemp_path, plrNum, neo);
             }
         }
 
-        private void GenerateTurnSheet(string celemp_path, int plrNum)
+        private void GenerateTurnSheet(string celemp_path, int plrNum, NeoUpdate neo)
         // Generate the turn sheet output file
         {
             string output_filename = Path.Join(celemp_path, $"turn_{plrNum}_{galaxy!.turn}.tex");
@@ -38,7 +39,7 @@ namespace Celemp
                 Owner_Summary(sw);
                 Planet_Summary(sw, plr);
                 Ship_Summary(sw, plr);
-                Planet_Details(sw, plr);
+                Planet_Details(sw, plr, neo);
                 Command_History(sw, plr);
                 Footer(sw);
             }
@@ -80,7 +81,7 @@ namespace Celemp
             outfh.WriteLine("");
         }
 
-        private void Planet_Details(StreamWriter outfh, Player plr)
+        private void Planet_Details(StreamWriter outfh, Player plr, NeoUpdate neo)
         {
             for (int planNum = 0; planNum < numPlanets; planNum++)
             {
@@ -92,7 +93,7 @@ namespace Celemp
                     {
                         if (ship.Value.planet == planNum)
                             if (plr.number == ship.Value.owner || plr.number == 0)
-                                Friend_Ship(outfh, ship.Value);
+                                Friend_Ship(outfh, ship.Value, neo);
                             else
                                 Enemy_Ship(outfh, ship.Value);
                     }
@@ -246,7 +247,7 @@ namespace Celemp
             outfh.WriteLine("}\n");
         }
 
-        public void Friend_Ship(StreamWriter outfh, Ship s)
+        public void Friend_Ship(StreamWriter outfh, Ship s, NeoUpdate neo)
         {
             bool hasCargo = false;
             String ownerName = galaxy!.players[s.owner].name;
@@ -305,9 +306,27 @@ namespace Celemp
                 outfh.Write("None");
             };
             outfh.WriteLine("}\\\\");
-            outfh.WriteLine("\\end{tabular}");
+            PathHome(outfh, s, neo);
+            outfh.WriteLine("\\end{tabular}\n");
+
             outfh.WriteLine("}");
             outfh.WriteLine("");
+        }
+
+        private void PathHome(StreamWriter outfh, Ship shp, NeoUpdate neo)
+        {
+            Player plr = galaxy.players[shp.owner];
+            Planet home = galaxy.planets[plr.home_planet];
+            if (shp.planet == home.number)
+                return;
+            outfh.Write("Path to Home & \\multicolumn{3}{l}{");
+            foreach (Planet link in neo.RouteToPlanet(galaxy.planets[shp.planet], home, plr))
+            {
+                outfh.Write($"{link.DisplayNumber()}");
+                if (link.number != home.number)
+                    outfh.Write("$\\rightarrow$");
+            }
+            outfh.WriteLine("}\\\\");
         }
 
         private void TitlePage(StreamWriter outfh)

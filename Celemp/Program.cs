@@ -81,8 +81,12 @@ namespace Celemp
             string save_file = Path.Join(celemp_path, "celemp.json");
 
             Galaxy galaxy = LoadGame(save_file);
+
+            NeoUpdate neo = new NeoUpdate(galaxy, "neo4j://localhost", "neo4j", "secret");
+            neo.GenerateUpdate();
+
             TurnSheet ts = new TurnSheet(galaxy);
-            ts.GenerateTurnSheets(celemp_path);
+            ts.GenerateTurnSheets(celemp_path, neo);
 
             GraphMap gm = new GraphMap(galaxy);
             gm.GenerateTurnSheets(celemp_path);
