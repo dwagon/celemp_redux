@@ -78,16 +78,34 @@ namespace Celemp
                 {
                     var path = record["r"].As<IPath>();
                     foreach (var node in path.Nodes)
-                    {
                         foreach (var label in node.Labels)
-                        {
                             foreach (var prop in node.Properties)
-                                if (prop.Key == "number")
+                                if (prop.Key == "number" && (int)(long)prop.Value != start.number)
                                     yield return galaxy!.planets[(int)(long)prop.Value];
-                        }
-                    }
                 }
+            }
+        }
 
+        public IEnumerable<Planet> RouteToFuel(Planet start, Player plr)
+        {
+            // match(s:Planet {player:8, number:43}),(d:Planet {player:8} where d.R0>0), r=shortestPath((s)-[*]-(d)) return r
+            using (var session = _driver.Session())
+            {
+                string cmd = $"MATCH ";
+                cmd += $"(s: Planet {{number: {start.number}, player: {plr.number}}}), ";
+                cmd += $"(d: Planet {{player: {plr.number}}} WHERE d.R0>0), ";
+                cmd += "r = shortestPath((s) -[*]- (d)) return r order by length(r)";
+                var result = session.Run(cmd);
+                foreach (var record in result)
+                {
+                    var path = record["r"].As<IPath>();
+                    foreach (var node in path.Nodes)
+                        foreach (var label in node.Labels)
+                            foreach (var prop in node.Properties)
+                                if (prop.Key == "number" && (int)(long)prop.Value != start.number)
+                                    yield return galaxy!.planets[(int)(long)prop.Value];
+                    yield break;
+                }
             }
         }
 
@@ -140,7 +158,7 @@ namespace Celemp
 
             cmd = "MATCH(p: Planet), (s: Ship) ";
             cmd += $"WHERE p.number = {planet.number} AND p.player = {plr.number} AND s.number = {ship.number} ";
-            cmd += "CREATE(s) -[r: orbits]->(p);\n";
+            cmd += "MERGE(s) -[r: orbits]->(p);\n";
             // Console.Write(cmd);
             session.Run(cmd);
         }

@@ -306,26 +306,43 @@ namespace Celemp
                 outfh.Write("None");
             };
             outfh.WriteLine("}\\\\");
-            PathHome(outfh, s, neo);
+            PathToHome(outfh, s, neo);
+            PathToFuel(outfh, s, neo);
             outfh.WriteLine("\\end{tabular}\n");
 
             outfh.WriteLine("}");
             outfh.WriteLine("");
         }
 
-        private void PathHome(StreamWriter outfh, Ship shp, NeoUpdate neo)
+        private void PathToHome(StreamWriter outfh, Ship shp, NeoUpdate neo)
         {
             Player plr = galaxy.players[shp.owner];
             Planet home = galaxy.planets[plr.home_planet];
             if (shp.planet == home.number)
                 return;
             outfh.Write("Path to Home & \\multicolumn{3}{l}{");
-            foreach (Planet link in neo.RouteToPlanet(galaxy.planets[shp.planet], home, plr))
+            foreach (Planet path in neo.RouteToPlanet(galaxy.planets[shp.planet], home, plr))
             {
-                outfh.Write($"{link.DisplayNumber()}");
-                if (link.number != home.number)
-                    outfh.Write("$\\rightarrow$");
+                outfh.Write($"{path.DisplayNumber()}");
+                if (path.number != home.number)
+                    outfh.Write(" $\\rightarrow$ ");
             }
+            outfh.WriteLine("}\\\\");
+        }
+
+        private void PathToFuel(StreamWriter outfh, Ship shp, NeoUpdate neo)
+        {
+            Player plr = galaxy.players[shp.owner];
+
+            if (galaxy.planets[shp.planet].ore[0] > 0)
+                return;
+            outfh.Write("Path to Fuel & \\multicolumn{3}{l}{");
+            foreach (Planet path in neo.RouteToFuel(galaxy.planets[shp.planet], plr))
+            {
+                outfh.Write($"{path.DisplayNumber()}");
+                outfh.Write(" $\\rightarrow$ ");
+            }
+            outfh.Write("Fuel");
             outfh.WriteLine("}\\\\");
         }
 
