@@ -62,8 +62,16 @@ namespace Celemp
             if (plr.home_planet == plan.number)
                 shape = "square";
 
+            label += "\n";
+            for (int oreType = 0; oreType < numOreTypes; oreType++)
+                if (plan.ore[oreType] > 0)
+                    label += $"R{oreType}; ";
+            if (plan.industry > 0)
+                label += "I; ";
+            if (plan.pdu > 0)
+                label += "D; ";
             if (plan.IsResearch())
-                label += " (RP)";
+                label += " RP;";
 
             if (plan.owner == plr.number)
                 colour = "green";
