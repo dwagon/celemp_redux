@@ -46,6 +46,8 @@ namespace Celemp
         private void Header(StreamWriter outfh)
         {
             outfh.WriteLine("strict graph G {");
+            outfh.WriteLine("size = \"8.3,11.7\"");
+            outfh.WriteLine("margin = 0");
         }
 
         private void Footer(StreamWriter outfh)
@@ -66,10 +68,12 @@ namespace Celemp
             for (int oreType = 0; oreType < numOreTypes; oreType++)
                 if (plan.ore[oreType] > 0)
                     label += $"R{oreType}; ";
+
+            label += "\n";
             if (plan.industry > 0)
-                label += "I; ";
+                label += $"{plan.industry}I; ";
             if (plan.pdu > 0)
-                label += "D; ";
+                label += $"{plan.pdu}D; ";
             if (plan.IsResearch())
                 label += " RP;";
 

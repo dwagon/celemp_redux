@@ -104,9 +104,9 @@ namespace Celemp
                 if (galaxy!.planets[planet].owner != owner)
                 {
                     int newowner = galaxy!.planets[planet].owner;
-                    galaxy.players[newowner].messages.Add($"You now control {DisplayNumber()}");
+                    galaxy.players[newowner].cmd_results.Add($"You now control {DisplayNumber()}");
                     stndord = "";
-                    galaxy.players[owner].messages.Add($"You lost control of {DisplayNumber()}");
+                    galaxy.players[owner].cmd_results.Add($"You lost control of {DisplayNumber()}");
                     owner = newowner;
                 }
             }
@@ -119,18 +119,18 @@ namespace Celemp
             hits -= ShieldPower();
             if (hits < 0)
             {
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} All hits absorbed on shields");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} All hits absorbed on shields");
                 return;
             }
             else
             {
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {ShieldPower()} hits absorbed on shields");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} {ShieldPower()} hits absorbed on shields");
             }
 
             int shield_destroyed = Math.Min(shield, hits);
             shield -= shield_destroyed;
             if (shield_destroyed > 0)
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {shield_destroyed} Shields units destroyed");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} {shield_destroyed} Shields units destroyed");
             hits -= shield_destroyed;
             if (hits < 0)
                 return;
@@ -138,7 +138,7 @@ namespace Celemp
             int fight_destroyed = Math.Min(fighter, hits);
             fighter -= fight_destroyed;
             if (fight_destroyed > 0)
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {fight_destroyed} Fighter units destroyed");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} {fight_destroyed} Fighter units destroyed");
             hits -= fight_destroyed;
             if (hits < 0)
                 return;
@@ -146,7 +146,7 @@ namespace Celemp
             int tractor_destroyed = Math.Min(tractor, hits);
             tractor -= tractor_destroyed;
             if (tractor_destroyed > 0)
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {tractor_destroyed} Tractor units destroyed");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} {tractor_destroyed} Tractor units destroyed");
             hits -= tractor_destroyed;
             if (hits < 0)
                 return;
@@ -154,9 +154,9 @@ namespace Celemp
             int cargo_destroyed = Math.Min(cargo, hits);
             cargo -= cargo_destroyed;
             if (cargo_destroyed > 0)
-                galaxy!.players[owner].messages.Add($"{DisplayNumber()} {cargo_destroyed} Cargo units destroyed");
+                galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} {cargo_destroyed} Cargo units destroyed");
 
-            galaxy!.players[owner].messages.Add($"{DisplayNumber()} is now {CalcType()}");
+            galaxy!.players[owner].cmd_results.Add($"{DisplayNumber()} is now {CalcType()}");
             RemoveDestroyedCargo();
         }
 

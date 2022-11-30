@@ -24,7 +24,7 @@ public class BuildingTest
         pr.ProcessCommand(cmd);
         pr.OutputLog();
 
-        Assert.IsTrue(pr.messages[0].Contains("Insufficient Ore 9"));
+        Assert.IsTrue(pr.cmd_results[0].Contains("Insufficient Ore 9"));
 
         // Should be constrained to building 4
         Assert.AreEqual(50 - 4 * 10, pt.ind_left);
@@ -84,7 +84,7 @@ public class BuildingTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 3"));
+        Assert.IsTrue(plr.cmd_results[0].Contains("Insufficient Ore 3"));
         Assert.AreEqual(8, s.fighter);
         Assert.AreEqual(20 - (8 * 2), plan.ind_left);
         Assert.AreEqual(10 - 8, plan.ore[2]);
@@ -116,7 +116,7 @@ public class BuildingTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.messages[0].Contains("Insufficient Ore 7"));
+        Assert.IsTrue(plr.cmd_results[0].Contains("Insufficient Ore 7"));
 
         Assert.AreEqual(7, s.tractor);
         Assert.AreEqual(20 - (7 * 2), plan.ind_left);
@@ -147,7 +147,7 @@ public class BuildingTest
         plr.ProcessCommand(cmd);
         plr.OutputLog();
 
-        Assert.IsTrue(plr.messages[0].Contains("Insufficient Industry"));
+        Assert.IsTrue(plr.cmd_results[0].Contains("Insufficient Industry"));
 
         Assert.AreEqual(6, s.shield);
         Assert.AreEqual(12 - (6 * 2), plan.ind_left);

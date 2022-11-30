@@ -99,7 +99,7 @@ namespace Celemp
                     }
                     catch (CommandParseException exc)
                     {
-                        players[planets[planNum].owner].messages.Add($"{planets[planNum].stndord}: {exc.Message}");
+                        players[planets[planNum].owner].cmd_results.Add($"{planets[planNum].stndord}: {exc.Message}");
                     }
                 }
             foreach (var kvp in ships)
@@ -113,7 +113,7 @@ namespace Celemp
                     }
                     catch (CommandParseException exc)
                     {
-                        players[kvp.Value.owner].messages.Add($"{kvp.Value.stndord}: {exc.Message}");
+                        players[kvp.Value.owner].cmd_results.Add($"{kvp.Value.stndord}: {exc.Message}");
                     }
                 }
             }

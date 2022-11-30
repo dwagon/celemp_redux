@@ -99,12 +99,24 @@ namespace Celemp
 
         private void Broadcast(string cmd)
         {
-            throw new CommandParseException($"Unimplemented order {cmd}");
+            // {Message to everyone}
+            string msg = cmd.Substring(1);
+            if (msg[msg.Length - 1] == '}')
+                msg = msg.Substring(0, msg.Length - 1);
+            priority = CommandOrder.BROADCAST;
+            strings.Add("message", msg);
         }
 
         private void PersonalMessage(string cmd)
         {
-            throw new CommandParseException($"Unimplemented order {cmd}");
+            // &recipient Message to recipient&
+            string msg = cmd.Substring(cmd.IndexOf(' ') + 1);
+            string recipient = cmd.Substring(1, cmd.IndexOf(' ') - 1);
+            if (msg[msg.Length - 1] == '&')
+                msg = msg.Substring(0, msg.Length - 1);
+            priority = CommandOrder.MESSAGE;
+            strings.Add("recipient", recipient);
+            strings.Add("message", msg);
         }
 
         private void AllMessage(string cmd)

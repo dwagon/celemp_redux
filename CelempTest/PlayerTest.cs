@@ -22,7 +22,7 @@ public class PlayerTest
         g.players[1] = p1;
         g.players[2] = p2;
 
-        p1.Cmd_GiftShip(cmd);
+        p1.ProcessCommand(cmd);
         Assert.AreEqual(2, s.owner);
     }
 
@@ -42,7 +42,7 @@ public class PlayerTest
         g.players[2] = p2;
 
         Command cmd = new("123GJohn", 1);
-        p1.Cmd_GiftPlan(cmd);
+        p1.ProcessCommand(cmd);
         Assert.AreEqual(2, p.owner);
     }
 
@@ -62,7 +62,7 @@ public class PlayerTest
         g.players[2] = p2;
 
         Command cmd = new("123GBadName", 1);
-        p1.Cmd_GiftPlan(cmd);
+        p1.ProcessCommand(cmd);
         Assert.AreEqual(1, p.owner);
     }
 
@@ -503,5 +503,52 @@ public class PlayerTest
         plr.OutputLog();
 
         Assert.AreEqual("Testing", plan.name);
+    }
+
+    [TestMethod]
+    public void Cmd_Broadcast()
+    {
+        Galaxy g = new();
+        Player plr1 = new("Max");
+        Player plr2 = new("Blue");
+
+        plr1.InitPlayer(g, 1);
+        plr2.InitPlayer(g, 2);
+
+        Command cmd = new("{Testing123}", 1);
+        plr1.ProcessCommand(cmd);
+        plr1.OutputLog();
+        bool found = false;
+        foreach (var msg in plr2.messages)
+        {
+            Console.WriteLine($"Message={msg}");
+            if (msg == "Broadcast: Testing123")
+                found = true;
+        }
+        Assert.AreEqual(true, found);
+    }
+
+    [TestMethod]
+    public void Cmd_Message()
+    {
+        Galaxy g = new();
+        Player plr1 = new("Max");
+        Player plr2 = new("Blue");
+
+        plr1.InitPlayer(g, 1);
+        plr2.InitPlayer(g, 2);
+
+        Command cmd = new("&Blue Testing345&", 1);
+        plr1.ProcessCommand(cmd);
+        plr1.OutputLog();
+        bool found = false;
+
+        foreach (var msg in plr2.messages)
+        {
+            Console.WriteLine($"Message={msg}");
+            if (msg == "Msg from Max: Testing345")
+                found = true;
+        }
+        Assert.AreEqual(true, found);
     }
 }

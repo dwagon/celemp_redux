@@ -572,4 +572,22 @@ public class CommandTest
         Assert.AreEqual(134, cmd.numbers["target"]);
         Assert.AreEqual(-1, cmd.numbers["amount"]);
     }
+
+    [TestMethod]
+    public void Test_Broadcast()
+    {
+        Command cmd = new("{Hello}", 1);
+        Assert.AreEqual(CommandOrder.BROADCAST, cmd.priority);
+        Assert.AreEqual("Hello", cmd.strings["message"]);
+    }
+
+    [TestMethod]
+    public void Test_Message()
+    {
+        Command cmd = new("&Foo Hello", 1);
+        Assert.AreEqual(CommandOrder.MESSAGE, cmd.priority);
+        Assert.AreEqual("Hello", cmd.strings["message"]);
+        Assert.AreEqual("Foo", cmd.strings["recipient"]);
+
+    }
 }
