@@ -121,10 +121,16 @@ namespace Celemp
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
             foreach (string cmd in plr.cmd_results)
-                outfh.WriteLine($"\\item {cmd}");
+                outfh.WriteLine($"\\item {Escape(cmd)}");
             if (plr.cmd_results.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
             outfh.WriteLine("\\end{itemize}\n");
+        }
+
+        private string Escape(string input)
+        {
+            input = input.Replace('&', ' ');
+            return input;
         }
 
         private void Owner_Summary(StreamWriter outfh)
