@@ -161,57 +161,64 @@ namespace Celemp
 
         private void Ship_Order(string cmd)
         {
-            int ship = ParseShip(cmd.Substring(0, 4));
-            numbers.Add("ship", ship);
-            if (cmd.Length <= 4)
-                throw new CommandParseException($"Ship command not understood {cmd}");
-            char cmdchar = Char.ToLower(cmd[4]);
-            switch (cmdchar)
+            try
             {
-                case 'a':
-                    ShipAttack(cmd, ship);
-                    break;
-                case 'b':
-                    ShipBuildContract(cmd);
-                    break;
-                case 'd':
-                    ShipDeploy(cmd, ship);
-                    break;
-                case 'e':
-                    ShipEngageTractor(cmd);
-                    break;
-                case 'g':
-                    ShipGift(cmd, ship);
-                    break;
-                case 'j':
-                    ShipJump(cmd, ship);
-                    break;
-                case 'l':
-                    ShipLoad(cmd, ship);
-                    break;
-                case 'p':
-                    ShipPurchaseOre(cmd);
-                    break;
-                case 'r':
-                    ShipRetrieve(cmd, ship);
-                    break;
-                case 't':
-                    ShipTend(cmd);
-                    break;
-                case 'u':
-                    ShipUnload(cmd);
-                    break;
-                case 'x':
-                    ShipSellOre(cmd);
-                    break;
-                case 'z':
-                    ShipUnbuild(cmd);
-                    break;
-                case '=':
-                    ShipName(cmd, ship);
-                    break;
-                default:
+                int ship = ParseShip(cmd.Substring(0, 4));
+                numbers.Add("ship", ship);
+                if (cmd.Length <= 4)
                     throw new CommandParseException($"Ship command not understood {cmd}");
+                char cmdchar = Char.ToLower(cmd[4]);
+                switch (cmdchar)
+                {
+                    case 'a':
+                        ShipAttack(cmd, ship);
+                        break;
+                    case 'b':
+                        ShipBuildContract(cmd);
+                        break;
+                    case 'd':
+                        ShipDeploy(cmd, ship);
+                        break;
+                    case 'e':
+                        ShipEngageTractor(cmd);
+                        break;
+                    case 'g':
+                        ShipGift(cmd, ship);
+                        break;
+                    case 'j':
+                        ShipJump(cmd, ship);
+                        break;
+                    case 'l':
+                        ShipLoad(cmd, ship);
+                        break;
+                    case 'p':
+                        ShipPurchaseOre(cmd);
+                        break;
+                    case 'r':
+                        ShipRetrieve(cmd, ship);
+                        break;
+                    case 't':
+                        ShipTend(cmd);
+                        break;
+                    case 'u':
+                        ShipUnload(cmd);
+                        break;
+                    case 'x':
+                        ShipSellOre(cmd);
+                        break;
+                    case 'z':
+                        ShipUnbuild(cmd);
+                        break;
+                    case '=':
+                        ShipName(cmd, ship);
+                        break;
+                    default:
+                        throw new CommandParseException($"Unknown ship command: {cmd}");
+                }
+            }
+            catch
+            {
+                throw new CommandParseException($"Ship command not understood: {cmd}");
             }
         }
 

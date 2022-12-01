@@ -96,6 +96,12 @@ public class CommandTest
         Command cmd = new("S323L270", 1);
     }
 
+    [ExpectedException(typeof(CommandParseException))]
+    public void Test_Build_Fail()
+    {
+        Command cmd = new("S323B270", 1);
+    }
+
     [TestMethod]
     public void Test_BuildMine()
     {
