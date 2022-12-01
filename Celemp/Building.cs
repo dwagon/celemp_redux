@@ -62,7 +62,7 @@ namespace Celemp
             int cost = amount * cmd.numbers["bid"];
             SpendEarthCredit(cost);
             results.Add($"Built {amount} cargo units at {cmd.numbers["bid"]} for {cost}");
-            messages.Add(String.Join(": ", results));
+            cmd_results.Add(String.Join(": ", results));
         }
 
         public void Earth_Build_Fighter(Command cmd)
@@ -86,7 +86,7 @@ namespace Celemp
             int cost = amount * cmd.numbers["bid"];
             SpendEarthCredit(cost);
             results.Add($"Built {amount} fighter units at {cmd.numbers["bid"]} for {cost}");
-            messages.Add(String.Join(": ", results));
+            cmd_results.Add(String.Join(": ", results));
         }
 
         public void Earth_Build_Shield(Command cmd)
@@ -111,7 +111,7 @@ namespace Celemp
             int cost = amount * cmd.numbers["bid"];
             SpendEarthCredit(cost);
             results.Add($"Built {amount} shield units at {cmd.numbers["bid"]} for {cost}");
-            messages.Add(String.Join(": ", results));
+            cmd_results.Add(String.Join(": ", results));
         }
 
         public void Earth_Build_Tractor(Command cmd)
@@ -133,7 +133,7 @@ namespace Celemp
             int cost = amount * cmd.numbers["bid"];
             SpendEarthCredit(cost);
             results.Add($"Built {amount} tractor units at {cmd.numbers["bid"]} for {cost}");
-            messages.Add(String.Join(": ", results));
+            cmd_results.Add(String.Join(": ", results));
         }
 
         public void Cmd_BuildIndustry(Command cmd)

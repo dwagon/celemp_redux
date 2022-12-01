@@ -82,6 +82,7 @@ namespace Celemp
 
             Galaxy galaxy = LoadGame(save_file);
 
+            Console.WriteLine("Updating graph database");
             NeoUpdate neo = new NeoUpdate(galaxy, "neo4j://localhost", "neo4j", "secret");
             neo.GenerateUpdate();
 

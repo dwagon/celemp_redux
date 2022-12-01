@@ -14,6 +14,7 @@ namespace Celemp
         public int earthCredit { get; set; }
         public int desired_endturn { get; set; }
         public int home_planet { get; set; }
+        public List<string> cmd_results { get; set; }
         public List<string> messages { get; set; }
 
         private Galaxy? galaxy;
@@ -28,6 +29,7 @@ namespace Celemp
             earthCredit = 0;
             desired_endturn = 30;
             home_planet = -1;
+            cmd_results = new();
             messages = new();
             results = new();
         }
@@ -51,6 +53,7 @@ namespace Celemp
 
         public void InitialiseTurn()
         {
+            cmd_results = new();
             messages = new();
             InitScans();
         }
@@ -66,7 +69,7 @@ namespace Celemp
                 }
                 catch (CommandParseException exc)
                 {
-                    messages.Add($"{command} - Command not understood error: {exc.Message}");
+                    cmd_results.Add($"{command} - Command not understood error: {exc.Message}");
                     continue;
                 }
                 catch
@@ -286,14 +289,20 @@ namespace Celemp
                 case CommandOrder.TEND_SPACEMINE:
                     Cmd_TendSpacemine(cmd);
                     break;
+                case CommandOrder.BROADCAST:
+                    Cmd_Broadcast(cmd);
+                    break;
+                case CommandOrder.MESSAGE:
+                    Cmd_Message(cmd);
+                    break;
                 default:
                     Console.WriteLine($"Command not implemented {cmd.cmdstr}");
                     break;
             }
-            messages.Add(String.Join(": ", results));
+            cmd_results.Add(String.Join(": ", results));
         }
 
-        public void SpendEarthCredit(int cost)
+        private void SpendEarthCredit(int cost)
         {
             earthCredit -= cost;
             if (earthCredit < 0)
@@ -304,9 +313,37 @@ namespace Celemp
             }
         }
 
+        private void Cmd_Broadcast(Command cmd)
+        {
+            for (int plrNum = 0; plrNum < numPlayers; plrNum++)
+                try
+                {
+                    galaxy!.players[plrNum].messages.Add("Broadcast: " + cmd.strings["message"]);
+                }
+                catch (NullReferenceException)  // Player array not full - in testing
+                {
+                    Console.WriteLine($"Cmd_Broadcast: Unconstructed player {plrNum}");
+                    continue;
+                }
+            results.Add("OK");
+        }
+
+        private void Cmd_Message(Command cmd)
+        {
+            string recipient = cmd.strings["recipient"];
+            int recip = galaxy!.GuessPlayerName(recipient);
+            if (recip < 0)
+            {
+                results.Add($"Unknown player {recipient}");
+                return;
+            }
+            galaxy!.players[recip].messages.Add($"Msg from {name}: " + cmd.strings["message"]);
+            results.Add("OK");
+        }
+
         // Contracts are weird as they get resolved in contractor order
         // So we lodge them first, then resolve them later
-        public void Cmd_Contract_Cargo(Command cmd)
+        private void Cmd_Contract_Cargo(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -317,7 +354,7 @@ namespace Celemp
             results.Add("Bid accepted");
         }
 
-        public void Cmd_Contract_Fighter(Command cmd)
+        private void Cmd_Contract_Fighter(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -328,7 +365,7 @@ namespace Celemp
             results.Add("Bid accepted");
         }
 
-        public void Cmd_Contract_Shield(Command cmd)
+        private void Cmd_Contract_Shield(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -339,7 +376,7 @@ namespace Celemp
             results.Add("Bid accepted");
         }
 
-        public void Cmd_Contract_Tractor(Command cmd)
+        private void Cmd_Contract_Tractor(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -350,7 +387,7 @@ namespace Celemp
             results.Add("Bid accepted");
         }
 
-        public void Cmd_EngageTractor(Command cmd)
+        private void Cmd_EngageTractor(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             Ship victim = galaxy!.ships[cmd.numbers["victim"]];
@@ -377,7 +414,7 @@ namespace Celemp
             results.Add("OK");
         }
 
-        public void Standing_Order(Command cmd)
+        private void Standing_Order(Command cmd)
         {
             Ship ship; Planet plan;
             switch (cmd.strings["order"])
@@ -413,19 +450,19 @@ namespace Celemp
             results.Add("OK");
         }
 
-        public void System_ResolveContracts(Command cmd)
+        private void System_ResolveContracts(Command cmd)
         {
             galaxy!.ResolveContracts();
         }
 
-        public void System_ResolveAttacks(Command cmd)
+        private void System_ResolveAttacks(Command cmd)
         // Resolve all the hits to ships
         {
             foreach (KeyValuePair<int, Ship> kvp in galaxy!.ships)
                 kvp.Value.ResolveDamage();
         }
 
-        public void Cmd_BuyOre(Command cmd)
+        private void Cmd_BuyOre(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -437,7 +474,7 @@ namespace Celemp
             BuyOre(ship, oretype, amount);
         }
 
-        public void BuyOre(Ship ship, int oretype, int amount)
+        private void BuyOre(Ship ship, int oretype, int amount)
         {
             int price = galaxy!.earth_price[oretype];
 
@@ -454,7 +491,7 @@ namespace Celemp
             galaxy.planets[ship.planet].ore[oretype] -= amount;
         }
 
-        public void Cmd_SellOre(Command cmd)
+        private void Cmd_SellOre(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -471,7 +508,7 @@ namespace Celemp
             SellOre(ship, oretype, amount);
         }
 
-        public void Cmd_SellAll(Command cmd)
+        private void Cmd_SellAll(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             if (!CheckShipOwnership(ship, cmd))
@@ -482,7 +519,7 @@ namespace Celemp
                 SellOre(ship, oreType, ship.carrying[$"{oreType}"]);
         }
 
-        public void SellOre(Ship ship, int oretype, int amount)
+        private void SellOre(Ship ship, int oretype, int amount)
         {
             int value = (int)(0.666F * amount * galaxy!.earth_price[oretype]);
             results.Add($"Gained {value} Earth Credits for {amount} x R{oretype}");
@@ -491,7 +528,7 @@ namespace Celemp
             galaxy.planets[ship.planet].ore[oretype] += amount;
         }
 
-        public int CheckIndustry(int amount, Planet plan, int scale)
+        private int CheckIndustry(int amount, Planet plan, int scale)
         {
             if (plan.ind_left < amount * scale)
             {
@@ -501,7 +538,7 @@ namespace Celemp
             return amount;
         }
 
-        public int CheckOre(int amount, Planet plan, int scale, int oretype)
+        private int CheckOre(int amount, Planet plan, int scale, int oretype)
         {
             if (plan.ore[oretype] < amount * scale)
             {
@@ -511,7 +548,7 @@ namespace Celemp
             return amount;
         }
 
-        public int CheckShipOre(int amount, Ship ship, int scale, int oretype)
+        private int CheckShipOre(int amount, Ship ship, int scale, int oretype)
         // Check amount of ore on the ship (for Earth contractor)
         {
             if (ship.carrying[$"{oretype}"] < amount * scale)
@@ -522,7 +559,7 @@ namespace Celemp
             return amount;
         }
 
-        public void Cmd_GiftShip(Command cmd)
+        private void Cmd_GiftShip(Command cmd)
         {
             Ship ship = galaxy!.ships[cmd.numbers["ship"]];
             String recip = cmd.strings["recipient"];
@@ -535,13 +572,13 @@ namespace Celemp
                 results.Add($"Unknown player {recip}");
                 return;
             }
-            galaxy.players[new_owner].messages.Add($"{galaxy.players[ship.owner].name} gave you {ship.DisplayNumber()}");
+            galaxy.players[new_owner].cmd_results.Add($"{galaxy.players[ship.owner].name} gave you {ship.DisplayNumber()}");
             ship.owner = new_owner;
             ship.stndord = "";
             results.Add("OK");
         }
 
-        public void Cmd_GiftPlan(Command cmd)
+        private void Cmd_GiftPlan(Command cmd)
         // Gift a planet
         {
             Planet plan = galaxy!.planets[cmd.numbers["planet"]];
@@ -555,7 +592,7 @@ namespace Celemp
                 results.Add($"Unknown player {recip}");
                 return;
             }
-            galaxy.players[new_owner].messages.Add($"{galaxy.players[plan.owner].name} gave you {plan.DisplayNumber()}");
+            galaxy.players[new_owner].cmd_results.Add($"{galaxy.players[plan.owner].name} gave you {plan.DisplayNumber()}");
             plan.owner = new_owner;
             plan.stndord = "";
             results.Add("OK");
@@ -838,7 +875,7 @@ namespace Celemp
         public void OutputLog()
         // Dump executed output for debugging purposes
         {
-            foreach (string str in messages)
+            foreach (string str in cmd_results)
             {
                 Console.WriteLine(str);
             }

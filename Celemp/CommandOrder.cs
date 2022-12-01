@@ -73,7 +73,9 @@ namespace Celemp
         JUMP4,
         JUMP5,
         SCAN,
-        STANDING_ORDER
+        STANDING_ORDER,
+        BROADCAST,
+        MESSAGE,
     }
 }
 

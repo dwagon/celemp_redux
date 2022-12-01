@@ -40,8 +40,23 @@ namespace Celemp
                 Planet_Summary(sw, plr);
                 Ship_Summary(sw, plr);
                 Planet_Details(sw, plr, neo);
+                Messages(sw, plr);
                 Command_History(sw, plr);
                 Footer(sw);
+            }
+        }
+
+        private void Messages(StreamWriter outfh, Player plr)
+        {
+            if (plr.messages.Count() > 0)
+            {
+                outfh.WriteLine("\\section*{Messages}");
+                outfh.WriteLine("\\begin{verbatim}");
+                foreach (string msg in plr.messages)
+                {
+                    outfh.Write($"{msg}\n");
+                }
+                outfh.WriteLine("\\end{verbatim}");
             }
         }
 
@@ -105,11 +120,17 @@ namespace Celemp
         {
             outfh.WriteLine("\\section*{Command history}");
             outfh.WriteLine("\\begin{itemize}");
-            foreach (string cmd in plr.messages)
-                outfh.WriteLine($"\\item {cmd}");
-            if (plr.messages.Count == 0)
+            foreach (string cmd in plr.cmd_results)
+                outfh.WriteLine($"\\item {Escape(cmd)}");
+            if (plr.cmd_results.Count == 0)
                 outfh.WriteLine("\\item No commands entered");
             outfh.WriteLine("\\end{itemize}\n");
+        }
+
+        private string Escape(string input)
+        {
+            input = input.Replace('&', ' ');
+            return input;
         }
 
         private void Owner_Summary(StreamWriter outfh)

@@ -96,6 +96,12 @@ public class CommandTest
         Command cmd = new("S323L270", 1);
     }
 
+    [ExpectedException(typeof(CommandParseException))]
+    public void Test_Build_Fail()
+    {
+        Command cmd = new("S323B270", 1);
+    }
+
     [TestMethod]
     public void Test_BuildMine()
     {
@@ -571,5 +577,23 @@ public class CommandTest
         Assert.AreEqual(CommandOrder.TEND_SPACEMINE, cmd.priority);
         Assert.AreEqual(134, cmd.numbers["target"]);
         Assert.AreEqual(-1, cmd.numbers["amount"]);
+    }
+
+    [TestMethod]
+    public void Test_Broadcast()
+    {
+        Command cmd = new("{Hello}", 1);
+        Assert.AreEqual(CommandOrder.BROADCAST, cmd.priority);
+        Assert.AreEqual("Hello", cmd.strings["message"]);
+    }
+
+    [TestMethod]
+    public void Test_Message()
+    {
+        Command cmd = new("&Foo Hello", 1);
+        Assert.AreEqual(CommandOrder.MESSAGE, cmd.priority);
+        Assert.AreEqual("Hello", cmd.strings["message"]);
+        Assert.AreEqual("Foo", cmd.strings["recipient"]);
+
     }
 }

@@ -72,7 +72,7 @@ namespace Celemp
             {
                 string cmd = $"MATCH ";
                 cmd += $"(s: Planet {{number: {start.number}, player: {plr.number}}}), (p: Planet {{number: {dest.number}, player: {plr.number}}}),";
-                cmd += "r = shortestPath((s) -[*]- (p)) return r";
+                cmd += "r = shortestPath((s) -[:links*..10]- (p)) return r";
                 var result = session.Run(cmd);
                 foreach (var record in result)
                 {
@@ -82,6 +82,7 @@ namespace Celemp
                             foreach (var prop in node.Properties)
                                 if (prop.Key == "number" && (int)(long)prop.Value != start.number)
                                     yield return galaxy!.planets[(int)(long)prop.Value];
+                    yield break;
                 }
             }
         }
@@ -147,6 +148,12 @@ namespace Celemp
         private void KnownShip(Ship ship, Player plr, ISession session)
         {
             string cmd = "";
+            // Delete existing ship
+            cmd = $"MATCH (s:Ship {{number: {ship.number}}}) DETACH DELETE s";
+            session.Run(cmd);
+
+            // Add new ship;
+            cmd = "";
             Planet planet = galaxy!.planets[ship.planet];
             cmd += $"MERGE ({ship.DisplayNumber()}:Ship {{";
             cmd += $"number: {ship.number},";

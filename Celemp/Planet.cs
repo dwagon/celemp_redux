@@ -119,8 +119,8 @@ namespace Celemp
             int newowner = OwnershipCheck();
             if (newowner != owner)
             {
-                galaxy!.players[owner].messages.Add($"Lost control of {DisplayNumber()}");
-                galaxy.players[newowner].messages.Add($"Gained control of {DisplayNumber()}");
+                galaxy!.players[owner].cmd_results.Add($"Lost control of {DisplayNumber()}");
+                galaxy.players[newowner].cmd_results.Add($"Gained control of {DisplayNumber()}");
                 owner = newowner;
                 stndord = "";
             }
